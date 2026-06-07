@@ -17,76 +17,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 async function fetchVerses(bookName: string, chapterNum: number, translation: string): Promise<BibleVerse[]> {
-  const supabase = await createClient();
-
-  const { data: book } = await supabase
-    .from("bible_books")
-    .select("id")
-    .eq("name", bookName)
-    .single();
-
-  if (!book) return [];
-
-  const { data: chapter } = await supabase
-    .from("bible_chapters")
-    .select("id")
-    .eq("book_id", book.id)
-    .eq("chapter_number", chapterNum)
-    .single();
-
-  if (!chapter) return [];
-
-  const { data: verses } = await supabase
-    .from("bible_verses")
-    .select("*")
-    .eq("chapter_id", chapter.id)
-    .eq("translation", translation)
-    .order("verse_number");
-
-  if (verses && verses.length > 0) return verses;
-
-  const bibleId = process.env.NEXT_PUBLIC_DEFAULT_BIBLE_ID ?? "de4e12af7f28f599-02";
-  const apiKey = process.env.BIBLE_API_KEY;
-
-  if (!apiKey) return fetchFromFreeApi(bookName, chapterNum);
-
-  try {
-    const bookInfo = getBookByName(bookName);
-    if (!bookInfo) return [];
-
-    const resp = await fetch(
-      `https://api.scripture.api.bible/v1/bibles/${bibleId}/chapters/${bookInfo.abbreviation}.${chapterNum}/verses?content-type=text&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true`,
-      { headers: { "api-key": apiKey }, next: { revalidate: 86400 } }
-    );
-
-    if (!resp.ok) return fetchFromFreeApi(bookName, chapterNum);
-
-    const data = await resp.json();
-    const fetchedVerses = (data.data ?? []).map((v: { id: string; reference: string; content: string }) => ({
-      book_id: book.id,
-      chapter_id: chapter.id,
-      translation,
-      verse_number: parseInt(v.id.split(".").pop() ?? "1"),
-      text: v.content.trim(),
-      reference: v.reference,
-      api_id: v.id,
-    }));
-
-    if (fetchedVerses.length > 0) {
-      await supabase.from("bible_verses").upsert(fetchedVerses, { onConflict: "chapter_id,translation,verse_number" });
-    }
-
-    const { data: saved } = await supabase
-      .from("bible_verses")
-      .select("*")
-      .eq("chapter_id", chapter.id)
-      .eq("translation", translation)
-      .order("verse_number");
-
-    return saved ?? getMockVerses(bookName, chapterNum);
-  } catch {
-    return getMockVerses(bookName, chapterNum);
-  }
+  // Always go straight to the free API — DB caching is a future optimisation
+  // (bible_chapters table is not pre-seeded, so DB lookups return nothing)
+  return fetchFromFreeApi(bookName, chapterNum);
 }
 
 async function fetchFromFreeApi(bookName: string, chapterNum: number): Promise<BibleVerse[]> {
