@@ -80,6 +80,7 @@ export default async function ChapterPage({ params }: PageProps) {
         prevBook: prevBook ? { name: prevBook.name, slug: prevBook.name.toLowerCase().replace(/\s+/g, "-"), lastChapter: prevBook.chapters } : null,
         nextBook: nextBook ? { name: nextBook.name, slug: nextBook.name.toLowerCase().replace(/\s+/g, "-") } : null,
       }}
+      basePath="/app/bible"
     />
   );
 }

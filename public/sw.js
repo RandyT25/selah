@@ -45,6 +45,8 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Skip non-http(s) requests (e.g. chrome-extension://)
+  if (!request.url.startsWith("http")) return;
   // Skip non-GET requests and API calls (except bible verses)
   if (request.method !== "GET") return;
   if (url.pathname.startsWith("/api/") && !url.pathname.startsWith("/api/bible/")) return;

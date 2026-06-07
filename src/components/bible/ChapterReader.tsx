@@ -54,6 +54,7 @@ interface ChapterReaderProps {
     prevBook: { name: string; slug: string; lastChapter: number } | null;
     nextBook: { name: string; slug: string } | null;
   };
+  basePath?: string;
 }
 
 export function ChapterReader({
@@ -67,6 +68,7 @@ export function ChapterReader({
   preferences,
   userId,
   navigation,
+  basePath = "/bible",
 }: ChapterReaderProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -149,15 +151,15 @@ export function ChapterReader({
   const noteVerse = verses.find(v => v.id === noteVerseId);
 
   const prevHref = navigation.prevChapter
-    ? `/bible/${bookSlug}/${navigation.prevChapter}`
+    ? `${basePath}/${bookSlug}/${navigation.prevChapter}`
     : navigation.prevBook
-    ? `/bible/${navigation.prevBook.slug}/${navigation.prevBook.lastChapter}`
+    ? `${basePath}/${navigation.prevBook.slug}/${navigation.prevBook.lastChapter}`
     : null;
 
   const nextHref = navigation.nextChapter
-    ? `/bible/${bookSlug}/${navigation.nextChapter}`
+    ? `${basePath}/${bookSlug}/${navigation.nextChapter}`
     : navigation.nextBook
-    ? `/bible/${navigation.nextBook.slug}/1`
+    ? `${basePath}/${navigation.nextBook.slug}/1`
     : null;
 
   return (
@@ -167,7 +169,7 @@ export function ChapterReader({
         <div className="max-w-3xl mx-auto flex items-center justify-between px-4 py-2">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon-sm" asChild>
-              <Link href="/bible">
+              <Link href={basePath}>
                 <ChevronLeft className="h-4 w-4" />
               </Link>
             </Button>
@@ -309,7 +311,7 @@ export function ChapterReader({
                   className="h-10 text-sm"
                   asChild
                 >
-                  <Link href={`/bible/${bookSlug}/${ch}`} onClick={() => setShowChapterNav(false)}>
+                  <Link href={`${basePath}/${bookSlug}/${ch}`} onClick={() => setShowChapterNav(false)}>
                     {ch}
                   </Link>
                 </Button>
