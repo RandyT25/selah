@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
@@ -15,9 +15,30 @@ const navLinks = [
   { label: "About", href: "/about" },
 ];
 
+type MarketingLang = "en" | "id";
+
+const marketingStrings = {
+  en: { signIn: "Sign In", getApp: "Get the App", getStarted: "Get Started Free" },
+  id: { signIn: "Masuk", getApp: "Unduh Aplikasi", getStarted: "Mulai Gratis" },
+};
+
 export function MarketingNav() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [lang, setLangState] = useState<MarketingLang>("en");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("selah_marketing_lang") as MarketingLang | null;
+    if (stored === "en" || stored === "id") setLangState(stored);
+  }, []);
+
+  const toggleLang = () => {
+    const next: MarketingLang = lang === "en" ? "id" : "en";
+    setLangState(next);
+    localStorage.setItem("selah_marketing_lang", next);
+  };
+
+  const s = marketingStrings[lang];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -36,9 +57,7 @@ export function MarketingNav() {
               href={href}
               className={cn(
                 "text-sm font-medium transition-colors",
-                pathname === href
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                pathname === href ? "text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {label}
@@ -46,23 +65,54 @@ export function MarketingNav() {
           ))}
         </nav>
 
-        {/* CTA */}
+        {/* CTA + Language toggle */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Language toggle pill */}
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-1 rounded-full border border-border px-1 py-1 bg-muted/50 hover:bg-muted transition-colors"
+            title="Switch language"
+          >
+            <span
+              className={cn(
+                "text-xs font-semibold rounded-full px-2.5 py-1 transition-all",
+                lang === "en" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+              )}
+            >
+              EN
+            </span>
+            <span
+              className={cn(
+                "text-xs font-semibold rounded-full px-2.5 py-1 transition-all",
+                lang === "id" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+              )}
+            >
+              ID
+            </span>
+          </button>
+
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/bibleapp/login">Sign In</Link>
+            <Link href="/app/login">{s.signIn}</Link>
           </Button>
           <Button variant="gold" size="sm" asChild>
-            <Link href="/download">Get the App</Link>
+            <Link href="/download">{s.getApp}</Link>
           </Button>
         </div>
 
         {/* Mobile toggle */}
-        <button
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          {/* Compact language pill for mobile */}
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-0.5 rounded-full border border-border px-1 py-0.5 bg-muted/50 text-xs"
+          >
+            <span className={cn("px-2 py-0.5 rounded-full font-semibold transition-all", lang === "en" ? "bg-background shadow-sm" : "text-muted-foreground")}>EN</span>
+            <span className={cn("px-2 py-0.5 rounded-full font-semibold transition-all", lang === "id" ? "bg-background shadow-sm" : "text-muted-foreground")}>ID</span>
+          </button>
+          <button onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -80,10 +130,10 @@ export function MarketingNav() {
           ))}
           <div className="flex flex-col gap-2 pt-2">
             <Button variant="outline" asChild>
-              <Link href="/bibleapp/login">Sign In</Link>
+              <Link href="/app/login">{s.signIn}</Link>
             </Button>
             <Button variant="gold" asChild>
-              <Link href="/bibleapp/register">Get Started Free</Link>
+              <Link href="/app/register">{s.getStarted}</Link>
             </Button>
           </div>
         </div>

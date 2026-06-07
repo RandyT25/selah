@@ -69,7 +69,7 @@ export interface Database {
           last_active_at?: string | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       user_preferences: {
         Row: {
@@ -127,7 +127,7 @@ export interface Database {
           language?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       bible_books: {
         Row: {
@@ -162,7 +162,7 @@ export interface Database {
           verse_count?: number;
           description?: string | null;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       bible_chapters: {
         Row: {
@@ -184,7 +184,7 @@ export interface Database {
           verse_count?: number;
           cached_at?: string | null;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       bible_verses: {
         Row: {
@@ -216,7 +216,7 @@ export interface Database {
           api_id?: string | null;
           cached_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       verse_highlights: {
         Row: {
@@ -240,7 +240,7 @@ export interface Database {
           note?: string | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       verse_bookmarks: {
         Row: {
@@ -262,7 +262,7 @@ export interface Database {
           collection_name?: string;
           note?: string | null;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       verse_notes: {
         Row: {
@@ -286,7 +286,7 @@ export interface Database {
           is_private?: boolean;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       reading_plans: {
         Row: {
@@ -333,7 +333,7 @@ export interface Database {
           tags?: string[];
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       plan_progress: {
         Row: {
@@ -365,7 +365,7 @@ export interface Database {
           last_read_at?: string | null;
           is_active?: boolean;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       devotionals: {
         Row: {
@@ -422,7 +422,7 @@ export interface Database {
           view_count?: number;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       journal_entries: {
         Row: {
@@ -466,7 +466,7 @@ export interface Database {
           is_favorite?: boolean;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       prayer_requests: {
         Row: {
@@ -511,7 +511,7 @@ export interface Database {
           expires_at?: string | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       prayer_interactions: {
         Row: {
@@ -529,7 +529,7 @@ export interface Database {
           user_id?: string;
           prayer_request_id?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       friendships: {
         Row: {
@@ -550,7 +550,7 @@ export interface Database {
           status?: "pending" | "accepted" | "declined" | "blocked";
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       comments: {
         Row: {
@@ -582,7 +582,7 @@ export interface Database {
           is_deleted?: boolean;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       notifications: {
         Row: {
@@ -610,7 +610,7 @@ export interface Database {
           is_read?: boolean;
           read_at?: string | null;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       subscriptions: {
         Row: {
@@ -650,7 +650,7 @@ export interface Database {
           canceled_at?: string | null;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       analytics_events: {
         Row: {
@@ -675,7 +675,7 @@ export interface Database {
           ip_address?: string | null;
         };
         Update: Record<string, never>;
-        Relationships: [];
+        Relationships: never[];
       };
       reading_history: {
         Row: {
@@ -697,7 +697,7 @@ export interface Database {
         Update: {
           read_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       verse_of_day: {
         Row: {
@@ -723,7 +723,7 @@ export interface Database {
           reflection?: string | null;
           scheduled_date?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
       ai_conversations: {
         Row: {
@@ -751,7 +751,7 @@ export interface Database {
           total_tokens?: number;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: never[];
       };
     };
     Views: Record<never, never>;

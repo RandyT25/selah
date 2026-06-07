@@ -53,10 +53,8 @@ export default function SettingsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [{ data: profileData }, { data: prefsData }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).single(),
-        supabase.from("user_preferences").select("*").eq("user_id", user.id).single(),
-      ]);
+      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      const { data: prefsData } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).single();
 
       if (profileData) {
         setProfile(profileData);
