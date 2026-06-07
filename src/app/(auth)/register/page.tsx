@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterForm) => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -52,7 +52,13 @@ export default function RegisterPage() {
       return;
     }
 
-    setRegistered(true);
+    // If email confirmation is disabled, Supabase returns a session immediately
+    if (signUpData.session) {
+      router.push("/dashboard");
+      router.refresh();
+    } else {
+      setRegistered(true);
+    }
   };
 
   const handleGoogleSignup = async () => {
