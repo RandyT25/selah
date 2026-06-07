@@ -81,6 +81,20 @@ export function ChapterReader({
   const [noteContent, setNoteContent] = useState("");
   const [, startTransition] = useTransition();
 
+  // Helper: call server API routes (bypasses client-side RLS entirely)
+  const api = async (path: string, method: string, body: object) => {
+    const res = await fetch(path, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? `HTTP ${res.status}`);
+    }
+    return res.json();
+  };
+
   // ── Highlight ──────────────────────────────────────────────────────────────
   const handleHighlight = async (verseId: string, color: HighlightColor) => {
     if (!userId) { toast.error("Sign in to highlight verses"); return; }
@@ -96,12 +110,10 @@ export function ChapterReader({
     };
     setHighlights([...prev.filter(h => h.verse_id !== verseId), optimistic]);
     try {
-      await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
-      const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
-      if (error) throw error;
+      await api("/api/verse/highlight", "POST", { verseId, color });
     } catch (err) {
-      setHighlights(prev); // rollback
-      throw err;           // bubble up to BibleReader
+      setHighlights(prev);
+      throw err;
     }
   };
 
@@ -109,10 +121,11 @@ export function ChapterReader({
     if (!userId) return;
     const prev = highlights;
     setHighlights(prev.filter(h => h.verse_id !== verseId));
-    const { error } = await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
-    if (error) {
+    try {
+      await api("/api/verse/highlight", "DELETE", { verseId });
+    } catch (err) {
       setHighlights(prev);
-      throw error;
+      throw err;
     }
   };
 
@@ -129,9 +142,7 @@ export function ChapterReader({
       created_at: new Date().toISOString(),
     }]);
     try {
-      await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
-      const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
-      if (error) throw error;
+      await api("/api/verse/bookmark", "POST", { verseId });
     } catch (err) {
       setBookmarks(prev);
       throw err;
@@ -142,24 +153,25 @@ export function ChapterReader({
     if (!userId) return;
     const prev = bookmarks;
     setBookmarks(prev.filter(b => b.verse_id !== verseId));
-    const { error } = await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
-    if (error) {
+    try {
+      await api("/api/verse/bookmark", "DELETE", { verseId });
+    } catch (err) {
       setBookmarks(prev);
-      throw error;
+      throw err;
     }
   };
 
   // ── Note ───────────────────────────────────────────────────────────────────
   const handleSaveNote = async () => {
     if (!userId || !noteVerseId || !noteContent.trim()) return;
-    await supabase.from("verse_notes").delete().eq("user_id", userId).eq("verse_id", noteVerseId);
-    const { error } = await supabase.from("verse_notes").insert({
-      user_id: userId, verse_id: noteVerseId, content: noteContent.trim(), is_private: true,
-    });
-    if (error) { toast.error("Failed to save note"); return; }
-    toast.success("Note saved");
-    setNoteVerseId(null);
-    setNoteContent("");
+    try {
+      await api("/api/verse/note", "POST", { verseId: noteVerseId, content: noteContent.trim() });
+      toast.success("Note saved");
+      setNoteVerseId(null);
+      setNoteContent("");
+    } catch {
+      toast.error("Failed to save note");
+    }
   };
 
   const savePreferences = () => {
