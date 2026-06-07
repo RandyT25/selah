@@ -2,36 +2,37 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
-  Flame, BookOpen, NotebookPen, ChevronRight,
-  Sparkles, Sun, HandHeart, CalendarDays,
+  Flame, BookOpen, ChevronRight, Share2, Heart,
+  Maximize2, Copy, CalendarDays,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import { getInitials } from "@/lib/utils/format";
-import type { Profile, PlanProgress, ReadingPlan, Devotional, VerseOfDay } from "@/types/database";
+import type { Profile, PlanProgress, ReadingPlan, VerseOfDay } from "@/types/database";
 
 type PlanWithProgress = PlanProgress & { reading_plans: ReadingPlan | null };
 
 export const metadata = { title: "Home" };
+
+const FALLBACK_VERSE = {
+  verse_text: "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand.",
+  verse_reference: "Isaiah 41:10",
+};
 
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/app/login");
 
-  const [profileResult, verseResult, plansResult, devosResult] = await Promise.all([
+  const [profileResult, verseResult, plansResult] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("verse_of_day").select("*").lte("scheduled_date", new Date().toISOString().split("T")[0]).order("scheduled_date", { ascending: false }).limit(1).single(),
-    supabase.from("plan_progress").select("*, reading_plans(*)").eq("user_id", user.id).eq("is_active", true).limit(3),
-    supabase.from("devotionals").select("*").eq("is_published", true).eq("is_featured", true).order("published_at", { ascending: false }).limit(1),
+    supabase.from("plan_progress").select("*, reading_plans(*)").eq("user_id", user.id).eq("is_active", true).limit(4),
   ]);
 
   const profile = profileResult.data as Profile | null;
-  const verseOfDay = verseResult.data as VerseOfDay | null;
+  const verse = (verseResult.data as VerseOfDay | null) ?? FALLBACK_VERSE;
   const activePlans = (plansResult.data ?? []) as unknown as PlanWithProgress[];
-  const devotional = ((devosResult.data ?? []) as Devotional[])[0] ?? null;
 
   const displayName = profile?.display_name ?? profile?.full_name ?? "Friend";
   const firstName = displayName.split(" ")[0];
@@ -40,23 +41,25 @@ export default async function HomePage() {
   const streak = profile?.streak_count ?? 0;
 
   return (
-    <div className="min-h-full">
-      {/* ── Top greeting bar ── */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+    <div className="min-h-full bg-background pb-2">
+
+      {/* ── Top bar ── */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div>
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{greeting}</p>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground">{firstName}</h1>
+          <p className="text-[13px] text-muted-foreground">{greeting}</p>
+          <h1 className="text-[24px] font-bold tracking-tight">{firstName}</h1>
         </div>
         <div className="flex items-center gap-3">
-          {/* Streak pill */}
-          <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40 rounded-full px-3 py-1.5">
-            <Flame className="h-4 w-4 text-amber-500" />
-            <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{streak}</span>
-          </div>
-          {/* Avatar */}
+          {streak > 0 && (
+            <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 rounded-full px-2.5 py-1 border border-amber-200/60 dark:border-amber-800/40">
+              <Flame className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-[13px] font-bold text-amber-600 dark:text-amber-400">{streak}</span>
+            </div>
+          )}
           <Link href="/app/profile">
-            <Avatar className="h-9 w-9 border-2 border-primary/20">
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={profile?.avatar_url ?? undefined} />
+              <AvatarFallback className="bg-muted text-foreground text-sm font-semibold">
                 {getInitials(profile?.full_name ?? profile?.email ?? "U")}
               </AvatarFallback>
             </Avatar>
@@ -64,72 +67,53 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ── Daily Verse card ── */}
-      {verseOfDay && (
-        <div className="mx-4 mt-3 rounded-3xl overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 p-px shadow-lg shadow-amber-500/20">
-          <div className="rounded-[23px] bg-gradient-to-br from-amber-500 to-orange-600 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center">
-                <Sun className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-white/90 text-xs font-semibold uppercase tracking-widest">Verse of the Day</span>
-            </div>
-            <blockquote className="font-serif text-white text-[17px] leading-[1.6] mb-3">
-              "{verseOfDay.verse_text}"
-            </blockquote>
-            <p className="text-white/80 text-sm font-semibold">— {verseOfDay.verse_reference}</p>
-            <div className="mt-4 flex gap-2">
-              <Link
-                href="/app/bible"
-                className="flex-1 bg-white/20 hover:bg-white/30 active:bg-white/10 text-white text-sm font-semibold rounded-2xl py-2.5 text-center transition-colors"
-              >
-                Read Chapter
-              </Link>
-              <Link
-                href="/app/bible"
-                className="bg-white/20 hover:bg-white/30 active:bg-white/10 text-white text-sm font-semibold rounded-2xl px-4 py-2.5 text-center transition-colors"
-              >
-                Share
-              </Link>
-            </div>
+      {/* ── Verse of the Day (hero) ── */}
+      <div className="px-4 mt-1">
+        <div className="bg-[#1C1C1E] dark:bg-[#2C2C2E] rounded-2xl overflow-hidden">
+          <div className="px-5 pt-5 pb-4">
+            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Verse of the Day</p>
+            <p className="text-[13px] text-white/60 font-medium mb-3">{verse.verse_reference}</p>
+            <p className="font-serif text-white text-[18px] leading-[1.65]">
+              {verse.verse_text}
+            </p>
           </div>
-        </div>
-      )}
 
-      {/* ── Quick Actions ── */}
-      <div className="px-4 mt-5">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { href: "/app/bible",     icon: BookOpen,    label: "Bible",   bg: "bg-blue-50 dark:bg-blue-950/40",   text: "text-blue-600 dark:text-blue-400" },
-            { href: "/app/journal/new", icon: NotebookPen, label: "Journal", bg: "bg-green-50 dark:bg-green-950/40",  text: "text-green-600 dark:text-green-400" },
-            { href: "/app/prayer",    icon: HandHeart,   label: "Prayer",  bg: "bg-rose-50 dark:bg-rose-950/40",   text: "text-rose-600 dark:text-rose-400" },
-            { href: "/app/plans",     icon: CalendarDays, label: "Plans",  bg: "bg-purple-50 dark:bg-purple-950/40", text: "text-purple-600 dark:text-purple-400" },
-          ].map(({ href, icon: Icon, label, bg, text }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex flex-col items-center gap-2"
-            >
-              <div className={`w-full aspect-square rounded-2xl flex items-center justify-center ${bg}`}>
-                <Icon className={`h-6 w-6 ${text}`} />
-              </div>
-              <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+          {/* Engagement row */}
+          <div className="flex items-center border-t border-white/8 px-2">
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-white/50 active:text-white/80 transition-colors">
+              <Heart className="h-4 w-4" />
+              <span className="text-[13px]">Like</span>
+            </button>
+            <div className="w-px h-5 bg-white/10" />
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-white/50 active:text-white/80 transition-colors">
+              <Copy className="h-4 w-4" />
+              <span className="text-[13px]">Copy</span>
+            </button>
+            <div className="w-px h-5 bg-white/10" />
+            <button className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-white/50 active:text-white/80 transition-colors">
+              <Share2 className="h-4 w-4" />
+              <span className="text-[13px]">Share</span>
+            </button>
+            <div className="w-px h-5 bg-white/10" />
+            <Link href="/app/bible" className="flex-1 flex items-center justify-center gap-1.5 py-3.5 text-white/50 active:text-white/80 transition-colors">
+              <Maximize2 className="h-4 w-4" />
+              <span className="text-[13px]">Read</span>
             </Link>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* ── Reading Plans ── */}
+      {/* ── Your Plans ── */}
       <div className="mt-6">
-        <div className="flex items-center justify-between px-4 mb-3">
-          <h2 className="text-[17px] font-bold">Reading Plans</h2>
-          <Link href="/app/plans" className="flex items-center text-primary text-sm font-semibold">
-            See all <ChevronRight className="h-4 w-4" />
+        <div className="flex items-center justify-between px-5 mb-3">
+          <h2 className="text-[17px] font-bold">Your Plans</h2>
+          <Link href="/app/plans" className="text-[13px] text-muted-foreground font-medium flex items-center gap-0.5">
+            See All <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {activePlans.length > 0 ? (
-          <div className="flex gap-3 px-4 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-3 pl-5 pr-4 overflow-x-auto pb-1 scrollbar-hide">
             {activePlans.map((progress) => {
               const plan = progress.reading_plans;
               if (!plan) return null;
@@ -138,94 +122,80 @@ export default async function HomePage() {
                 <Link
                   key={progress.id}
                   href={`/app/plans/${progress.plan_id}`}
-                  className="flex-shrink-0 w-[200px] bg-card border border-border rounded-3xl p-4 shadow-sm active:scale-[0.98] transition-transform"
+                  className="flex-shrink-0 w-[175px] bg-card border border-border rounded-2xl p-4 shadow-sm active:scale-[0.97] transition-transform"
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <BookOpen className="h-4 w-4 text-primary" />
-                    </div>
-                    <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">
-                      Day {progress.current_day}
-                    </Badge>
+                  <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center mb-3">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <h3 className="font-semibold text-sm leading-snug mb-3 line-clamp-2">{plan.title}</h3>
-                  <Progress value={pct} className="h-1.5 mb-1" />
-                  <p className="text-[10px] text-muted-foreground">{pct}% complete · {plan.duration_days} days</p>
+                  <p className="text-[11px] text-muted-foreground mb-1">Day {progress.current_day} of {plan.duration_days}</p>
+                  <h3 className="font-semibold text-[13px] leading-snug mb-3 line-clamp-2">{plan.title}</h3>
+                  <Progress value={pct} className="h-1" />
+                  <p className="text-[10px] text-muted-foreground mt-1.5">{pct}% complete</p>
                 </Link>
               );
             })}
-            {/* Add plan card */}
             <Link
               href="/app/plans"
-              className="flex-shrink-0 w-[160px] border-2 border-dashed border-border rounded-3xl p-4 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              className="flex-shrink-0 w-[140px] border border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2 py-6 active:scale-[0.97] transition-transform"
             >
-              <div className="h-10 w-10 rounded-2xl bg-muted flex items-center justify-center">
-                <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-xs font-medium text-muted-foreground text-center">Start a new plan</p>
+              <p className="text-[12px] text-muted-foreground text-center leading-snug px-2">Find a plan</p>
             </Link>
           </div>
         ) : (
-          <div className="mx-4 border-2 border-dashed border-border rounded-3xl p-6 flex flex-col items-center text-center">
-            <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
-              <CalendarDays className="h-6 w-6 text-primary" />
-            </div>
-            <p className="font-semibold text-sm">No active plans</p>
-            <p className="text-xs text-muted-foreground mt-1 mb-4">Start a reading plan to track your journey</p>
+          <div className="mx-5">
             <Link
               href="/app/plans"
-              className="bg-primary text-primary-foreground text-sm font-semibold rounded-2xl px-5 py-2.5 active:opacity-80 transition-opacity"
+              className="flex items-center gap-4 border border-border rounded-2xl px-4 py-4 active:bg-muted/50 transition-colors"
             >
-              Browse Plans
+              <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-[14px]">Start a Reading Plan</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Build a daily Bible habit</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Link>
           </div>
         )}
       </div>
 
-      {/* ── Today's Devotional ── */}
-      {devotional && (
-        <div className="px-4 mt-6">
-          <h2 className="text-[17px] font-bold mb-3">Today&apos;s Devotional</h2>
-          <Link
-            href={`/bibleapp/devotionals/${devotional.slug}`}
-            className="block rounded-3xl overflow-hidden border border-border bg-card shadow-sm active:scale-[0.99] transition-transform"
-          >
-            <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-5 py-4">
-              <Badge className="bg-primary/80 text-white border-0 text-[10px] mb-2">{devotional.category}</Badge>
-              <h3 className="font-bold text-white text-base leading-snug line-clamp-2">{devotional.title}</h3>
-              {devotional.key_verse_reference && (
-                <p className="text-white/60 text-xs mt-1">{devotional.key_verse_reference}</p>
-              )}
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{devotional.excerpt}</p>
-              <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-muted-foreground">{devotional.reading_time_minutes} min read</span>
-                <div className="flex items-center text-primary text-xs font-semibold gap-1">
-                  Read now <ChevronRight className="h-3.5 w-3.5" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
-
-      {/* ── AI Study ── */}
-      <div className="px-4 mt-6 mb-6">
+      {/* ── Continue in Bible ── */}
+      <div className="mt-6 px-5">
+        <h2 className="text-[17px] font-bold mb-3">Continue Reading</h2>
         <Link
-          href="/bibleapp/ai"
-          className="flex items-center gap-4 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200/50 dark:border-violet-800/30 rounded-3xl p-4 active:scale-[0.99] transition-transform"
+          href="/app/bible"
+          className="flex items-center gap-4 border border-border rounded-2xl px-4 py-4 bg-card shadow-sm active:scale-[0.98] transition-transform"
         >
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+            <BookOpen className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-sm">AI Bible Study</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Ask any question about Scripture</p>
+            <p className="font-semibold text-[14px]">Open Bible</p>
+            <p className="text-[12px] text-muted-foreground mt-0.5">Pick up where you left off</p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </Link>
       </div>
+
+      {/* ── Guided Prayer ── */}
+      <div className="mt-6 px-5 mb-8">
+        <h2 className="text-[17px] font-bold mb-3">Guided Prayer</h2>
+        <Link
+          href="/app/prayer"
+          className="flex items-center gap-4 bg-[#1B6CA8] rounded-2xl px-5 py-4 active:opacity-80 transition-opacity"
+        >
+          <div className="flex-1">
+            <p className="font-semibold text-white text-[15px]">Enter into a conversation with your creator.</p>
+            <p className="text-white/60 text-[13px] mt-1">Community prayer wall</p>
+          </div>
+          <ChevronRight className="h-5 w-5 text-white/60" />
+        </Link>
+      </div>
+
     </div>
   );
 }

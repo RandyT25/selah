@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, BookOpen, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ChevronRight, BookOpen, Search } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { ReadingPlan, PlanProgress } from "@/types/database";
 import type { Metadata } from "next";
@@ -10,6 +9,13 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Plans" };
 
 type PlanWithProgress = PlanProgress & { reading_plans: ReadingPlan | null };
+
+const TOPICS = ["Love", "Family", "Anxiety", "Whole Bible", "Prayer", "Faith", "New Believer", "Grief"];
+
+const TOPIC_COLORS = [
+  "#8B2330", "#276749", "#1B5E72", "#2563A8",
+  "#5B4397", "#B45309", "#065F46", "#9D174D",
+];
 
 export default async function PlansPage() {
   const supabase = await createClient();
@@ -25,117 +31,111 @@ export default async function PlansPage() {
   const featuredPlans = (featuredPlansResult.data ?? []) as ReadingPlan[];
   const enrolledIds = new Set(activePlans.map((p) => p.plan_id));
 
-  const categoryColor: Record<string, string> = {
-    "Foundations": "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    "Devotional": "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-    "Study": "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-    "Prayer": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
-  };
-
   return (
-    <div className="min-h-full pb-4">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-2xl border-b border-border/30 px-4 pt-4 pb-3">
-        <h1 className="text-[22px] font-bold">Plans</h1>
+    <div className="min-h-full bg-background">
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-5 pb-4">
+        <h1 className="text-[28px] font-bold tracking-tight mb-4">Plans</h1>
+        <div className="flex items-center gap-2.5 bg-muted rounded-xl px-4 py-3 w-full">
+          <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <span className="text-[15px] text-muted-foreground">Find plan</span>
+        </div>
       </div>
 
-      <div className="px-4 mt-5">
-        {/* ── Active Plans ── */}
-        {activePlans.length > 0 && (
-          <section className="mb-7">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[17px] font-bold">My Plans</h2>
-              <span className="text-xs text-muted-foreground">{activePlans.length} active</span>
-            </div>
-            <div className="space-y-3">
-              {activePlans.map((progress) => {
-                const plan = progress.reading_plans;
-                if (!plan) return null;
-                const pct = Math.round((progress.completed_days.length / plan.duration_days) * 100);
-                return (
-                  <Link
-                    key={progress.id}
-                    href={`/app/plans/${progress.plan_id}`}
-                    className="flex items-center gap-4 bg-card border border-border rounded-3xl p-4 shadow-sm active:scale-[0.99] transition-transform"
-                  >
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{plan.title}</p>
-                      <div className="flex items-center gap-2 mt-1 mb-2">
-                        <span className="text-[11px] text-muted-foreground">Day {progress.current_day} of {plan.duration_days}</span>
-                        <span className="text-[11px] font-semibold text-primary">{pct}%</span>
-                      </div>
-                      <Progress value={pct} className="h-1.5" />
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
+      {/* ── Topic pills ── */}
+      <div className="flex gap-2 px-5 overflow-x-auto pb-1 scrollbar-hide mb-5">
+        {TOPICS.map((t) => (
+          <button
+            key={t}
+            className="flex-shrink-0 rounded-full border border-border px-4 py-1.5 text-[13px] font-medium text-foreground bg-card active:bg-muted transition-colors"
+          >
+            {t}
+          </button>
+        ))}
+      </div>
 
-        {/* ── Featured Plans ── */}
-        <section>
+      {/* ── My Plans ── */}
+      {activePlans.length > 0 && (
+        <div className="px-5 mb-7">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[17px] font-bold">Featured Plans</h2>
+            <h2 className="text-[17px] font-bold">My Plans</h2>
+            <span className="text-[13px] text-muted-foreground">{activePlans.length} active</span>
           </div>
+          <div className="space-y-3">
+            {activePlans.map((progress) => {
+              const plan = progress.reading_plans;
+              if (!plan) return null;
+              const pct = Math.round((progress.completed_days.length / plan.duration_days) * 100);
+              return (
+                <Link
+                  key={progress.id}
+                  href={`/app/plans/${progress.plan_id}`}
+                  className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 shadow-sm active:scale-[0.98] transition-transform"
+                >
+                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-[14px] truncate">{plan.title}</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5 mb-2">Day {progress.current_day} of {plan.duration_days}</p>
+                    <Progress value={pct} className="h-1" />
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-          {featuredPlans.length > 0 ? (
-            <div className="space-y-3">
-              {featuredPlans.map((plan) => {
-                const enrolled = enrolledIds.has(plan.id);
-                return (
-                  <Link
-                    key={plan.id}
-                    href={`/app/plans/${plan.id}`}
-                    className="block bg-card border border-border rounded-3xl overflow-hidden shadow-sm active:scale-[0.99] transition-transform"
-                  >
-                    <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-5 py-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${categoryColor[plan.category] ?? "bg-muted text-muted-foreground"}`}>
-                            {plan.category}
-                          </span>
-                          <h3 className="font-bold text-white text-[15px] mt-2 leading-snug">{plan.title}</h3>
-                        </div>
-                        {enrolled && (
-                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] ml-2 flex-shrink-0">
-                            Enrolled
-                          </Badge>
-                        )}
-                      </div>
+      {/* ── Featured / Discover ── */}
+      {featuredPlans.length > 0 && (
+        <div className="px-5 mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[17px] font-bold">Featured</h2>
+            <Link href="/app/plans" className="text-[13px] text-muted-foreground flex items-center gap-0.5">
+              See All <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {featuredPlans.slice(0, 6).map((plan, i) => {
+              const enrolled = enrolledIds.has(plan.id);
+              const color = TOPIC_COLORS[i % TOPIC_COLORS.length];
+              return (
+                <Link
+                  key={plan.id}
+                  href={`/app/plans/${plan.id}`}
+                  className="rounded-2xl overflow-hidden shadow-sm active:scale-[0.97] transition-transform"
+                >
+                  {/* Cover */}
+                  <div className="h-[120px] flex items-end p-3" style={{ backgroundColor: color }}>
+                    <div>
+                      <p className="text-white/70 text-[10px] font-semibold uppercase tracking-wide">{plan.duration_days} Days</p>
+                      <p className="text-white font-bold text-[13px] leading-snug line-clamp-2">{plan.title}</p>
                     </div>
-                    <div className="px-5 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span className="text-xs">{plan.duration_days} days</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <CalendarDays className="h-3.5 w-3.5" />
-                          <span className="text-xs capitalize">{plan.difficulty}</span>
-                        </div>
-                      </div>
-                      <span className="text-primary text-xs font-semibold">
-                        {enrolled ? "Continue →" : "Start →"}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="border-2 border-dashed border-border rounded-3xl p-8 flex flex-col items-center text-center">
-              <CalendarDays className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="font-semibold">No plans available yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Check back soon for new reading plans</p>
-            </div>
-          )}
-        </section>
-      </div>
+                  </div>
+                  {/* Meta */}
+                  <div className="bg-card border border-border border-t-0 rounded-b-2xl px-3 py-2 flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground capitalize">{plan.category}</span>
+                    <span className="text-[11px] font-semibold text-primary">{enrolled ? "Enrolled" : "Start →"}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {activePlans.length === 0 && featuredPlans.length === 0 && (
+        <div className="mx-5 border border-dashed border-border rounded-2xl p-8 flex flex-col items-center text-center">
+          <BookOpen className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="font-semibold text-[15px]">No plans yet</p>
+          <p className="text-[13px] text-muted-foreground mt-1">Check back soon for reading plans</p>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -7,16 +7,18 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Bible" };
 
-const genreColor: Record<string, string> = {
-  Law:      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  History:  "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  Wisdom:   "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400",
-  Poetry:   "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
-  Prophecy: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  Gospel:   "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  Epistle:  "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  Apocalyptic: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-};
+const TOPICS = [
+  { label: "Love",      bg: "#8B2330" },
+  { label: "Healing",   bg: "#276749" },
+  { label: "Anxiety",   bg: "#1B5E72" },
+  { label: "Hope",      bg: "#2563A8" },
+  { label: "Peace",     bg: "#5B4397" },
+  { label: "Strength",  bg: "#B45309" },
+  { label: "Faith",     bg: "#065F46" },
+  { label: "Grace",     bg: "#9D174D" },
+];
+
+const bookSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
 
 export default async function BiblePage() {
   const supabase = await createClient();
@@ -30,88 +32,104 @@ export default async function BiblePage() {
     .order("read_at", { ascending: false })
     .limit(1);
   const lastRead = histResult.data?.[0] as Record<string, unknown> | null;
-
-  const bookSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
+  const lastBook = (lastRead?.bible_books as Record<string, string>)?.name;
+  const lastChapter = (lastRead?.bible_chapters as Record<string, number>)?.chapter_number;
 
   return (
-    <div className="min-h-full">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/90 backdrop-blur-2xl border-b border-border/30">
-        <div className="px-4 pt-4 pb-3">
-          <h1 className="text-[22px] font-bold mb-3">Bible</h1>
-          {/* Search bar */}
+    <div className="min-h-full bg-background">
+
+      {/* ── Header ── */}
+      <div className="px-5 pt-5 pb-4">
+        <h1 className="text-[28px] font-bold tracking-tight mb-4">Bible</h1>
+        <Link
+          href="/app/search"
+          className="flex items-center gap-2.5 bg-muted rounded-xl px-4 py-3 w-full"
+        >
+          <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <span className="text-[15px] text-muted-foreground">Search</span>
+        </Link>
+      </div>
+
+      {/* ── Continue Reading ── */}
+      {lastRead && lastBook && (
+        <div className="px-5 mb-5">
+          <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Continue Reading</p>
           <Link
-            href="/app/search"
-            className="flex items-center gap-3 bg-muted/80 rounded-2xl px-4 py-3 w-full"
+            href={`/app/bible/${bookSlug(lastBook)}/${lastChapter ?? 1}`}
+            className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 shadow-sm active:scale-[0.98] transition-transform"
           >
-            <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-sm text-muted-foreground">Search the Bible...</span>
+            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-primary font-bold text-[11px]">{lastBook.slice(0, 3).toUpperCase()}</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-[14px]">{lastBook}</p>
+              <p className="text-[12px] text-muted-foreground">Chapter {lastChapter ?? 1}</p>
+            </div>
+            <span className="text-[13px] text-muted-foreground font-medium">Open →</span>
           </Link>
         </div>
-      </div>
+      )}
 
-      <div className="px-4 pb-6">
-        {/* Continue Reading */}
-        {lastRead && (
-          <div className="mt-4 mb-5">
-            <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Continue Reading</h2>
+      {/* ── Search by Topic ── */}
+      <div className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[17px] font-bold">Search by Topic</h2>
+          <Link href="/app/search" className="text-[13px] text-muted-foreground">See All</Link>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {TOPICS.map(({ label, bg }) => (
             <Link
-              href={`/app/bible/${bookSlug((lastRead?.bible_books as Record<string, string>)?.name ?? "genesis")}/${(lastRead?.bible_chapters as Record<string, number>)?.chapter_number ?? 1}`}
-              className="flex items-center gap-4 bg-primary/5 border border-primary/20 rounded-2xl px-4 py-3 active:scale-[0.98] transition-transform"
+              key={label}
+              href={`/app/search?q=${label.toLowerCase()}`}
+              className="rounded-xl px-4 py-3.5 active:opacity-75 transition-opacity"
+              style={{ backgroundColor: bg }}
             >
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <span className="text-primary font-bold text-sm">
-                  {String((lastRead?.bible_books as Record<string, string>)?.name ?? "Gen").slice(0, 3)}
-                </span>
-              </div>
-              <div>
-                <p className="font-semibold text-sm">{(lastRead?.bible_books as Record<string, string>)?.name ?? "Genesis"}</p>
-                <p className="text-xs text-muted-foreground">Chapter {(lastRead?.bible_chapters as Record<string, number>)?.chapter_number ?? 1}</p>
-              </div>
+              <span className="text-white font-bold text-[14px] uppercase tracking-wide">{label}</span>
             </Link>
-          </div>
-        )}
-
-        {/* Old Testament */}
-        <div className="mb-6">
-          <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Old Testament</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {OLD_TESTAMENT.map((book) => (
-              <Link
-                key={book.number}
-                href={`/app/bible/${bookSlug(book.name)}/1`}
-                className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-3 px-2 active:scale-[0.96] transition-transform gap-1 min-h-[72px]"
-              >
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${genreColor[book.genre] ?? "bg-muted text-muted-foreground"}`}>
-                  {book.genre}
-                </span>
-                <span className="text-[12px] font-semibold text-center leading-tight mt-0.5">{book.name}</span>
-                <span className="text-[10px] text-muted-foreground">{book.chapters} ch</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* New Testament */}
-        <div>
-          <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">New Testament</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {NEW_TESTAMENT.map((book) => (
-              <Link
-                key={book.number}
-                href={`/app/bible/${bookSlug(book.name)}/1`}
-                className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-3 px-2 active:scale-[0.96] transition-transform gap-1 min-h-[72px]"
-              >
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${genreColor[book.genre] ?? "bg-muted text-muted-foreground"}`}>
-                  {book.genre}
-                </span>
-                <span className="text-[12px] font-semibold text-center leading-tight mt-0.5">{book.name}</span>
-                <span className="text-[10px] text-muted-foreground">{book.chapters} ch</span>
-              </Link>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
+
+      {/* ── Old Testament ── */}
+      <div className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[17px] font-bold">Old Testament</h2>
+          <span className="text-[13px] text-muted-foreground">{OLD_TESTAMENT.length} books</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {OLD_TESTAMENT.map((book) => (
+            <Link
+              key={book.number}
+              href={`/app/bible/${bookSlug(book.name)}/1`}
+              className="flex flex-col rounded-xl border border-border bg-card py-3 px-3 active:bg-muted/60 transition-colors"
+            >
+              <span className="text-[13px] font-semibold leading-tight">{book.name}</span>
+              <span className="text-[11px] text-muted-foreground mt-1">{book.chapters} ch</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── New Testament ── */}
+      <div className="px-5 pb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[17px] font-bold">New Testament</h2>
+          <span className="text-[13px] text-muted-foreground">{NEW_TESTAMENT.length} books</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {NEW_TESTAMENT.map((book) => (
+            <Link
+              key={book.number}
+              href={`/app/bible/${bookSlug(book.name)}/1`}
+              className="flex flex-col rounded-xl border border-border bg-card py-3 px-3 active:bg-muted/60 transition-colors"
+            >
+              <span className="text-[13px] font-semibold leading-tight">{book.name}</span>
+              <span className="text-[11px] text-muted-foreground mt-1">{book.chapters} ch</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
