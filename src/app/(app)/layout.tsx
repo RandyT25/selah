@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+import { CompactSidebar } from "@/components/layout/CompactSidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { AppHeader } from "@/components/layout/AppHeader";
 import type { Profile } from "@/types/database";
@@ -29,9 +29,11 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <AppSidebar profile={profile} />
+      {/* Desktop: compact icon sidebar */}
+      <CompactSidebar profile={profile} />
 
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile-only header */}
         <AppHeader
           profile={profile}
           unreadNotifications={unreadCount ?? 0}
@@ -42,6 +44,7 @@ export default async function AppLayout({
         </main>
       </div>
 
+      {/* Mobile bottom nav */}
       <MobileNav />
     </div>
   );

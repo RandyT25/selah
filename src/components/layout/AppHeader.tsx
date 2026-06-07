@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { Bell, Menu, Search, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -13,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import type { Profile } from "@/types/database";
 import { getInitials } from "@/lib/utils/format";
 import { createClient } from "@/lib/supabase/client";
@@ -26,7 +23,6 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ profile, title, unreadNotifications = 0 }: AppHeaderProps) {
-  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const supabase = createClient();
 
@@ -37,43 +33,17 @@ export function AppHeader({ profile, title, unreadNotifications = 0 }: AppHeader
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center px-4 gap-4">
-        {/* Mobile: Logo */}
-        <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-          <Image src="/logo-mark.png" alt="Selah" width={28} height={28} className="rounded-sm" />
-          <span className="font-bold text-base">Selah</span>
-        </Link>
-
-        {/* Title */}
-        {title && (
-          <h1 className="hidden lg:block text-lg font-semibold">{title}</h1>
-        )}
+    <header className="lg:hidden sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="relative flex h-[52px] items-center px-4">
+        {/* Centered page title */}
+        <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
+          <h1 className="text-base font-semibold">{title ?? "Selah"}</h1>
+        </div>
 
         <div className="flex-1" />
 
-        {/* Actions */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            asChild
-            className="hidden sm:flex"
-          >
-            <Link href="/search">
-              <Search className="h-4 w-4" />
-            </Link>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-
+        {/* Right actions */}
+        <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon-sm" className="relative" asChild>
             <Link href="/notifications">
               <Bell className="h-4 w-4" />
@@ -88,7 +58,7 @@ export function AppHeader({ profile, title, unreadNotifications = 0 }: AppHeader
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" className="rounded-full">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-7 w-7">
                   <AvatarImage src={profile?.avatar_url ?? undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                     {getInitials(profile?.full_name ?? profile?.email ?? "U")}

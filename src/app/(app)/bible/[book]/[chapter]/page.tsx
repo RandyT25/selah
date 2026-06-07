@@ -48,7 +48,7 @@ async function fetchVerses(bookName: string, chapterNum: number, translation: st
   const bibleId = process.env.NEXT_PUBLIC_DEFAULT_BIBLE_ID ?? "de4e12af7f28f599-02";
   const apiKey = process.env.BIBLE_API_KEY;
 
-  if (!apiKey) return getMockVerses(bookName, chapterNum);
+  if (!apiKey) return fetchFromFreeApi(bookName, chapterNum);
 
   try {
     const bookInfo = getBookByName(bookName);
@@ -59,7 +59,7 @@ async function fetchVerses(bookName: string, chapterNum: number, translation: st
       { headers: { "api-key": apiKey }, next: { revalidate: 86400 } }
     );
 
-    if (!resp.ok) return getMockVerses(bookName, chapterNum);
+    if (!resp.ok) return fetchFromFreeApi(bookName, chapterNum);
 
     const data = await resp.json();
     const fetchedVerses = (data.data ?? []).map((v: { id: string; reference: string; content: string }) => ({
@@ -84,6 +84,28 @@ async function fetchVerses(bookName: string, chapterNum: number, translation: st
       .order("verse_number");
 
     return saved ?? getMockVerses(bookName, chapterNum);
+  } catch {
+    return getMockVerses(bookName, chapterNum);
+  }
+}
+
+async function fetchFromFreeApi(bookName: string, chapterNum: number): Promise<BibleVerse[]> {
+  try {
+    const slug = bookName.toLowerCase().replace(/\s+/g, "+");
+    const resp = await fetch(
+      `https://bible-api.com/${slug}+${chapterNum}?translation=kjv`,
+      { next: { revalidate: 86400 } }
+    );
+    if (!resp.ok) return getMockVerses(bookName, chapterNum);
+    const data = await resp.json();
+    const base = { book_id: "", chapter_id: "", translation: "KJV", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
+    return (data.verses ?? []).map((v: { verse: number; text: string }) => ({
+      ...base,
+      id: `free-${bookName}-${chapterNum}-${v.verse}`,
+      verse_number: v.verse,
+      text: v.text.trim(),
+      reference: `${bookName} ${chapterNum}:${v.verse}`,
+    }));
   } catch {
     return getMockVerses(bookName, chapterNum);
   }
