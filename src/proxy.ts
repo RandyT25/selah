@@ -29,10 +29,10 @@ const BIBLEAPP_REDIRECTS: Record<string, string> = {
 
 const ADMIN_ROUTES = ["/admin"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Redirect legacy /bibleapp URLs → /app (except deep sub-paths like /bibleapp/bible/genesis/1)
+  // Redirect legacy /bibleapp URLs → /app
   for (const [from, to] of Object.entries(BIBLEAPP_REDIRECTS)) {
     if (pathname === from) {
       return NextResponse.redirect(new URL(to, request.url));
@@ -61,19 +61,19 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // /app auth: redirect logged-in users away from auth screens
+  // Redirect logged-in users away from auth screens
   if (user && APP_AUTH.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL("/app/home", request.url));
   }
 
-  // /app auth: protect app routes
+  // Protect app routes
   if (!user && APP_PROTECTED.some((r) => pathname.startsWith(r))) {
     const url = new URL("/app/login", request.url);
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
 
-  // Legacy /bibleapp protected routes (still support them for sub-paths)
+  // Legacy /bibleapp protected routes
   const BIBLEAPP_PROTECTED = [
     "/bibleapp/dashboard", "/bibleapp/bible", "/bibleapp/audio",
     "/bibleapp/plans", "/bibleapp/devotionals", "/bibleapp/journal",
