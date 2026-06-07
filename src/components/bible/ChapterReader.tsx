@@ -87,20 +87,14 @@ export function ChapterReader({
 
   const handleHighlight = async (verseId: string, color: HighlightColor) => {
     if (!userId) { toast.error("Sign in to highlight verses"); return; }
-    const verse = verses.find(v => v.id === verseId);
-    if (!verse) return;
-
-    const { error } = await supabase.from("verse_highlights").upsert({
-      user_id: userId,
-      verse_id: verseId,
-      color,
-    }, { onConflict: "user_id,verse_id" });
-
-    if (error) { toast.error("Failed to save highlight"); return; }
-    setHighlights(prev => {
-      const filtered = prev.filter(h => h.verse_id !== verseId);
-      return [...filtered, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }];
-    });
+    // delete-then-insert avoids upsert conflict constraint issues
+    await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
+    const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
+    if (error) { console.error("highlight error:", error); toast.error("Failed to save highlight"); return; }
+    setHighlights(prev => [
+      ...prev.filter(h => h.verse_id !== verseId),
+      { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    ]);
   };
 
   const handleRemoveHighlight = async (verseId: string) => {
@@ -111,8 +105,9 @@ export function ChapterReader({
 
   const handleBookmark = async (verseId: string) => {
     if (!userId) { toast.error("Sign in to bookmark verses"); return; }
+    await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
     const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
-    if (error) { toast.error("Failed to bookmark"); return; }
+    if (error) { console.error("bookmark error:", error); toast.error("Failed to bookmark"); return; }
     setBookmarks(prev => [...prev, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, collection_name: "Default", note: null, created_at: new Date().toISOString() }]);
   };
 
@@ -124,13 +119,11 @@ export function ChapterReader({
 
   const handleSaveNote = async () => {
     if (!userId || !noteVerseId || !noteContent.trim()) return;
-    const { error } = await supabase.from("verse_notes").upsert({
-      user_id: userId,
-      verse_id: noteVerseId,
-      content: noteContent.trim(),
-    }, { onConflict: "user_id,verse_id" });
-
-    if (error) { toast.error("Failed to save note"); return; }
+    await supabase.from("verse_notes").delete().eq("user_id", userId).eq("verse_id", noteVerseId);
+    const { error } = await supabase.from("verse_notes").insert({
+      user_id: userId, verse_id: noteVerseId, content: noteContent.trim(), is_private: true,
+    });
+    if (error) { console.error("note error:", error); toast.error("Failed to save note"); return; }
     toast.success("Note saved");
     setNoteVerseId(null);
     setNoteContent("");
@@ -163,45 +156,46 @@ export function ChapterReader({
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Reader Toolbar */}
-      <div className="sticky top-14 z-20 bg-background/95 backdrop-blur border-b">
-        <div className="max-w-3xl mx-auto flex items-center justify-between px-4 py-2">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon-sm" asChild>
-              <Link href={basePath}>
-                <ChevronLeft className="h-4 w-4" />
-              </Link>
-            </Button>
-            <button
-              onClick={() => setShowChapterNav(true)}
-              className="flex items-center gap-2 hover:bg-muted rounded-lg px-2 py-1 transition-colors"
-            >
-              <BookOpen className="h-4 w-4 text-primary" />
-              <span className="font-semibold text-sm">
-                {bookName} {chapterNum}
-              </span>
-            </button>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setShowSettings(true)}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#111111]">
+      {/* ── Top bar ── */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-[#FDFBF7]/95 dark:bg-[#111111]/95 backdrop-blur border-b border-black/5 dark:border-white/5">
+        <div className="flex items-center gap-2">
+          <Link
+            href={basePath}
+            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            aria-label="Back to Bible"
+          >
+            <ChevronLeft className="h-5 w-5 text-foreground" />
+          </Link>
+          <button
+            onClick={() => setShowChapterNav(true)}
+            className="flex items-center gap-1.5 bg-black/5 dark:bg-white/8 hover:bg-black/10 dark:hover:bg-white/12 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
+          >
+            <span className="font-semibold text-[14px]">{bookName} {chapterNum}</span>
+            <ChevronRight className="h-3 w-3 text-muted-foreground rotate-90" />
+          </button>
+          <span className="text-[12px] text-muted-foreground font-medium px-2 py-1 rounded-full bg-black/5 dark:bg-white/8">KJV</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="Reader settings"
+          >
+            <span className="text-[13px] font-bold tracking-tight text-foreground">AA</span>
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label="More options"
+          >
+            <Settings2 className="h-4 w-4 text-muted-foreground" />
+          </button>
         </div>
       </div>
 
-      {/* Chapter Content */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold font-serif mb-8 text-center">
-          {bookName} {chapterNum}
-        </h2>
-
+      {/* ── Chapter Content ── */}
+      <div className="max-w-xl mx-auto px-5 pt-8 pb-6">
         <BibleReader
           verses={verses}
           highlights={highlights}
@@ -216,29 +210,28 @@ export function ChapterReader({
           lineSpacing={lineSpacing}
           showVerseNumbers={showVerseNumbers}
         />
+      </div>
 
-        {/* Chapter Navigation */}
-        <div className="flex items-center justify-between mt-12 pt-6 border-t">
-          {prevHref ? (
-            <Button variant="outline" asChild>
-              <Link href={prevHref}>
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                {navigation.prevChapter ? `Chapter ${navigation.prevChapter}` : navigation.prevBook?.name}
-              </Link>
-            </Button>
-          ) : <div />}
-
-          <span className="text-xs text-muted-foreground">KJV</span>
-
-          {nextHref ? (
-            <Button variant="outline" asChild>
-              <Link href={nextHref}>
-                {navigation.nextChapter ? `Chapter ${navigation.nextChapter}` : navigation.nextBook?.name}
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Link>
-            </Button>
-          ) : <div />}
-        </div>
+      {/* ── Chapter Navigation ── */}
+      <div className="border-t border-black/5 dark:border-white/5 px-5 py-4 flex items-center gap-3">
+        {prevHref ? (
+          <Link
+            href={prevHref}
+            className="flex-1 flex items-center justify-center gap-2 min-h-[52px] rounded-2xl border border-border bg-card text-[14px] font-semibold active:scale-[0.97] transition-transform cursor-pointer"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {navigation.prevChapter ? `Chapter ${navigation.prevChapter}` : navigation.prevBook?.name ?? "Prev"}
+          </Link>
+        ) : <div className="flex-1" />}
+        {nextHref ? (
+          <Link
+            href={nextHref}
+            className="flex-1 flex items-center justify-center gap-2 min-h-[52px] rounded-2xl border border-border bg-card text-[14px] font-semibold active:scale-[0.97] transition-transform cursor-pointer"
+          >
+            {navigation.nextChapter ? `Chapter ${navigation.nextChapter}` : navigation.nextBook?.name ?? "Next"}
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        ) : <div className="flex-1" />}
       </div>
 
       {/* Settings Dialog */}

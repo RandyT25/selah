@@ -1,0 +1,1 @@
+{"nodes": [{"id": "migrations_001_initial_schema", "label": "Migration 001: Initial Database Schema", "file_type": "code", "source_file": "supabase/migrations/001_initial_schema.sql", "source_location": "1-598", "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

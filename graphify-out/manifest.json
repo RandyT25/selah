@@ -1,0 +1,477 @@
+{
+  "/Users/randy/selah/.eslintrc.json": {
+    "mtime": 1780635577.8507752,
+    "ast_hash": "792da49cb21f4c48da8cb9b3a742a35c",
+    "semantic_hash": "792da49cb21f4c48da8cb9b3a742a35c"
+  },
+  "/Users/randy/selah/next.config.ts": {
+    "mtime": 1780635541.8356562,
+    "ast_hash": "7728c90844571f015bde974a572d0a8d",
+    "semantic_hash": "7728c90844571f015bde974a572d0a8d"
+  },
+  "/Users/randy/selah/package.json": {
+    "mtime": 1780637426.3024204,
+    "ast_hash": "f4aaf209f1ef76ea975568588800e19d",
+    "semantic_hash": "f4aaf209f1ef76ea975568588800e19d"
+  },
+  "/Users/randy/selah/postcss.config.js": {
+    "mtime": 1780635560.4153094,
+    "ast_hash": "8640f9b2e6475cc3f5b1ff4548925765",
+    "semantic_hash": "8640f9b2e6475cc3f5b1ff4548925765"
+  },
+  "/Users/randy/selah/public/manifest.json": {
+    "mtime": 1780636980.2407596,
+    "ast_hash": "e8b3d7f94d3f98c435126e86db974f38",
+    "semantic_hash": "e8b3d7f94d3f98c435126e86db974f38"
+  },
+  "/Users/randy/selah/public/sw.js": {
+    "mtime": 1780636996.7247202,
+    "ast_hash": "a76d177b8f231acb6f5331195ee41dad",
+    "semantic_hash": "a76d177b8f231acb6f5331195ee41dad"
+  },
+  "/Users/randy/selah/src/__typetest.ts": {
+    "mtime": 1780638393.962058,
+    "ast_hash": "c630ef1e6c49aa0efef0909569f1857f",
+    "semantic_hash": "c630ef1e6c49aa0efef0909569f1857f"
+  },
+  "/Users/randy/selah/src/app/(app)/ai/page.tsx": {
+    "mtime": 1780636684.672694,
+    "ast_hash": "fc617cbebf0e8d405301211d90adf178",
+    "semantic_hash": "fc617cbebf0e8d405301211d90adf178"
+  },
+  "/Users/randy/selah/src/app/(app)/audio/page.tsx": {
+    "mtime": 1780637086.1239285,
+    "ast_hash": "1200593f38f40e9253e5a7cb0392234b",
+    "semantic_hash": "1200593f38f40e9253e5a7cb0392234b"
+  },
+  "/Users/randy/selah/src/app/(app)/bible/[book]/[chapter]/page.tsx": {
+    "mtime": 1780638555.490427,
+    "ast_hash": "5c01a4ae4cbb307340bc205953952387",
+    "semantic_hash": "5c01a4ae4cbb307340bc205953952387"
+  },
+  "/Users/randy/selah/src/app/(app)/bible/page.tsx": {
+    "mtime": 1780638603.9855268,
+    "ast_hash": "b69ad73e5bd8b8e06867585965066c4c",
+    "semantic_hash": "b69ad73e5bd8b8e06867585965066c4c"
+  },
+  "/Users/randy/selah/src/app/(app)/community/page.tsx": {
+    "mtime": 1780638629.512392,
+    "ast_hash": "3f3c14269909e2ddd0e93a1ad8d45873",
+    "semantic_hash": "3f3c14269909e2ddd0e93a1ad8d45873"
+  },
+  "/Users/randy/selah/src/app/(app)/community/prayer/page.tsx": {
+    "mtime": 1780638656.2952633,
+    "ast_hash": "78f94c6ce04ff92414707330eb9ce662",
+    "semantic_hash": "78f94c6ce04ff92414707330eb9ce662"
+  },
+  "/Users/randy/selah/src/app/(app)/dashboard/page.tsx": {
+    "mtime": 1780638583.344487,
+    "ast_hash": "a064d24d112009f3b9e834ba9700d112",
+    "semantic_hash": "a064d24d112009f3b9e834ba9700d112"
+  },
+  "/Users/randy/selah/src/app/(app)/devotionals/[slug]/page.tsx": {
+    "mtime": 1780638704.933057,
+    "ast_hash": "e009b523047be397812c62fc33180ec1",
+    "semantic_hash": "e009b523047be397812c62fc33180ec1"
+  },
+  "/Users/randy/selah/src/app/(app)/devotionals/page.tsx": {
+    "mtime": 1780638723.3261673,
+    "ast_hash": "90fced8ec85d337f7f9f7f3bc9b551d8",
+    "semantic_hash": "90fced8ec85d337f7f9f7f3bc9b551d8"
+  },
+  "/Users/randy/selah/src/app/(app)/journal/[id]/page.tsx": {
+    "mtime": 1780639117.8647752,
+    "ast_hash": "a971ae02d9395e2e7bfe69614fcab8c6",
+    "semantic_hash": "a971ae02d9395e2e7bfe69614fcab8c6"
+  },
+  "/Users/randy/selah/src/app/(app)/journal/edit/[id]/page.tsx": {
+    "mtime": 1780639137.3264992,
+    "ast_hash": "5c40ca8c4d018713b2ede60a6558dfee",
+    "semantic_hash": "5c40ca8c4d018713b2ede60a6558dfee"
+  },
+  "/Users/randy/selah/src/app/(app)/journal/new/page.tsx": {
+    "mtime": 1780636499.8976536,
+    "ast_hash": "eada8e6d82039fc18a2aa9cde4385e73",
+    "semantic_hash": "eada8e6d82039fc18a2aa9cde4385e73"
+  },
+  "/Users/randy/selah/src/app/(app)/journal/page.tsx": {
+    "mtime": 1780638774.2859662,
+    "ast_hash": "6895fe149cb6221a0dfc4381f21f7627",
+    "semantic_hash": "6895fe149cb6221a0dfc4381f21f7627"
+  },
+  "/Users/randy/selah/src/app/(app)/layout.tsx": {
+    "mtime": 1780636231.7749412,
+    "ast_hash": "eecd71a63656d713ebabbdf5eb35a431",
+    "semantic_hash": "eecd71a63656d713ebabbdf5eb35a431"
+  },
+  "/Users/randy/selah/src/app/(app)/plans/[id]/page.tsx": {
+    "mtime": 1780639079.9908855,
+    "ast_hash": "e4121d3a5bbdbaeba44590176807ccf6",
+    "semantic_hash": "e4121d3a5bbdbaeba44590176807ccf6"
+  },
+  "/Users/randy/selah/src/app/(app)/plans/page.tsx": {
+    "mtime": 1780638757.4318624,
+    "ast_hash": "e6d580eda4cb776a4f4b4557d95ebf92",
+    "semantic_hash": "e6d580eda4cb776a4f4b4557d95ebf92"
+  },
+  "/Users/randy/selah/src/app/(app)/profile/page.tsx": {
+    "mtime": 1780638798.4771624,
+    "ast_hash": "ef77e1f0c0bc88c9b5e38b4b9023355a",
+    "semantic_hash": "ef77e1f0c0bc88c9b5e38b4b9023355a"
+  },
+  "/Users/randy/selah/src/app/(app)/search/page.tsx": {
+    "mtime": 1780637040.8836713,
+    "ast_hash": "258df37b783cdf057277bd6ad8287729",
+    "semantic_hash": "258df37b783cdf057277bd6ad8287729"
+  },
+  "/Users/randy/selah/src/app/(app)/settings/page.tsx": {
+    "mtime": 1780639033.5151544,
+    "ast_hash": "938cf178938a2f286caa8686b010ea48",
+    "semantic_hash": "938cf178938a2f286caa8686b010ea48"
+  },
+  "/Users/randy/selah/src/app/(auth)/forgot-password/page.tsx": {
+    "mtime": 1780638040.4555216,
+    "ast_hash": "d8aa82747ca543c0b0ee5eb19adf0bf0",
+    "semantic_hash": "d8aa82747ca543c0b0ee5eb19adf0bf0"
+  },
+  "/Users/randy/selah/src/app/(auth)/login/page.tsx": {
+    "mtime": 1780636428.2410698,
+    "ast_hash": "6d343e8e87521d302827122382137b12",
+    "semantic_hash": "6d343e8e87521d302827122382137b12"
+  },
+  "/Users/randy/selah/src/app/(auth)/register/page.tsx": {
+    "mtime": 1780636456.6638672,
+    "ast_hash": "2a95163a957a0cb8fd079983ff765d1b",
+    "semantic_hash": "2a95163a957a0cb8fd079983ff765d1b"
+  },
+  "/Users/randy/selah/src/app/(marketing)/about/page.tsx": {
+    "mtime": 1780636938.974319,
+    "ast_hash": "1a6b64e88d1451249ff1e5db77dfbe5d",
+    "semantic_hash": "1a6b64e88d1451249ff1e5db77dfbe5d"
+  },
+  "/Users/randy/selah/src/app/(marketing)/features/page.tsx": {
+    "mtime": 1780636891.9502308,
+    "ast_hash": "bce4db9d30d2fc48118fd37052f2b58d",
+    "semantic_hash": "bce4db9d30d2fc48118fd37052f2b58d"
+  },
+  "/Users/randy/selah/src/app/(marketing)/layout.tsx": {
+    "mtime": 1780636782.7889464,
+    "ast_hash": "711a8ad520842b269afffa81fc0d9cb7",
+    "semantic_hash": "711a8ad520842b269afffa81fc0d9cb7"
+  },
+  "/Users/randy/selah/src/app/(marketing)/pricing/page.tsx": {
+    "mtime": 1780636917.5463796,
+    "ast_hash": "257cd7b1926831da4a7177ac0ae21f1b",
+    "semantic_hash": "257cd7b1926831da4a7177ac0ae21f1b"
+  },
+  "/Users/randy/selah/src/app/admin/devotionals/page.tsx": {
+    "mtime": 1780639177.7854905,
+    "ast_hash": "81ad6a2330766fa09bba8cc9260f23d5",
+    "semantic_hash": "81ad6a2330766fa09bba8cc9260f23d5"
+  },
+  "/Users/randy/selah/src/app/admin/layout.tsx": {
+    "mtime": 1780636950.2534492,
+    "ast_hash": "ed384fff90fee4da985b1c457fbc5414",
+    "semantic_hash": "ed384fff90fee4da985b1c457fbc5414"
+  },
+  "/Users/randy/selah/src/app/admin/moderation/page.tsx": {
+    "mtime": 1780639191.323553,
+    "ast_hash": "d59ec58bf272b914e6508af316423014",
+    "semantic_hash": "d59ec58bf272b914e6508af316423014"
+  },
+  "/Users/randy/selah/src/app/admin/page.tsx": {
+    "mtime": 1780636968.1102984,
+    "ast_hash": "ee1dd7c8c7e98b1b5af3a04e85e3e1c3",
+    "semantic_hash": "ee1dd7c8c7e98b1b5af3a04e85e3e1c3"
+  },
+  "/Users/randy/selah/src/app/admin/plans/page.tsx": {
+    "mtime": 1780639167.2507312,
+    "ast_hash": "ef2b4a6c900ca97296e099c416c868dc",
+    "semantic_hash": "ef2b4a6c900ca97296e099c416c868dc"
+  },
+  "/Users/randy/selah/src/app/admin/users/page.tsx": {
+    "mtime": 1780639155.3296769,
+    "ast_hash": "842d9336c0fa16974356d576047a0ece",
+    "semantic_hash": "842d9336c0fa16974356d576047a0ece"
+  },
+  "/Users/randy/selah/src/app/api/ai/route.ts": {
+    "mtime": 1780636735.4321766,
+    "ast_hash": "d003be5b050aeeea611dbe7e7a71a300",
+    "semantic_hash": "d003be5b050aeeea611dbe7e7a71a300"
+  },
+  "/Users/randy/selah/src/app/api/auth/callback/route.ts": {
+    "mtime": 1780636474.8477118,
+    "ast_hash": "6906e11742aa63e71c7abc621a303896",
+    "semantic_hash": "6906e11742aa63e71c7abc621a303896"
+  },
+  "/Users/randy/selah/src/app/api/bible/search/route.ts": {
+    "mtime": 1780637021.6010725,
+    "ast_hash": "0d9ee32ab7f38bc00a0d6619e8c90baa",
+    "semantic_hash": "0d9ee32ab7f38bc00a0d6619e8c90baa"
+  },
+  "/Users/randy/selah/src/app/layout.tsx": {
+    "mtime": 1780636016.2548006,
+    "ast_hash": "da1c5e0fbba1b3a30ae6704c4afc0487",
+    "semantic_hash": "da1c5e0fbba1b3a30ae6704c4afc0487"
+  },
+  "/Users/randy/selah/src/app/page.tsx": {
+    "mtime": 1780636855.584646,
+    "ast_hash": "170c94eb437477832593c4febc18cd66",
+    "semantic_hash": "170c94eb437477832593c4febc18cd66"
+  },
+  "/Users/randy/selah/src/components/ai/AIAssistant.tsx": {
+    "mtime": 1780636724.943752,
+    "ast_hash": "e7a61d7e908267a123c7946909c05c27",
+    "semantic_hash": "e7a61d7e908267a123c7946909c05c27"
+  },
+  "/Users/randy/selah/src/components/bible/BibleReader.tsx": {
+    "mtime": 1780636315.8003778,
+    "ast_hash": "42e5e151dbe70859d8b9fc61415d15bb",
+    "semantic_hash": "42e5e151dbe70859d8b9fc61415d15bb"
+  },
+  "/Users/randy/selah/src/components/bible/ChapterReader.tsx": {
+    "mtime": 1780636407.649323,
+    "ast_hash": "c4edd357b3f702d5810ea82f92d6f9f0",
+    "semantic_hash": "c4edd357b3f702d5810ea82f92d6f9f0"
+  },
+  "/Users/randy/selah/src/components/community/PrayerWall.tsx": {
+    "mtime": 1780638022.551,
+    "ast_hash": "13dcad41fc9390edd029f9ce6891ba76",
+    "semantic_hash": "13dcad41fc9390edd029f9ce6891ba76"
+  },
+  "/Users/randy/selah/src/components/journal/JournalEditor.tsx": {
+    "mtime": 1780639020.5797923,
+    "ast_hash": "348bb85806f32032a61b6698d240879a",
+    "semantic_hash": "348bb85806f32032a61b6698d240879a"
+  },
+  "/Users/randy/selah/src/components/journal/JournalEntryActions.tsx": {
+    "mtime": 1780639129.4391015,
+    "ast_hash": "43bf06b6aea635fbf067cfac24e4f5af",
+    "semantic_hash": "43bf06b6aea635fbf067cfac24e4f5af"
+  },
+  "/Users/randy/selah/src/components/layout/AppHeader.tsx": {
+    "mtime": 1780636225.0580223,
+    "ast_hash": "b5f04597520ce7472598352acfc622ab",
+    "semantic_hash": "b5f04597520ce7472598352acfc622ab"
+  },
+  "/Users/randy/selah/src/components/layout/AppSidebar.tsx": {
+    "mtime": 1780636201.0661626,
+    "ast_hash": "d6f4d20c36dfaf34e0ecd523405d8969",
+    "semantic_hash": "d6f4d20c36dfaf34e0ecd523405d8969"
+  },
+  "/Users/randy/selah/src/components/layout/MobileNav.tsx": {
+    "mtime": 1780636209.0551782,
+    "ast_hash": "a099dab6d6e1459774e621c636b0b082",
+    "semantic_hash": "a099dab6d6e1459774e621c636b0b082"
+  },
+  "/Users/randy/selah/src/components/marketing/MarketingFooter.tsx": {
+    "mtime": 1780636811.3159323,
+    "ast_hash": "c2e766c100b9d8cc55ff586c964a8f14",
+    "semantic_hash": "c2e766c100b9d8cc55ff586c964a8f14"
+  },
+  "/Users/randy/selah/src/components/marketing/MarketingNav.tsx": {
+    "mtime": 1780636800.6020312,
+    "ast_hash": "9a06696140b84de3c4be3bb6622e1ff0",
+    "semantic_hash": "9a06696140b84de3c4be3bb6622e1ff0"
+  },
+  "/Users/randy/selah/src/components/plans/EnrollButton.tsx": {
+    "mtime": 1780639089.8549118,
+    "ast_hash": "ddcbaf610cc959b5031be31c8a699122",
+    "semantic_hash": "ddcbaf610cc959b5031be31c8a699122"
+  },
+  "/Users/randy/selah/src/components/plans/MarkCompleteButton.tsx": {
+    "mtime": 1780639098.8743725,
+    "ast_hash": "d8ec69cba3f38f9518a9d07ad1b9e89d",
+    "semantic_hash": "d8ec69cba3f38f9518a9d07ad1b9e89d"
+  },
+  "/Users/randy/selah/src/components/shared/PWAInstallBanner.tsx": {
+    "mtime": 1780637014.7890785,
+    "ast_hash": "9d028c8e0f1c86cc5567b0f4260f0af2",
+    "semantic_hash": "9d028c8e0f1c86cc5567b0f4260f0af2"
+  },
+  "/Users/randy/selah/src/components/shared/ThemeProvider.tsx": {
+    "mtime": 1780636180.7464457,
+    "ast_hash": "0275e616206930a3508fc22b6e0cd1f2",
+    "semantic_hash": "0275e616206930a3508fc22b6e0cd1f2"
+  },
+  "/Users/randy/selah/src/components/ui/avatar.tsx": {
+    "mtime": 1780636058.4997294,
+    "ast_hash": "85cfb831f9b094eb705ea607a9dfe717",
+    "semantic_hash": "85cfb831f9b094eb705ea607a9dfe717"
+  },
+  "/Users/randy/selah/src/components/ui/badge.tsx": {
+    "mtime": 1780636052.0024226,
+    "ast_hash": "36707e973a0e29fe426151b9d87a16aa",
+    "semantic_hash": "36707e973a0e29fe426151b9d87a16aa"
+  },
+  "/Users/randy/selah/src/components/ui/button.tsx": {
+    "mtime": 1780636028.336955,
+    "ast_hash": "3c8ebf162292561d83721e8d28006f96",
+    "semantic_hash": "3c8ebf162292561d83721e8d28006f96"
+  },
+  "/Users/randy/selah/src/components/ui/card.tsx": {
+    "mtime": 1780636044.1865277,
+    "ast_hash": "07d9db7a343ce3a8f4aa1a286f551cae",
+    "semantic_hash": "07d9db7a343ce3a8f4aa1a286f551cae"
+  },
+  "/Users/randy/selah/src/components/ui/dialog.tsx": {
+    "mtime": 1780636071.7559283,
+    "ast_hash": "9de3474ca59790c83b3c95c01e6a4375",
+    "semantic_hash": "9de3474ca59790c83b3c95c01e6a4375"
+  },
+  "/Users/randy/selah/src/components/ui/dropdown-menu.tsx": {
+    "mtime": 1780636095.129363,
+    "ast_hash": "e656df335ce32f85b84a43306c709d78",
+    "semantic_hash": "e656df335ce32f85b84a43306c709d78"
+  },
+  "/Users/randy/selah/src/components/ui/input.tsx": {
+    "mtime": 1780636036.4467363,
+    "ast_hash": "9438d23ce7c4cb8aae0b87562c955331",
+    "semantic_hash": "9438d23ce7c4cb8aae0b87562c955331"
+  },
+  "/Users/randy/selah/src/components/ui/label.tsx": {
+    "mtime": 1780636149.4127352,
+    "ast_hash": "d01ccc1ec030c5990b562471b75013a2",
+    "semantic_hash": "d01ccc1ec030c5990b562471b75013a2"
+  },
+  "/Users/randy/selah/src/components/ui/progress.tsx": {
+    "mtime": 1780636110.8373642,
+    "ast_hash": "b281fd06e3b712e467949788c634cb42",
+    "semantic_hash": "b281fd06e3b712e467949788c634cb42"
+  },
+  "/Users/randy/selah/src/components/ui/scroll-area.tsx": {
+    "mtime": 1780636121.8957267,
+    "ast_hash": "13021aa3f82f61ed5f8d2ff1d333b0bd",
+    "semantic_hash": "13021aa3f82f61ed5f8d2ff1d333b0bd"
+  },
+  "/Users/randy/selah/src/components/ui/select.tsx": {
+    "mtime": 1780636144.821784,
+    "ast_hash": "af04114845c55dfbdb0fcd69674bdf12",
+    "semantic_hash": "af04114845c55dfbdb0fcd69674bdf12"
+  },
+  "/Users/randy/selah/src/components/ui/separator.tsx": {
+    "mtime": 1780636115.1008456,
+    "ast_hash": "8fb6731ce956056158a1fb69cc7ac5f1",
+    "semantic_hash": "8fb6731ce956056158a1fb69cc7ac5f1"
+  },
+  "/Users/randy/selah/src/components/ui/skeleton.tsx": {
+    "mtime": 1780636170.3759267,
+    "ast_hash": "41c84d5822f82c03707f6ab1e00db7b9",
+    "semantic_hash": "41c84d5822f82c03707f6ab1e00db7b9"
+  },
+  "/Users/randy/selah/src/components/ui/slider.tsx": {
+    "mtime": 1780636167.1087675,
+    "ast_hash": "4fb3ca4ecd16b59a8f6924710a4799ff",
+    "semantic_hash": "4fb3ca4ecd16b59a8f6924710a4799ff"
+  },
+  "/Users/randy/selah/src/components/ui/sonner.tsx": {
+    "mtime": 1780636127.3821545,
+    "ast_hash": "6059f58cad7ef996baf4262d2b74f74f",
+    "semantic_hash": "6059f58cad7ef996baf4262d2b74f74f"
+  },
+  "/Users/randy/selah/src/components/ui/switch.tsx": {
+    "mtime": 1780636161.0871553,
+    "ast_hash": "686b8598f514fb1653a4eed018ceabbd",
+    "semantic_hash": "686b8598f514fb1653a4eed018ceabbd"
+  },
+  "/Users/randy/selah/src/components/ui/tabs.tsx": {
+    "mtime": 1780636102.5638154,
+    "ast_hash": "0a79854f0c30acea3ee9ffaad7917a0c",
+    "semantic_hash": "0a79854f0c30acea3ee9ffaad7917a0c"
+  },
+  "/Users/randy/selah/src/components/ui/textarea.tsx": {
+    "mtime": 1780636154.0456645,
+    "ast_hash": "056be68088e649ae11a9da5a6ce654d7",
+    "semantic_hash": "056be68088e649ae11a9da5a6ce654d7"
+  },
+  "/Users/randy/selah/src/components/ui/tooltip.tsx": {
+    "mtime": 1780636176.220403,
+    "ast_hash": "94633c8a4de409f05343fca5b1ea438a",
+    "semantic_hash": "94633c8a4de409f05343fca5b1ea438a"
+  },
+  "/Users/randy/selah/src/hooks/useDebounce.ts": {
+    "mtime": 1780637045.2220113,
+    "ast_hash": "33f137bed333e7ca2e9806ee3a89fd31",
+    "semantic_hash": "33f137bed333e7ca2e9806ee3a89fd31"
+  },
+  "/Users/randy/selah/src/hooks/usePWA.ts": {
+    "mtime": 1780637007.4090466,
+    "ast_hash": "fa363be5ab49cfad1177e1bd4e6b1b51",
+    "semantic_hash": "fa363be5ab49cfad1177e1bd4e6b1b51"
+  },
+  "/Users/randy/selah/src/lib/ai/provider.ts": {
+    "mtime": 1780635974.284527,
+    "ast_hash": "1fc696b4832a0eacf5cf457f7680a55e",
+    "semantic_hash": "1fc696b4832a0eacf5cf457f7680a55e"
+  },
+  "/Users/randy/selah/src/lib/bible/books.ts": {
+    "mtime": 1780638015.2761555,
+    "ast_hash": "ef1a2826d6ebdd29555ea07b7e625995",
+    "semantic_hash": "ef1a2826d6ebdd29555ea07b7e625995"
+  },
+  "/Users/randy/selah/src/lib/supabase/client.ts": {
+    "mtime": 1780638407.2125685,
+    "ast_hash": "bbb2c240f4bff4622250c1c171e668f3",
+    "semantic_hash": "bbb2c240f4bff4622250c1c171e668f3"
+  },
+  "/Users/randy/selah/src/lib/supabase/server.ts": {
+    "mtime": 1780638523.8928423,
+    "ast_hash": "ee8f25478a8a99ac8d56a059255f379c",
+    "semantic_hash": "ee8f25478a8a99ac8d56a059255f379c"
+  },
+  "/Users/randy/selah/src/lib/utils/cn.ts": {
+    "mtime": 1780635912.508906,
+    "ast_hash": "618d00bf4537ce84f9ba62c5b215fb30",
+    "semantic_hash": "618d00bf4537ce84f9ba62c5b215fb30"
+  },
+  "/Users/randy/selah/src/lib/utils/format.ts": {
+    "mtime": 1780635923.7126863,
+    "ast_hash": "bf1a3e9224182ecb41b0f6381c4b8874",
+    "semantic_hash": "bf1a3e9224182ecb41b0f6381c4b8874"
+  },
+  "/Users/randy/selah/src/middleware.ts": {
+    "mtime": 1780638981.5735524,
+    "ast_hash": "82db7912671ee8ed268721a252dbdc72",
+    "semantic_hash": "82db7912671ee8ed268721a252dbdc72"
+  },
+  "/Users/randy/selah/src/types/app.ts": {
+    "mtime": 1780635889.216234,
+    "ast_hash": "b5bde32eb2b67eaa65b1cc2c30544486",
+    "semantic_hash": "b5bde32eb2b67eaa65b1cc2c30544486"
+  },
+  "/Users/randy/selah/src/types/database.ts": {
+    "mtime": 1780637984.9457293,
+    "ast_hash": "6c62f7af0c53e4775b8490c6e355ebdc",
+    "semantic_hash": "6c62f7af0c53e4775b8490c6e355ebdc"
+  },
+  "/Users/randy/selah/supabase/migrations/001_initial_schema.sql": {
+    "mtime": 1780635650.1350036,
+    "ast_hash": "34c1999272a2344ae002cdf710f69de6",
+    "semantic_hash": "34c1999272a2344ae002cdf710f69de6"
+  },
+  "/Users/randy/selah/supabase/migrations/002_rls_policies.sql": {
+    "mtime": 1780635689.3922033,
+    "ast_hash": "4a0d38caecdc2daa756ddc60cc90ab5e",
+    "semantic_hash": "4a0d38caecdc2daa756ddc60cc90ab5e"
+  },
+  "/Users/randy/selah/supabase/migrations/003_seed_bible_books.sql": {
+    "mtime": 1780635795.6986983,
+    "ast_hash": "d4387ad6b359b246d91ef6290d655660",
+    "semantic_hash": "d4387ad6b359b246d91ef6290d655660"
+  },
+  "/Users/randy/selah/tailwind.config.ts": {
+    "mtime": 1780635557.8432636,
+    "ast_hash": "5bd564f8e5f0d4183bbfd32df6005e8c",
+    "semantic_hash": "5bd564f8e5f0d4183bbfd32df6005e8c"
+  },
+  "/Users/randy/selah/tsconfig.json": {
+    "mtime": 1780635535.7707026,
+    "ast_hash": "3bd7a3770c6b44dbcaab1d2f175db8bd",
+    "semantic_hash": "3bd7a3770c6b44dbcaab1d2f175db8bd"
+  },
+  "/Users/randy/selah/README.md": {
+    "mtime": 1780635346.15361,
+    "ast_hash": "3a28db535b98f937099979d7a32d015c",
+    "semantic_hash": "3a28db535b98f937099979d7a32d015c"
+  }
+}
