@@ -81,35 +81,75 @@ export function ChapterReader({
   const [noteContent, setNoteContent] = useState("");
   const [, startTransition] = useTransition();
 
+  // ── Highlight ──────────────────────────────────────────────────────────────
   const handleHighlight = async (verseId: string, color: HighlightColor) => {
     if (!userId) { toast.error("Sign in to highlight verses"); return; }
-    const optimistic = { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-    setHighlights(prev => [...prev.filter(h => h.verse_id !== verseId), optimistic]);
-    await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
-    const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
-    if (error) console.error("highlight save error:", error);
+    const prev = highlights;
+    const optimistic: VerseHighlight = {
+      id: crypto.randomUUID(),
+      user_id: userId,
+      verse_id: verseId,
+      color,
+      note: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setHighlights([...prev.filter(h => h.verse_id !== verseId), optimistic]);
+    try {
+      await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
+      const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
+      if (error) throw error;
+    } catch (err) {
+      setHighlights(prev); // rollback
+      throw err;           // bubble up to BibleReader
+    }
   };
 
   const handleRemoveHighlight = async (verseId: string) => {
     if (!userId) return;
-    setHighlights(prev => prev.filter(h => h.verse_id !== verseId));
-    await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
+    const prev = highlights;
+    setHighlights(prev.filter(h => h.verse_id !== verseId));
+    const { error } = await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
+    if (error) {
+      setHighlights(prev);
+      throw error;
+    }
   };
 
+  // ── Bookmark ───────────────────────────────────────────────────────────────
   const handleBookmark = async (verseId: string) => {
     if (!userId) { toast.error("Sign in to bookmark verses"); return; }
-    setBookmarks(prev => [...prev, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, collection_name: "Default", note: null, created_at: new Date().toISOString() }]);
-    await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
-    const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
-    if (error) console.error("bookmark save error:", error);
+    const prev = bookmarks;
+    setBookmarks([...prev, {
+      id: crypto.randomUUID(),
+      user_id: userId,
+      verse_id: verseId,
+      collection_name: "Default",
+      note: null,
+      created_at: new Date().toISOString(),
+    }]);
+    try {
+      await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
+      const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
+      if (error) throw error;
+    } catch (err) {
+      setBookmarks(prev);
+      throw err;
+    }
   };
 
   const handleRemoveBookmark = async (verseId: string) => {
     if (!userId) return;
-    setBookmarks(prev => prev.filter(b => b.verse_id !== verseId));
-    await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
+    const prev = bookmarks;
+    setBookmarks(prev.filter(b => b.verse_id !== verseId));
+    const { error } = await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
+    if (error) {
+      setBookmarks(prev);
+      throw error;
+    }
   };
 
+  // ── Note ───────────────────────────────────────────────────────────────────
   const handleSaveNote = async () => {
     if (!userId || !noteVerseId || !noteContent.trim()) return;
     await supabase.from("verse_notes").delete().eq("user_id", userId).eq("verse_id", noteVerseId);
@@ -159,11 +199,9 @@ export function ChapterReader({
         </Link>
 
         <div className="flex items-center gap-2">
-          {/* Translation pill */}
           <span className="text-[11px] font-bold text-[#888] border border-[#E0E0E0] dark:border-[#333] rounded-full px-2.5 py-1">
             KJV
           </span>
-          {/* Settings */}
           <button
             onClick={() => setShowSettings(true)}
             className="h-9 w-9 flex items-center justify-center rounded-full active:bg-black/8 dark:active:bg-white/8 transition-colors cursor-pointer"
@@ -209,7 +247,6 @@ export function ChapterReader({
         className="fixed left-0 right-0 z-30 flex items-center justify-center gap-3 px-5 pb-3"
         style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
       >
-        {/* Play button */}
         <button
           className="h-11 w-11 flex items-center justify-center rounded-full bg-[#111] dark:bg-white active:opacity-70 transition-opacity cursor-pointer shadow-lg"
           aria-label="Audio (coming soon)"
@@ -217,7 +254,6 @@ export function ChapterReader({
           <Play className="h-4 w-4 text-white dark:text-black fill-current ml-0.5" />
         </button>
 
-        {/* Chapter nav pill */}
         <div className="flex items-center bg-[#111] dark:bg-white rounded-full shadow-lg overflow-hidden h-11">
           {prevHref ? (
             <Link
@@ -261,9 +297,7 @@ export function ChapterReader({
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={(open) => { setShowSettings(open); if (!open) savePreferences(); }}>
         <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Reader Settings</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Reader Settings</DialogTitle></DialogHeader>
           <div className="space-y-6 py-2">
             <div className="space-y-2">
               <Label>Font Size: {fontSize}px</Label>
@@ -302,9 +336,7 @@ export function ChapterReader({
       {/* Chapter Nav Dialog */}
       <Dialog open={showChapterNav} onOpenChange={setShowChapterNav}>
         <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>{bookName}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{bookName}</DialogTitle></DialogHeader>
           <ScrollArea className="h-64">
             <div className="grid grid-cols-5 gap-2 pr-4">
               {Array.from({ length: bookInfo.chapters }, (_, i) => i + 1).map((ch) => (

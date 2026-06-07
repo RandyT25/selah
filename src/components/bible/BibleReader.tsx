@@ -81,9 +81,11 @@ export function BibleReader({
     try {
       await onHighlight(selectedVerseId, color);
       toast.success("Highlighted");
+      closeSheet();
+    } catch {
+      toast.error("Couldn't save highlight — please try again");
     } finally {
       setLoading(null);
-      closeSheet();
     }
   };
 
@@ -92,9 +94,11 @@ export function BibleReader({
     try {
       await onRemoveHighlight(verseId);
       toast.success("Highlight removed");
+      closeSheet();
+    } catch {
+      toast.error("Couldn't remove highlight");
     } finally {
       setLoading(null);
-      closeSheet();
     }
   };
 
@@ -108,9 +112,11 @@ export function BibleReader({
         await onBookmark(verseId);
         toast.success("Bookmarked");
       }
+      closeSheet();
+    } catch {
+      toast.error("Couldn't save bookmark — please try again");
     } finally {
       setLoading(null);
-      closeSheet();
     }
   };
 

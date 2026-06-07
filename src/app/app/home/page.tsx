@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Heart, Copy, Share2, BookOpen, Bell } from "lucide-react";
+import { ChevronRight, Bell } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils/format";
+import { VerseActions } from "@/components/home/VerseActions";
 import type { Profile, PlanProgress, ReadingPlan, VerseOfDay } from "@/types/database";
 
 type PlanWithProgress = PlanProgress & { reading_plans: ReadingPlan | null };
@@ -84,23 +85,8 @@ export default async function HomePage() {
           {/* Reference */}
           <p className="text-[13px] font-semibold text-white/60 mb-4">— {verse.verse_reference}</p>
 
-          {/* Engagement row */}
-          <div className="flex items-center border-t border-white/10 pt-2 -mx-1">
-            {[
-              { icon: Heart,   label: "Like" },
-              { icon: Copy,    label: "Copy" },
-              { icon: Share2,  label: "Share" },
-            ].map(({ icon: Icon, label }) => (
-              <button key={label} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-white/40 active:text-white/80 transition-colors cursor-pointer">
-                <Icon className="h-4 w-4" strokeWidth={1.5} />
-                <span className="text-[12px]">{label}</span>
-              </button>
-            ))}
-            <Link href="/app/bible" className="flex-1 flex items-center justify-center gap-1.5 py-2 text-white/40 active:text-white/80 transition-colors cursor-pointer">
-              <BookOpen className="h-4 w-4" strokeWidth={1.5} />
-              <span className="text-[12px]">Read</span>
-            </Link>
-          </div>
+          {/* Engagement row — client component handles interactions */}
+          <VerseActions verseText={verse.verse_text} verseReference={verse.verse_reference} />
         </div>
       </div>
 
