@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterReader } from "@/components/bible/ChapterReader";
 import { getBookByName, getBookNameFromSlug, BIBLE_BOOKS } from "@/lib/bible/books";
+import { verseToId } from "@/lib/bible/verseId";
 import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from "@/types/database";
 import type { Metadata } from "next";
 
@@ -33,7 +34,7 @@ async function fetchFromApi(bookName: string, chapterNum: number): Promise<Bible
       const base = { book_id: "", chapter_id: "", translation: "KJV", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
       return (data.verses ?? []).map((v: { verse: number; text: string }) => ({
         ...base,
-        id: `free-${bookName}-${chapterNum}-${v.verse}`,
+        id: verseToId(bookName, chapterNum, v.verse),
         verse_number: v.verse,
         text: v.text.trim(),
         reference: `${bookName} ${chapterNum}:${v.verse}`,
