@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
@@ -80,9 +81,7 @@ export function AppSidebar({ profile }: AppSidebarProps) {
     <aside className="hidden lg:flex flex-col w-64 border-r bg-background h-screen sticky top-0">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b">
-        <div className="w-8 h-8 selah-gradient rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">S</span>
-        </div>
+        <Image src="/logo-mark.png" alt="Selah" width={36} height={36} className="rounded-sm" />
         <div>
           <h1 className="font-bold text-lg leading-none">Selah</h1>
           <p className="text-xs text-muted-foreground">Pause. Reflect. Grow.</p>

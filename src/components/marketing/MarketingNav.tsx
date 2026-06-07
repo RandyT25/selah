@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -22,9 +23,7 @@ export function MarketingNav() {
       <div className="max-w-7xl mx-auto px-6 flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 selah-gradient rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">S</span>
-          </div>
+          <Image src="/logo-mark.png" alt="Selah" width={32} height={32} className="rounded-sm" />
           <span className="font-bold text-xl">Selah</span>
         </Link>
 

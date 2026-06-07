@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Bell, Menu, Search, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -40,9 +41,7 @@ export function AppHeader({ profile, title, unreadNotifications = 0 }: AppHeader
       <div className="flex h-14 items-center px-4 gap-4">
         {/* Mobile: Logo */}
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-          <div className="w-7 h-7 selah-gradient rounded-md flex items-center justify-center">
-            <span className="text-white font-bold text-xs">S</span>
-          </div>
+          <Image src="/logo-mark.png" alt="Selah" width={28} height={28} className="rounded-sm" />
           <span className="font-bold text-base">Selah</span>
         </Link>
 

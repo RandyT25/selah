@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function MarketingFooter() {
   return (
@@ -7,9 +8,7 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 selah-gradient rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-xs">S</span>
-              </div>
+              <Image src="/logo-mark.png" alt="Selah" width={28} height={28} className="rounded-sm" />
               <span className="font-bold text-lg">Selah</span>
             </div>
             <p className="text-sm text-muted-foreground">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -66,9 +67,7 @@ function LoginForm() {
       {/* Left: Brand */}
       <div className="hidden lg:flex flex-col w-1/2 selah-gradient p-12 text-white">
         <Link href="/" className="flex items-center gap-3 mb-auto">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <span className="font-bold text-xl">S</span>
-          </div>
+          <Image src="/logo-app-icon.png" alt="Selah" width={40} height={40} className="rounded-xl" />
           <span className="font-bold text-2xl">Selah</span>
         </Link>
 
@@ -89,9 +88,7 @@ function LoginForm() {
         <div className="w-full max-w-md space-y-6">
           {/* Mobile Logo */}
           <Link href="/" className="flex items-center gap-2 lg:hidden mb-8">
-            <div className="w-8 h-8 selah-gradient rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
+            <Image src="/logo-mark.png" alt="Selah" width={32} height={32} className="rounded-sm" />
             <span className="font-bold text-xl">Selah</span>
           </Link>
 

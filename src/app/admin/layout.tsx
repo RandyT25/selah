@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, Users, BookOpen, FileText, Flag, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -26,9 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="w-56 border-r bg-muted/30 flex flex-col">
         <div className="px-4 py-4 border-b">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 selah-gradient rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">S</span>
-            </div>
+            <Image src="/logo-mark.png" alt="Selah" width={24} height={24} className="rounded-sm" />
             <span className="font-bold text-sm">Admin Panel</span>
           </div>
         </div>
