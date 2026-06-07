@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils/cn";
 const navLinks = [
   { label: "Features", href: "/features" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Download", href: "/download" },
   { label: "About", href: "/about" },
 ];
 
@@ -51,7 +52,7 @@ export function MarketingNav() {
             <Link href="/login">Sign In</Link>
           </Button>
           <Button variant="gold" size="sm" asChild>
-            <Link href="/register">Get Started Free</Link>
+            <Link href="/download">Get the App</Link>
           </Button>
         </div>
 

@@ -1,75 +1,35 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Headphones, NotebookPen, Users, Sparkles, Calendar, Check, Star } from "lucide-react";
+import Image from "next/image";
+import {
+  ArrowRight, BookOpen, Headphones, NotebookPen, Users,
+  Sparkles, Calendar, Check, Star, Smartphone, Globe, Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { InstallAppButton } from "@/components/marketing/InstallAppButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Selah — Pause. Reflect. Grow.",
-  description: "A modern Bible companion for reading, studying, journaling, and growing in faith. Bible reading plans, devotionals, prayer journal, and community.",
+  description: "A modern Bible companion app for reading, studying, journaling, and growing in faith. Free on Android, iOS, and web.",
 };
 
 const features = [
-  {
-    icon: BookOpen,
-    title: "Bible Reader",
-    description: "Read Scripture in beautiful typography with highlighting, bookmarks, verse notes, and offline support.",
-    color: "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400",
-  },
-  {
-    icon: Calendar,
-    title: "Reading Plans",
-    description: "Structured journeys through Scripture — from Bible-in-a-Year to focused 7-day topical studies.",
-    color: "bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400",
-  },
-  {
-    icon: NotebookPen,
-    title: "Prayer Journal",
-    description: "Capture your reflections, prayers, and spiritual insights with a beautiful rich text journal.",
-    color: "bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400",
-  },
-  {
-    icon: Headphones,
-    title: "Audio Bible",
-    description: "Listen to Scripture during your commute, workout, or quiet moments of reflection.",
-    color: "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400",
-  },
-  {
-    icon: Users,
-    title: "Community",
-    description: "Pray together, share reflections, and grow in faith alongside a global community.",
-    color: "bg-pink-50 text-pink-600 dark:bg-pink-950/30 dark:text-pink-400",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Bible Study",
-    description: "Ask any question about Scripture and receive thoughtful, grounded answers from Selah AI.",
-    color: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400",
-  },
+  { icon: BookOpen, title: "Bible Reader", description: "Read Scripture in beautiful typography with highlighting, bookmarks, and offline support.", color: "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400" },
+  { icon: Calendar, title: "Reading Plans", description: "Structured journeys through Scripture — from Bible-in-a-Year to 7-day topical studies.", color: "bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400" },
+  { icon: NotebookPen, title: "Prayer Journal", description: "Capture reflections, prayers, and spiritual insights with a beautiful rich-text journal.", color: "bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400" },
+  { icon: Headphones, title: "Audio Bible", description: "Listen to Scripture during your commute, workout, or quiet moments of reflection.", color: "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400" },
+  { icon: Users, title: "Community", description: "Pray together, share reflections, and grow in faith alongside a global community.", color: "bg-pink-50 text-pink-600 dark:bg-pink-950/30 dark:text-pink-400" },
+  { icon: Sparkles, title: "AI Bible Study", description: "Ask any question about Scripture and receive thoughtful, grounded answers.", color: "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400" },
 ];
 
 const testimonials = [
-  {
-    name: "Sarah M.",
-    role: "Daily User",
-    text: "Selah has completely transformed my morning devotions. The journal feature alone is worth it.",
-    rating: 5,
-  },
-  {
-    name: "Pastor James K.",
-    role: "Church Leader",
-    text: "I recommend Selah to my whole congregation. It's the most thoughtful Bible app I've seen.",
-    rating: 5,
-  },
-  {
-    name: "Rachel T.",
-    role: "Bible Study Leader",
-    text: "The AI assistant is incredible for digging deeper into passages. It's like having a theologian on call.",
-    rating: 5,
-  },
+  { name: "Sarah M.", role: "Daily User", text: "Selah has completely transformed my morning devotions. The journal feature alone is worth it.", rating: 5 },
+  { name: "Pastor James K.", role: "Church Leader", text: "I recommend Selah to my whole congregation. It's the most thoughtful Bible app I've seen.", rating: 5 },
+  { name: "Rachel T.", role: "Bible Study Leader", text: "The AI assistant is incredible for digging deeper into passages. It's like having a theologian on call.", rating: 5 },
 ];
 
 export default function LandingPage() {
@@ -97,9 +57,9 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="xl" variant="gold" asChild>
-              <Link href="/register">
-                Start for Free
-                <ArrowRight className="h-5 w-5 ml-1" />
+              <Link href="/download">
+                <Download className="h-5 w-5 mr-2" />
+                Get the App — Free
               </Link>
             </Button>
             <Button size="xl" variant="outline" asChild>
@@ -108,25 +68,88 @@ export default function LandingPage() {
           </div>
 
           <p className="text-sm text-muted-foreground mt-6">
-            Free forever · No credit card required · Available on all devices
+            Free forever · No credit card required · Android, iOS & Web
           </p>
         </div>
 
-        {/* Decorative gradient */}
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </section>
 
-      {/* Verse of the Day Preview */}
+      {/* Verse of the Day */}
       <section className="py-16 bg-muted/30">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-4">
-            Verse of the Day
-          </p>
+          <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-4">Verse of the Day</p>
           <blockquote className="font-serif text-2xl lg:text-3xl leading-relaxed text-foreground mb-4">
             "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."
           </blockquote>
           <p className="font-semibold text-primary">— John 3:16, KJV</p>
+        </div>
+      </section>
+
+      {/* Get the App — Platform section */}
+      <section className="py-24 px-6 bg-slate-900 text-white">
+        <div className="max-w-5xl mx-auto text-center">
+          <Badge className="mb-6 bg-primary/20 text-primary border-primary/30">Available Now</Badge>
+          <h2 className="text-4xl font-bold mb-4">One app, every platform</h2>
+          <p className="text-slate-300 text-lg max-w-xl mx-auto mb-12">
+            Install Selah on your phone, tablet, or computer. Works offline. No app store required on iOS or Android — install directly from your browser in seconds.
+          </p>
+
+          <div className="grid sm:grid-cols-3 gap-6 mb-12">
+            <Card className="bg-slate-800 border-slate-700 text-white">
+              <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                  <Smartphone className="h-6 w-6 text-green-400" />
+                </div>
+                <h3 className="font-bold text-lg">Android</h3>
+                <p className="text-slate-400 text-sm">Install via Chrome browser or download from the Play Store</p>
+                <div className="flex flex-col gap-2 w-full mt-2">
+                  <Button variant="gold" size="sm" asChild>
+                    <Link href="/download#android">Install on Android</Link>
+                  </Button>
+                  <span className="text-xs text-slate-500">Play Store — coming soon</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700 text-white">
+              <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <Smartphone className="h-6 w-6 text-blue-400" />
+                </div>
+                <h3 className="font-bold text-lg">iPhone / iPad</h3>
+                <p className="text-slate-400 text-sm">Add to your Home Screen from Safari in 3 taps</p>
+                <div className="flex flex-col gap-2 w-full mt-2">
+                  <Button variant="outline" size="sm" className="border-slate-600 text-white hover:bg-slate-700" asChild>
+                    <Link href="/download#ios">Install on iOS</Link>
+                  </Button>
+                  <span className="text-xs text-slate-500">App Store — coming soon</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800 border-slate-700 text-white">
+              <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <Globe className="h-6 w-6 text-purple-400" />
+                </div>
+                <h3 className="font-bold text-lg">Web / Desktop</h3>
+                <p className="text-slate-400 text-sm">Open in any browser — works like a native app</p>
+                <div className="flex flex-col gap-2 w-full mt-2">
+                  <InstallAppButton />
+                  <span className="text-xs text-slate-500">Chrome, Edge, Safari, Firefox</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Button size="lg" className="bg-white text-slate-900 hover:bg-white/90" asChild>
+            <Link href="/download">
+              Full Install Guide
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
         </div>
       </section>
 
@@ -135,11 +158,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Everything for your faith journey</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Six powerful tools, one elegant application
-            </p>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Six powerful tools, one elegant app</p>
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map(({ icon: Icon, title, description, color }) => (
               <Card key={title} className="card-hover border-0 shadow-sm">
@@ -161,25 +181,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
-                Beautiful Reading Experience
-              </Badge>
-              <h2 className="text-4xl font-bold mb-6">
-                Read Scripture the way it deserves
-              </h2>
+              <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">Beautiful Reading Experience</Badge>
+              <h2 className="text-4xl font-bold mb-6">Read Scripture the way it deserves</h2>
               <p className="text-slate-300 text-lg leading-relaxed mb-8">
-                A distraction-free Bible reader designed for long, immersive reading sessions.
+                A distraction-free Bible reader designed for deep, immersive reading.
                 Highlight, bookmark, and annotate any verse with a single tap.
               </p>
               <ul className="space-y-3">
-                {[
-                  "Multiple translations (KJV, ASV, WEB, and more)",
-                  "6 highlight colors for visual annotation",
-                  "Verse-by-verse notes and bookmarks",
-                  "Customizable font, size, and spacing",
-                  "Dark mode and sepia theme",
-                  "Full offline support",
-                ].map((item) => (
+                {["Multiple translations (KJV, ASV, WEB, and more)", "6 highlight colors for visual annotation", "Verse-by-verse notes and bookmarks", "Customizable font, size, and spacing", "Dark mode and sepia theme", "Full offline support"].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-slate-300">
                     <Check className="h-5 w-5 text-primary shrink-0" />
                     {item}
@@ -187,32 +196,19 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Button variant="gold" size="lg" className="mt-8" asChild>
-                <Link href="/register">Try the Bible Reader</Link>
+                <Link href="/download">Get the App Free</Link>
               </Button>
             </div>
-
             <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
               <div className="text-xs text-slate-400 mb-6 flex items-center gap-2">
                 <BookOpen className="h-3.5 w-3.5" />
                 Genesis 1 · KJV
               </div>
               <div className="space-y-4 font-serif text-lg leading-loose">
-                <p>
-                  <span className="text-xs font-bold text-primary/70 align-super mr-1">1</span>
-                  In the beginning God created the heaven and the earth.
-                </p>
-                <p>
-                  <span className="text-xs font-bold text-primary/70 align-super mr-1">2</span>
-                  And the earth was without form, and void; and darkness was upon the face of the deep.
-                </p>
-                <p className="bg-yellow-500/20 rounded px-1">
-                  <span className="text-xs font-bold text-primary/70 align-super mr-1">3</span>
-                  <span>And God said, Let there be light: and there was light.</span>
-                </p>
-                <p>
-                  <span className="text-xs font-bold text-primary/70 align-super mr-1">4</span>
-                  And God saw the light, that it was good: and God divided the light from the darkness.
-                </p>
+                <p><span className="text-xs font-bold text-primary/70 align-super mr-1">1</span>In the beginning God created the heaven and the earth.</p>
+                <p><span className="text-xs font-bold text-primary/70 align-super mr-1">2</span>And the earth was without form, and void; and darkness was upon the face of the deep.</p>
+                <p className="bg-yellow-500/20 rounded px-1"><span className="text-xs font-bold text-primary/70 align-super mr-1">3</span>And God said, Let there be light: and there was light.</p>
+                <p><span className="text-xs font-bold text-primary/70 align-super mr-1">4</span>And God saw the light, that it was good: and God divided the light from the darkness.</p>
               </div>
             </div>
           </div>
@@ -247,20 +243,25 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Final CTA */}
       <section className="py-24 selah-gradient text-white text-center px-6">
         <div className="max-w-3xl mx-auto">
+          <Image src="/logo-app-icon.png" alt="Selah" width={80} height={80} className="rounded-2xl mx-auto mb-6 shadow-2xl" />
           <h2 className="text-4xl font-bold mb-4">Begin your journey today</h2>
           <p className="text-white/80 text-lg mb-8">
-            Join thousands who are growing deeper in their faith with Selah.
-            Free to start, meaningful forever.
+            Join thousands growing deeper in their faith with Selah. Free to install, meaningful forever.
           </p>
-          <Button size="xl" className="bg-white text-primary hover:bg-white/90" asChild>
-            <Link href="/register">
-              Create Your Free Account
-              <ArrowRight className="h-5 w-5 ml-1" />
-            </Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="xl" className="bg-white text-primary hover:bg-white/90" asChild>
+              <Link href="/download">
+                <Download className="h-5 w-5 mr-2" />
+                Install Free
+              </Link>
+            </Button>
+            <Button size="xl" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
+              <Link href="/pricing">View Pricing</Link>
+            </Button>
+          </div>
         </div>
       </section>
 

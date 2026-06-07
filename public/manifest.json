@@ -2,7 +2,8 @@
   "name": "Selah — Pause. Reflect. Grow.",
   "short_name": "Selah",
   "description": "A modern Bible companion for reading, studying, journaling, and growing in faith.",
-  "start_url": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#FFFFFF",
@@ -73,14 +74,6 @@
       "description": "View the community prayer wall",
       "url": "/community/prayer",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/dashboard.png",
-      "type": "image/png",
-      "sizes": "1280x720",
-      "label": "Dashboard"
     }
   ],
   "related_applications": [],
