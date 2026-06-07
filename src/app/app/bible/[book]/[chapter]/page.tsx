@@ -16,26 +16,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: `${bookName} ${chapter}` };
 }
 
-async function fetchFromApi(bookName: string, chapterNum: number): Promise<BibleVerse[]> {
-  try {
-    const slug = bookName.toLowerCase().replace(/\s+/g, "+");
-    const resp = await fetch(
-      `https://bible-api.com/${slug}+${chapterNum}?translation=kjv`,
-      { next: { revalidate: 86400 } }
-    );
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    const base = { book_id: "", chapter_id: "", translation: "KJV", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
-    return (data.verses ?? []).map((v: { verse: number; text: string }) => ({
-      ...base,
-      id: `free-${bookName}-${chapterNum}-${v.verse}`,
-      verse_number: v.verse,
-      text: v.text.trim(),
-      reference: `${bookName} ${chapterNum}:${v.verse}`,
-    }));
-  } catch {
-    return [];
+async function fetchFromApi(bookName: string, chapterNum: number): Promise<BibleVerse[] | null> {
+  const slug = bookName.toLowerCase().replace(/\s+/g, "+");
+  const url = `https://bible-api.com/${slug}+${chapterNum}?translation=kjv`;
+
+  // Try up to 2 times with a short delay on 5xx
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const resp = await fetch(url, { next: { revalidate: 86400 } });
+      if (resp.status === 404) return []; // book/chapter not found — not an error
+      if (!resp.ok) {
+        if (attempt === 0) await new Promise(r => setTimeout(r, 800));
+        continue;
+      }
+      const data = await resp.json();
+      const base = { book_id: "", chapter_id: "", translation: "KJV", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
+      return (data.verses ?? []).map((v: { verse: number; text: string }) => ({
+        ...base,
+        id: `free-${bookName}-${chapterNum}-${v.verse}`,
+        verse_number: v.verse,
+        text: v.text.trim(),
+        reference: `${bookName} ${chapterNum}:${v.verse}`,
+      }));
+    } catch {
+      if (attempt === 0) await new Promise(r => setTimeout(r, 800));
+    }
   }
+  return null; // null = API down, show error
 }
 
 export default async function ChapterPage({ params }: PageProps) {
@@ -57,6 +64,21 @@ export default async function ChapterPage({ params }: PageProps) {
     user ? supabase.from("verse_bookmarks").select("*").eq("user_id", user.id) : { data: [] as VerseBookmark[] },
     user ? supabase.from("user_preferences").select("*").eq("user_id", user.id).single() : { data: null as UserPreferences | null },
   ]);
+
+  // null = API error (503 etc.), show a friendly error instead of blank page
+  if (verses === null) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center px-8 text-center gap-4">
+        <p className="text-[40px]">📖</p>
+        <p className="text-[18px] font-semibold">Couldn&apos;t load {bookName} {chapterNum}</p>
+        <p className="text-[14px] text-[#888]">The Bible API is temporarily unavailable. Please try again in a moment.</p>
+        <a href={`/app/bible/${bookSlug}/${chapterNum}`}
+           className="mt-2 px-6 py-3 rounded-2xl bg-[#111] dark:bg-white text-white dark:text-black text-[15px] font-semibold">
+          Try Again
+        </a>
+      </div>
+    );
+  }
 
   const prevChapter = chapterNum > 1 ? chapterNum - 1 : null;
   const nextChapter = chapterNum < bookInfo.chapters ? chapterNum + 1 : null;
