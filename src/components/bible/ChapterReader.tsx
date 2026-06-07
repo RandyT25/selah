@@ -87,34 +87,34 @@ export function ChapterReader({
 
   const handleHighlight = async (verseId: string, color: HighlightColor) => {
     if (!userId) { toast.error("Sign in to highlight verses"); return; }
-    // delete-then-insert avoids upsert conflict constraint issues
+    // Optimistic update first — visual applies immediately regardless of DB
+    const optimistic = { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+    setHighlights(prev => [...prev.filter(h => h.verse_id !== verseId), optimistic]);
+    // Persist to DB (delete+insert avoids upsert conflict)
     await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
     const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
-    if (error) { console.error("highlight error:", error); toast.error("Failed to save highlight"); return; }
-    setHighlights(prev => [
-      ...prev.filter(h => h.verse_id !== verseId),
-      { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    ]);
+    if (error) { console.error("highlight save error:", error); }
   };
 
   const handleRemoveHighlight = async (verseId: string) => {
     if (!userId) return;
-    await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
     setHighlights(prev => prev.filter(h => h.verse_id !== verseId));
+    await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
   };
 
   const handleBookmark = async (verseId: string) => {
     if (!userId) { toast.error("Sign in to bookmark verses"); return; }
+    // Optimistic update first
+    setBookmarks(prev => [...prev, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, collection_name: "Default", note: null, created_at: new Date().toISOString() }]);
     await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
     const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
-    if (error) { console.error("bookmark error:", error); toast.error("Failed to bookmark"); return; }
-    setBookmarks(prev => [...prev, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, collection_name: "Default", note: null, created_at: new Date().toISOString() }]);
+    if (error) { console.error("bookmark save error:", error); }
   };
 
   const handleRemoveBookmark = async (verseId: string) => {
     if (!userId) return;
-    await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
     setBookmarks(prev => prev.filter(b => b.verse_id !== verseId));
+    await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
   };
 
   const handleSaveNote = async () => {

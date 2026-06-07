@@ -44,6 +44,7 @@ function SearchContent() {
         const res = await fetch(`/api/bible/search?q=${encodeURIComponent(query)}`);
         if (res.ok) {
           const data = await res.json();
+          // API returns { results: [...] }
           setResults(data.results ?? []);
         }
       } catch {
@@ -112,18 +113,25 @@ function SearchContent() {
           <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] px-5 pt-4 pb-1">
             {results.length} result{results.length !== 1 ? "s" : ""}
           </p>
-          {results.map((r, i) => (
-            <Link
-              key={r.id}
-              href={`/app/bible/${bookSlug(r.book)}/${r.chapter}`}
-              className={`flex flex-col px-5 py-4 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors ${
-                i > 0 ? "border-t border-[#F0F0F0] dark:border-[#222]" : ""
-              }`}
-            >
-              <p className="text-[11px] font-semibold text-[#888] mb-1">{r.book} {r.chapter}:{r.verse}</p>
-              <p className="text-[14px] leading-relaxed line-clamp-3">{r.text}</p>
-            </Link>
-          ))}
+          {results.map((r, i) => {
+            // r.book is the full reference string e.g. "John 3:16"
+            // Parse out book name + chapter for the link
+            const refMatch = r.book.match(/^(.+?)\s+(\d+)/);
+            const linkBook = refMatch ? bookSlug(refMatch[1]) : bookSlug(r.book);
+            const linkChapter = refMatch ? parseInt(refMatch[2]) : 1;
+            return (
+              <Link
+                key={r.id}
+                href={`/app/bible/${linkBook}/${linkChapter}`}
+                className={`flex flex-col px-5 py-4 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors ${
+                  i > 0 ? "border-t border-[#F0F0F0] dark:border-[#222]" : ""
+                }`}
+              >
+                <p className="text-[11px] font-semibold text-[#888] mb-1">{r.book}</p>
+                <p className="text-[14px] leading-relaxed line-clamp-3">{r.text}</p>
+              </Link>
+            );
+          })}
         </div>
       )}
 
