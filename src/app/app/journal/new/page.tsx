@@ -25,7 +25,8 @@ const TYPE_COLOR: Record<string, string> = {
 
 export default function NewJournalPage() {
   const router = useRouter();
-  const [type, setType] = useState("reflection");
+  type EntryType = "reflection" | "prayer" | "gratitude" | "sermon_notes" | "study" | "general";
+  const [type, setType] = useState<EntryType>("reflection");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,7 +80,7 @@ export default function NewJournalPage() {
         {TYPES.map((t) => (
           <button
             key={t.value}
-            onClick={() => setType(t.value)}
+            onClick={() => setType(t.value as EntryType)}
             className="flex-shrink-0 rounded-full px-4 py-1.5 text-[13px] font-semibold transition-all cursor-pointer"
             style={type === t.value
               ? { backgroundColor: TYPE_COLOR[t.value], color: "white" }
