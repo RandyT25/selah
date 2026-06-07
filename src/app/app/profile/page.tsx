@@ -21,7 +21,7 @@ export default async function ProfilePage() {
     const meta = user.user_metadata as Record<string, string> | undefined;
     await supabase.from("profiles").upsert({
       id: user.id,
-      email: user.email,
+      email: user.email ?? "",
       full_name: meta?.full_name ?? meta?.name ?? null,
       avatar_url: meta?.avatar_url ?? meta?.picture ?? null,
     }, { onConflict: "id" });
