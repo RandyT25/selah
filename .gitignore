@@ -47,3 +47,5 @@ next-env.d.ts
 
 # OS
 Thumbs.db
+graphify-out/
+selah@1.0.0
