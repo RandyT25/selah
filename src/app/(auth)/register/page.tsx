@@ -42,7 +42,7 @@ export default function RegisterPage() {
       password: data.password,
       options: {
         data: { full_name: data.fullName },
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard`,
       },
     });
 
