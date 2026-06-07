@@ -4,26 +4,48 @@ import { useState } from "react";
 import Link from "next/link";
 import { Heart, Copy, Share2, BookOpen, Check } from "lucide-react";
 import { toast } from "sonner";
+import { BIBLE_BOOKS } from "@/lib/bible/books";
 
 interface VerseActionsProps {
   verseText: string;
   verseReference: string;
 }
 
+// Match a raw book name string against the authoritative BIBLE_BOOKS list.
+// Returns the canonical slug or null if no match.
+function findBookSlug(rawName: string): string | null {
+  const norm = rawName.toLowerCase().trim();
+  // 1. Exact name match
+  let book = BIBLE_BOOKS.find(b => b.name.toLowerCase() === norm);
+  // 2. Abbreviation match
+  if (!book) book = BIBLE_BOOKS.find(b => b.abbreviation.toLowerCase() === norm);
+  // 3. Starts-with match (handles "Psalm" → "Psalms", "Song" → "Song of Songs")
+  if (!book) book = BIBLE_BOOKS.find(b => b.name.toLowerCase().startsWith(norm));
+  // 4. Raw name starts with book name (handles full name already included)
+  if (!book) book = BIBLE_BOOKS.find(b => norm.startsWith(b.name.toLowerCase()));
+  return book ? book.name.toLowerCase().replace(/\s+/g, "-") : null;
+}
+
 function parseBibleLink(reference: string): string {
-  // "Jeremiah 29:11" → /app/bible/jeremiah/29
-  // "1 John 4:7"    → /app/bible/1-john/4
   try {
-    const [bookChapterPart] = reference.split(":");
-    const parts = bookChapterPart.trim().split(" ");
-    const chapter = parseInt(parts[parts.length - 1]);
-    const bookName = parts.slice(0, -1).join(" ");
-    const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
-    if (!isNaN(chapter) && bookSlug) return `/app/bible/${bookSlug}/${chapter}`;
+    // Format: "Jeremiah 29:11" | "1 John 4:7" | "Psalm 23:1" | "Song of Solomon 1:2"
+    const colonIdx = reference.indexOf(":");
+    if (colonIdx === -1) return "/app/bible";
+
+    const bookAndChapter = reference.slice(0, colonIdx).trim(); // "Jeremiah 29"
+    const parts = bookAndChapter.split(" ");
+    const chapter = parseInt(parts[parts.length - 1], 10);
+    const rawBook = parts.slice(0, -1).join(" "); // "Jeremiah"
+
+    if (isNaN(chapter) || !rawBook) return "/app/bible";
+
+    const slug = findBookSlug(rawBook);
+    if (!slug) return "/app/bible";
+
+    return `/app/bible/${slug}/${chapter}`;
   } catch {
-    // fall through
+    return "/app/bible";
   }
-  return "/app/bible";
 }
 
 export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
@@ -52,7 +74,7 @@ export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
         toast.success("Verse copied for sharing");
       }
     } catch {
-      // user cancelled share — no error toast needed
+      // user cancelled share sheet — no error needed
     }
   };
 
@@ -63,11 +85,11 @@ export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
         className="flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors cursor-pointer active:opacity-60"
       >
         <Heart
-          className="h-4 w-4"
+          className="h-4 w-4 transition-colors"
           strokeWidth={1.5}
           style={{ color: liked ? "#ef4444" : "rgba(255,255,255,0.4)", fill: liked ? "#ef4444" : "none" }}
         />
-        <span className="text-[12px]" style={{ color: liked ? "#ef4444" : "rgba(255,255,255,0.4)" }}>
+        <span className="text-[12px] transition-colors" style={{ color: liked ? "#ef4444" : "rgba(255,255,255,0.4)" }}>
           {liked ? "Liked" : "Like"}
         </span>
       </button>
@@ -76,11 +98,10 @@ export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
         onClick={handleCopy}
         className="flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors cursor-pointer active:opacity-60"
       >
-        {copied ? (
-          <Check className="h-4 w-4 text-green-400" strokeWidth={1.5} />
-        ) : (
-          <Copy className="h-4 w-4 text-white/40" strokeWidth={1.5} />
-        )}
+        {copied
+          ? <Check className="h-4 w-4 text-green-400" strokeWidth={1.5} />
+          : <Copy className="h-4 w-4 text-white/40" strokeWidth={1.5} />
+        }
         <span className={`text-[12px] ${copied ? "text-green-400" : "text-white/40"}`}>
           {copied ? "Copied" : "Copy"}
         </span>
@@ -96,7 +117,7 @@ export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
 
       <Link
         href={bibleLink}
-        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-white/40 active:opacity-60 transition-colors cursor-pointer"
+        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-white/40 active:opacity-60 transition-colors"
       >
         <BookOpen className="h-4 w-4" strokeWidth={1.5} />
         <span className="text-[12px]">Read</span>
