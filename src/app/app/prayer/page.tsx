@@ -33,11 +33,10 @@ export default async function PrayerPage() {
   const prayedForIds = new Set((prayedForResult.data ?? []).map((p) => p.prayer_request_id));
 
   return (
-    <div className="min-h-full bg-background">
+    <div className="min-h-full bg-white dark:bg-black">
       {/* ── Header ── */}
-      <div className="px-5 pt-5 pb-4">
+      <div className="px-5 pt-6 pb-5">
         <h1 className="text-[28px] font-bold tracking-tight">Prayer</h1>
-        <p className="text-[14px] text-muted-foreground mt-1">Pray for others, share your requests.</p>
       </div>
 
       <PrayerWall

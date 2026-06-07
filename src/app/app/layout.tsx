@@ -29,7 +29,7 @@ export default async function AppLayout({
     <LanguageProvider initial={initial}>
       {/* Safe-area top padding */}
       <div
-        className="min-h-[100dvh] bg-background flex flex-col"
+        className="min-h-[100dvh] bg-white dark:bg-black flex flex-col"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <main className="flex-1 overflow-y-auto pb-[calc(64px+env(safe-area-inset-bottom))]">

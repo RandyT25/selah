@@ -36,95 +36,96 @@ export default async function BiblePage() {
   const lastChapter = (lastRead?.bible_chapters as Record<string, number>)?.chapter_number;
 
   return (
-    <div className="min-h-full bg-background">
+    <div className="min-h-full bg-white dark:bg-black">
 
       {/* ── Header ── */}
-      <div className="px-5 pt-5 pb-4">
-        <h1 className="text-[28px] font-bold tracking-tight mb-4">Bible</h1>
+      <div className="px-5 pt-6 pb-4">
+        <h1 className="text-[28px] font-bold tracking-tight">Bible</h1>
+      </div>
+
+      {/* ── Search ── */}
+      <div className="px-5 mb-6">
         <Link
           href="/app/search"
-          className="flex items-center gap-2.5 bg-muted rounded-xl px-4 py-3 w-full"
+          className="flex items-center gap-2.5 bg-[#F5F5F5] dark:bg-[#1A1A1A] rounded-xl px-4 h-[44px] w-full active:opacity-70 transition-opacity"
         >
-          <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <span className="text-[15px] text-muted-foreground">Search</span>
+          <Search className="h-4 w-4 text-[#888]" strokeWidth={1.5} />
+          <span className="text-[15px] text-[#888]">Search verses, books…</span>
         </Link>
       </div>
 
       {/* ── Continue Reading ── */}
       {lastRead && lastBook && (
-        <div className="px-5 mb-5">
-          <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Continue Reading</p>
+        <div className="border-t border-[#F0F0F0] dark:border-[#222]">
           <Link
             href={`/app/bible/${bookSlug(lastBook)}/${lastChapter ?? 1}`}
-            className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3 shadow-sm active:scale-[0.98] transition-transform"
+            className="flex items-center px-5 py-4 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors"
           >
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary font-bold text-[11px]">{lastBook.slice(0, 3).toUpperCase()}</span>
-            </div>
             <div className="flex-1">
-              <p className="font-semibold text-[14px]">{lastBook}</p>
-              <p className="text-[12px] text-muted-foreground">Chapter {lastChapter ?? 1}</p>
+              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] mb-0.5">Continue</p>
+              <p className="text-[16px] font-semibold">{lastBook} {lastChapter ?? 1}</p>
             </div>
-            <span className="text-[13px] text-muted-foreground font-medium">Open →</span>
+            <span className="text-[13px] text-[#888]">Open →</span>
           </Link>
         </div>
       )}
 
-      {/* ── Search by Topic ── */}
-      <div className="px-5 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[17px] font-bold">Search by Topic</h2>
-          <Link href="/app/search" className="text-[13px] text-muted-foreground">See All</Link>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
+      {/* ── Topics ── */}
+      <div className="px-5 py-5 border-t border-[#F0F0F0] dark:border-[#222]">
+        <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] mb-3">Topics</p>
+        <div className="grid grid-cols-4 gap-2">
           {TOPICS.map(({ label, bg }) => (
             <Link
               key={label}
               href={`/app/search?q=${label.toLowerCase()}`}
-              className="rounded-xl px-4 py-3.5 active:opacity-75 transition-opacity"
+              className="rounded-xl h-[52px] flex items-center justify-center active:opacity-70 transition-opacity"
               style={{ backgroundColor: bg }}
             >
-              <span className="text-white font-bold text-[14px] uppercase tracking-wide">{label}</span>
+              <span className="text-white font-bold text-[11px] uppercase tracking-wide">{label}</span>
             </Link>
           ))}
         </div>
       </div>
 
       {/* ── Old Testament ── */}
-      <div className="px-5 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[17px] font-bold">Old Testament</h2>
-          <span className="text-[13px] text-muted-foreground">{OLD_TESTAMENT.length} books</span>
+      <div className="border-t border-[#F0F0F0] dark:border-[#222] pt-5 pb-2">
+        <div className="flex items-center justify-between px-5 mb-3">
+          <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em]">Old Testament</p>
+          <p className="text-[11px] text-[#888]">{OLD_TESTAMENT.length} books</p>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {OLD_TESTAMENT.map((book) => (
+        <div className="grid grid-cols-3">
+          {OLD_TESTAMENT.map((book, i) => (
             <Link
               key={book.number}
               href={`/app/bible/${bookSlug(book.name)}/1`}
-              className="flex flex-col rounded-xl border border-border bg-card py-3 px-3 active:bg-muted/60 transition-colors"
+              className={`px-5 py-3 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors ${
+                i % 3 !== 2 ? "border-r border-[#F0F0F0] dark:border-[#222]" : ""
+              } ${i >= 3 ? "border-t border-[#F0F0F0] dark:border-[#222]" : ""}`}
             >
-              <span className="text-[13px] font-semibold leading-tight">{book.name}</span>
-              <span className="text-[11px] text-muted-foreground mt-1">{book.chapters} ch</span>
+              <p className="text-[13px] font-semibold leading-snug">{book.name}</p>
+              <p className="text-[11px] text-[#888] mt-0.5">{book.chapters} ch</p>
             </Link>
           ))}
         </div>
       </div>
 
       {/* ── New Testament ── */}
-      <div className="px-5 pb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[17px] font-bold">New Testament</h2>
-          <span className="text-[13px] text-muted-foreground">{NEW_TESTAMENT.length} books</span>
+      <div className="border-t border-[#F0F0F0] dark:border-[#222] pt-5 pb-28">
+        <div className="flex items-center justify-between px-5 mb-3">
+          <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em]">New Testament</p>
+          <p className="text-[11px] text-[#888]">{NEW_TESTAMENT.length} books</p>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {NEW_TESTAMENT.map((book) => (
+        <div className="grid grid-cols-3">
+          {NEW_TESTAMENT.map((book, i) => (
             <Link
               key={book.number}
               href={`/app/bible/${bookSlug(book.name)}/1`}
-              className="flex flex-col rounded-xl border border-border bg-card py-3 px-3 active:bg-muted/60 transition-colors"
+              className={`px-5 py-3 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors ${
+                i % 3 !== 2 ? "border-r border-[#F0F0F0] dark:border-[#222]" : ""
+              } ${i >= 3 ? "border-t border-[#F0F0F0] dark:border-[#222]" : ""}`}
             >
-              <span className="text-[13px] font-semibold leading-tight">{book.name}</span>
-              <span className="text-[11px] text-muted-foreground mt-1">{book.chapters} ch</span>
+              <p className="text-[13px] font-semibold leading-snug">{book.name}</p>
+              <p className="text-[11px] text-[#888] mt-0.5">{book.chapters} ch</p>
             </Link>
           ))}
         </div>

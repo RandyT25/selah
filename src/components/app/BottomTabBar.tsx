@@ -23,10 +23,10 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-50 bg-background/90 backdrop-blur-2xl border-t border-border/40"
+      className="fixed bottom-0 inset-x-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-2xl border-t border-[#F0F0F0] dark:border-[#222]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="flex items-center justify-around px-2 pt-1 pb-1">
+      <div className="flex items-center justify-around px-2 pt-2 pb-1">
         {tabs.map(({ label, href, icon: Icon }) => {
           const active = isActive(href);
           return (
@@ -35,29 +35,20 @@ export function BottomTabBar() {
               href={href}
               className="flex flex-col items-center gap-[3px] flex-1 py-1"
             >
-              {/* Icon container with active pill */}
-              <div
+              <Icon
                 className={cn(
-                  "flex items-center justify-center w-12 h-8 rounded-2xl transition-all duration-200",
-                  active ? "bg-primary/12" : "bg-transparent"
+                  "h-[22px] w-[22px] transition-all duration-150",
+                  active
+                    ? "text-[#111] dark:text-white stroke-[2.25]"
+                    : "text-[#AAA] stroke-[1.5]"
                 )}
-              >
-                <Icon
-                  className={cn(
-                    "h-[22px] w-[22px] transition-all duration-200",
-                    active
-                      ? "text-primary stroke-[2.25]"
-                      : "text-muted-foreground stroke-[1.75]"
-                  )}
-                />
-              </div>
-              {/* Label */}
+              />
               <span
                 className={cn(
-                  "text-[10px] transition-all duration-200 leading-none",
+                  "text-[10px] transition-all duration-150 leading-none",
                   active
-                    ? "text-primary font-semibold"
-                    : "text-muted-foreground font-medium"
+                    ? "text-[#111] dark:text-white font-semibold"
+                    : "text-[#AAA] font-normal"
                 )}
               >
                 {label}

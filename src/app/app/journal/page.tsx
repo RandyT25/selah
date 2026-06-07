@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { NotebookPen, Plus } from "lucide-react";
+import { Plus, NotebookPen } from "lucide-react";
 import type { JournalEntry } from "@/types/database";
 import type { Metadata } from "next";
 
@@ -28,7 +28,11 @@ function formatDate(iso: string) {
   yesterday.setDate(today.getDate() - 1);
   if (d.toDateString() === today.toDateString()) return "Today";
   if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined });
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: d.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+  });
 }
 
 export default async function JournalPage() {
@@ -45,7 +49,6 @@ export default async function JournalPage() {
 
   const entries = (data ?? []) as JournalEntry[];
 
-  // Group by date label
   type Group = { label: string; entries: JournalEntry[] };
   const grouped: Group[] = [];
   for (const entry of entries) {
@@ -56,66 +59,65 @@ export default async function JournalPage() {
   }
 
   return (
-    <div className="min-h-full bg-background">
+    <div className="min-h-full bg-white dark:bg-black">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+      <div className="flex items-center justify-between px-5 pt-6 pb-5">
         <h1 className="text-[28px] font-bold tracking-tight">Journal</h1>
         <Link
           href="/app/journal/new"
-          className="flex items-center gap-1.5 bg-foreground text-background text-[13px] font-semibold rounded-full px-4 py-2 min-h-[36px] active:opacity-70 transition-opacity cursor-pointer"
+          className="flex items-center gap-1.5 text-[13px] font-semibold text-[#888] cursor-pointer"
         >
-          <Plus className="h-3.5 w-3.5" /> New
+          <Plus className="h-4 w-4" /> New
         </Link>
       </div>
 
       {entries.length === 0 ? (
-        <div className="flex flex-col items-center text-center px-8 mt-20">
-          <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center mb-5">
-            <NotebookPen className="h-9 w-9 text-muted-foreground" />
-          </div>
-          <h2 className="font-bold text-[20px] tracking-tight">Your journal is empty</h2>
-          <p className="text-muted-foreground text-[15px] mt-2 mb-8 leading-relaxed">Capture your thoughts, prayers, and reflections on Scripture.</p>
+        <div className="flex flex-col items-center text-center px-8 mt-24">
+          <NotebookPen className="h-10 w-10 text-[#CCC] mb-5" strokeWidth={1} />
+          <h2 className="font-bold text-[19px] tracking-tight">Your journal is empty</h2>
+          <p className="text-[14px] text-[#888] mt-2 mb-8 leading-relaxed">Capture thoughts, prayers, and reflections.</p>
           <Link
             href="/app/journal/new"
-            className="bg-foreground text-background font-semibold rounded-2xl px-8 py-3.5 text-[15px] active:opacity-70 transition-opacity cursor-pointer"
+            className="bg-[#111] dark:bg-white text-white dark:text-black font-semibold rounded-2xl px-8 py-3.5 text-[15px] active:opacity-70 transition-opacity cursor-pointer"
           >
-            Write your first entry
+            Write first entry
           </Link>
         </div>
       ) : (
-        <div className="px-5 pb-28 space-y-6">
+        <div className="pb-28">
           {grouped.map(({ label, entries: groupEntries }) => (
-            <div key={label}>
-              <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">{label}</p>
-              <div className="space-y-2">
-                {groupEntries.map((entry) => {
-                  const color = TYPE_COLOR[entry.type] ?? TYPE_COLOR.general;
-                  return (
-                    <Link
-                      key={entry.id}
-                      href={`/app/journal/${entry.id}`}
-                      className="flex items-start gap-3 bg-card border border-border rounded-2xl px-4 py-4 active:bg-muted/50 transition-colors cursor-pointer"
-                    >
-                      <div className="w-1 self-stretch rounded-full flex-shrink-0 mt-0.5" style={{ backgroundColor: color }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-[11px] font-semibold" style={{ color }}>
-                            {TYPE_LABEL[entry.type] ?? "Entry"}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground flex-shrink-0">
-                            {new Date(entry.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                          </span>
-                        </div>
-                        {entry.title && (
-                          <p className="font-semibold text-[14px] mb-0.5 truncate">{entry.title}</p>
-                        )}
-                        <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed">{entry.content}</p>
+            <div key={label} className="border-t border-[#F0F0F0] dark:border-[#222]">
+              {/* Date header */}
+              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] px-5 pt-4 pb-1">{label}</p>
+
+              {groupEntries.map((entry) => {
+                const color = TYPE_COLOR[entry.type] ?? TYPE_COLOR.general;
+                return (
+                  <Link
+                    key={entry.id}
+                    href={`/app/journal/${entry.id}`}
+                    className="flex items-start gap-0 border-t border-[#F0F0F0] dark:border-[#222] first:border-t-0 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors cursor-pointer"
+                  >
+                    {/* Color strip */}
+                    <div className="w-[3px] self-stretch flex-shrink-0" style={{ backgroundColor: color }} />
+                    <div className="flex-1 min-w-0 px-4 py-4">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[11px] font-semibold" style={{ color }}>
+                          {TYPE_LABEL[entry.type] ?? "Entry"}
+                        </span>
+                        <span className="text-[11px] text-[#888] flex-shrink-0">
+                          {new Date(entry.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                        </span>
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                      {entry.title && (
+                        <p className="font-semibold text-[15px] mb-0.5 truncate">{entry.title}</p>
+                      )}
+                      <p className="text-[13px] text-[#888] line-clamp-2 leading-relaxed">{entry.content}</p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -124,11 +126,12 @@ export default async function JournalPage() {
       {/* FAB */}
       <Link
         href="/app/journal/new"
-        className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-5 h-14 w-14 bg-foreground rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40 cursor-pointer"
+        className="fixed bottom-[calc(80px+env(safe-area-inset-bottom))] right-5 h-14 w-14 bg-[#111] dark:bg-white rounded-full flex items-center justify-center active:scale-90 transition-transform z-40 cursor-pointer"
         aria-label="New journal entry"
       >
-        <Plus className="h-6 w-6 text-background" />
+        <Plus className="h-6 w-6 text-white dark:text-black" />
       </Link>
+
     </div>
   );
 }
