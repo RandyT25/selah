@@ -109,19 +109,8 @@ export function ChapterReader({
       updated_at: new Date().toISOString(),
     };
     setHighlights([...prev.filter(h => h.verse_id !== verseId), optimistic]);
-    const verseData = verses.find(v => v.id === verseId);
     try {
-      await api("/api/verse/highlight", "POST", {
-        verseId,
-        color,
-        verse: verseData ? {
-          book_id: bookName,
-          chapter_id: `${bookName}-${chapterNum}`,
-          verse_number: verseData.verse_number,
-          text: verseData.text,
-          reference: verseData.reference,
-        } : null,
-      });
+      await api("/api/verse/highlight", "POST", { verseId, color });
     } catch (err) {
       setHighlights(prev);
       throw err;
@@ -152,18 +141,8 @@ export function ChapterReader({
       note: null,
       created_at: new Date().toISOString(),
     }]);
-    const verseData = verses.find(v => v.id === verseId);
     try {
-      await api("/api/verse/bookmark", "POST", {
-        verseId,
-        verse: verseData ? {
-          book_id: bookName,
-          chapter_id: `${bookName}-${chapterNum}`,
-          verse_number: verseData.verse_number,
-          text: verseData.text,
-          reference: verseData.reference,
-        } : null,
-      });
+      await api("/api/verse/bookmark", "POST", { verseId });
     } catch (err) {
       setBookmarks(prev);
       throw err;
