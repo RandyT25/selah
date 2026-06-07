@@ -14,10 +14,13 @@ export async function POST(req: Request) {
   const { verseId } = await req.json();
   if (!verseId) return NextResponse.json({ error: "Missing verseId" }, { status: 400 });
 
-  const admin = await createAdminClient();
+  const admin = createAdminClient();
   await admin.from("verse_bookmarks").delete().eq("user_id", user.id).eq("verse_id", verseId);
   const { error } = await admin.from("verse_bookmarks").insert({ user_id: user.id, verse_id: verseId });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[bookmark POST]", error);
+    return NextResponse.json({ error: error.message, code: error.code }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }
 
@@ -28,8 +31,11 @@ export async function DELETE(req: Request) {
   const { verseId } = await req.json();
   if (!verseId) return NextResponse.json({ error: "Missing verseId" }, { status: 400 });
 
-  const admin = await createAdminClient();
+  const admin = createAdminClient();
   const { error } = await admin.from("verse_bookmarks").delete().eq("user_id", user.id).eq("verse_id", verseId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[bookmark DELETE]", error);
+    return NextResponse.json({ error: error.message, code: error.code }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }

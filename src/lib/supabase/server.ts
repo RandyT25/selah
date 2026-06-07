@@ -32,27 +32,10 @@ export async function createClient(): Promise<ServerClient> {
   ) as unknown as ServerClient;
 }
 
-export async function createAdminClient(): Promise<ServerClient> {
-  const cookieStore = await cookies();
-
-  return createServerClient<Database>(
+export function createAdminClient(): ServerClient {
+  return createSupabaseClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet: CookieItem[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // ignore
-          }
-        },
-      },
-    }
+    { auth: { autoRefreshToken: false, persistSession: false } }
   ) as unknown as ServerClient;
 }

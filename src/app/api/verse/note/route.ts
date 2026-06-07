@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const { verseId, content } = await req.json();
   if (!verseId || !content?.trim()) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-  const admin = await createAdminClient();
+  const admin = createAdminClient();
   await admin.from("verse_notes").delete().eq("user_id", user.id).eq("verse_id", verseId);
   const { error } = await admin.from("verse_notes").insert({ user_id: user.id, verse_id: verseId, content: content.trim(), is_private: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
