@@ -5,22 +5,28 @@ import type { Database } from "@/types/database";
 
 type CookieItem = { name: string; value: string; options: CookieOptions };
 
-const PROTECTED_ROUTES = [
-  "/dashboard",
-  "/bible",
-  "/audio",
-  "/plans",
-  "/devotionals",
-  "/journal",
-  "/community",
-  "/settings",
-  "/profile",
-  "/ai",
+// ── Bible App routes (all under /bibleapp) ──────────────────────────────────
+const BIBLEAPP_PROTECTED = [
+  "/bibleapp/dashboard",
+  "/bibleapp/bible",
+  "/bibleapp/audio",
+  "/bibleapp/plans",
+  "/bibleapp/devotionals",
+  "/bibleapp/journal",
+  "/bibleapp/community",
+  "/bibleapp/settings",
+  "/bibleapp/profile",
+  "/bibleapp/ai",
+  "/bibleapp/search",
+];
+
+const BIBLEAPP_AUTH = [
+  "/bibleapp/login",
+  "/bibleapp/register",
+  "/bibleapp/forgot-password",
 ];
 
 const ADMIN_ROUTES = ["/admin"];
-
-const AUTH_ROUTES = ["/login", "/register", "/forgot-password"];
 
 export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -59,32 +65,30 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Redirect authenticated users away from auth pages
-  if (user && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // Bible App: redirect logged-in users away from auth pages
+  if (user && BIBLEAPP_AUTH.some((route) => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL("/bibleapp/dashboard", request.url));
   }
 
-  // Protect app routes
-  if (!user && PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
-    const loginUrl = new URL("/login", request.url);
+  // Bible App: protect app routes — redirect to app login
+  if (!user && BIBLEAPP_PROTECTED.some((route) => pathname.startsWith(route))) {
+    const loginUrl = new URL("/bibleapp/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Protect admin routes
+  // Admin routes
   if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
     if (!user) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.redirect(new URL("/bibleapp/login", request.url));
     }
-
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
-
     if (!profile || !["admin", "moderator"].includes((profile as { role: string }).role)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/bibleapp/dashboard", request.url));
     }
   }
 

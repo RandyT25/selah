@@ -49,7 +49,7 @@ export function MarketingNav() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">Sign In</Link>
+            <Link href="/bibleapp/login">Sign In</Link>
           </Button>
           <Button variant="gold" size="sm" asChild>
             <Link href="/download">Get the App</Link>
@@ -80,10 +80,10 @@ export function MarketingNav() {
           ))}
           <div className="flex flex-col gap-2 pt-2">
             <Button variant="outline" asChild>
-              <Link href="/login">Sign In</Link>
+              <Link href="/bibleapp/login">Sign In</Link>
             </Button>
             <Button variant="gold" asChild>
-              <Link href="/register">Get Started Free</Link>
+              <Link href="/bibleapp/register">Get Started Free</Link>
             </Button>
           </div>
         </div>

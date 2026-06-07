@@ -158,10 +158,10 @@ export default function DownloadPage() {
         <p className="text-muted-foreground mb-6">Sign in to pick up right where you left off.</p>
         <div className="flex gap-4 justify-center">
           <Button variant="gold" size="lg" asChild>
-            <Link href="/dashboard">Open App</Link>
+            <Link href="/bibleapp/dashboard">Open App</Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link href="/register">Create Free Account</Link>
+            <Link href="/bibleapp/register">Create Free Account</Link>
           </Button>
         </div>
       </div>

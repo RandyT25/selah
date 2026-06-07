@@ -24,7 +24,7 @@ export function MarketingFooter() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/features" className="hover:text-foreground transition-colors">Features</Link></li>
               <li><Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-              <li><Link href="/register" className="hover:text-foreground transition-colors">Get Started</Link></li>
+              <li><Link href="/bibleapp/register" className="hover:text-foreground transition-colors">Get Started</Link></li>
             </ul>
           </div>
 

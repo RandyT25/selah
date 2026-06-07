@@ -2,7 +2,7 @@
   "name": "Selah — Pause. Reflect. Grow.",
   "short_name": "Selah",
   "description": "A modern Bible companion for reading, studying, journaling, and growing in faith.",
-  "start_url": "/dashboard",
+  "start_url": "/bibleapp/dashboard",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -58,21 +58,21 @@
       "name": "Read Bible",
       "short_name": "Bible",
       "description": "Open the Bible reader",
-      "url": "/bible",
+      "url": "/bibleapp/bible",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "New Journal Entry",
       "short_name": "Journal",
       "description": "Write a new journal entry",
-      "url": "/journal/new",
+      "url": "/bibleapp/journal/new",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Prayer Wall",
       "short_name": "Prayer",
       "description": "View the community prayer wall",
-      "url": "/community/prayer",
+      "url": "/bibleapp/community/prayer",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],
