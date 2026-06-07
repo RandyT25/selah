@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Bookmark,
   BookmarkCheck,
   Copy,
-  Highlighter,
   MessageSquare,
   Share2,
-  Check,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { HIGHLIGHT_COLORS, type HighlightColor } from "@/types/app";
 import type { BibleVerse, VerseHighlight, VerseBookmark } from "@/types/database";
@@ -33,12 +29,6 @@ interface BibleReaderProps {
   showVerseNumbers: boolean;
 }
 
-interface PopupState {
-  verseId: string | null;
-  position: { x: number; y: number };
-  mode: "main" | "highlight";
-}
-
 export function BibleReader({
   verses,
   highlights,
@@ -53,70 +43,47 @@ export function BibleReader({
   lineSpacing,
   showVerseNumbers,
 }: BibleReaderProps) {
-  const [popup, setPopup] = useState<PopupState>({ verseId: null, position: { x: 0, y: 0 }, mode: "main" });
+  const [selectedVerseId, setSelectedVerseId] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const highlightMap = Object.fromEntries(highlights.map((h) => [h.verse_id, h]));
   const bookmarkSet = new Set(bookmarks.map((b) => b.verse_id));
 
-  const closePopup = useCallback(() => {
-    setPopup({ verseId: null, position: { x: 0, y: 0 }, mode: "main" });
-  }, []);
+  const closeSheet = useCallback(() => setSelectedVerseId(null), []);
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (!(e.target as Element).closest(".verse-action-popup")) {
-        closePopup();
-      }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeSheet();
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [closePopup]);
-
-  const handleVerseClick = (verse: BibleVerse, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const containerRect = containerRef.current?.getBoundingClientRect() ?? { left: 0, top: 0 };
-
-    setPopup({
-      verseId: verse.id,
-      position: {
-        x: rect.left - containerRect.left,
-        y: rect.bottom - containerRect.top + 8,
-      },
-      mode: "main",
-    });
-  };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [closeSheet]);
 
   const handleCopy = async (verse: BibleVerse) => {
-    await navigator.clipboard.writeText(`${verse.text} — ${verse.reference}`);
-    toast.success("Verse copied to clipboard");
-    closePopup();
+    await navigator.clipboard.writeText(`"${verse.text.trim()}" — ${verse.reference}`);
+    toast.success("Verse copied");
+    closeSheet();
   };
 
   const handleShare = async (verse: BibleVerse) => {
     if (navigator.share) {
-      await navigator.share({
-        title: verse.reference,
-        text: `${verse.text} — ${verse.reference}`,
-      });
+      await navigator.share({ title: verse.reference, text: `"${verse.text.trim()}" — ${verse.reference}` });
     } else {
-      await navigator.clipboard.writeText(`${verse.text} — ${verse.reference}`);
+      await navigator.clipboard.writeText(`"${verse.text.trim()}" — ${verse.reference}`);
       toast.success("Verse copied for sharing");
     }
-    closePopup();
+    closeSheet();
   };
 
   const handleHighlightSelect = async (color: HighlightColor) => {
-    if (!popup.verseId) return;
-    setLoading(popup.verseId);
+    if (!selectedVerseId) return;
+    setLoading(selectedVerseId);
     try {
-      await onHighlight(popup.verseId, color);
-      toast.success("Verse highlighted");
+      await onHighlight(selectedVerseId, color);
+      toast.success("Highlighted");
     } finally {
       setLoading(null);
-      closePopup();
+      closeSheet();
     }
   };
 
@@ -127,7 +94,7 @@ export function BibleReader({
       toast.success("Highlight removed");
     } finally {
       setLoading(null);
-      closePopup();
+      closeSheet();
     }
   };
 
@@ -139,11 +106,11 @@ export function BibleReader({
         toast.success("Bookmark removed");
       } else {
         await onBookmark(verseId);
-        toast.success("Verse bookmarked");
+        toast.success("Bookmarked");
       }
     } finally {
       setLoading(null);
-      closePopup();
+      closeSheet();
     }
   };
 
@@ -160,30 +127,32 @@ export function BibleReader({
     mono: "font-mono",
   }[fontFamily];
 
-  const selectedVerse = verses.find((v) => v.id === popup.verseId);
+  const selectedVerse = verses.find((v) => v.id === selectedVerseId);
 
   return (
-    <div ref={containerRef} className="relative">
-      <div
-        className={cn("space-y-1", fontClass, spacingClass)}
-        style={{ fontSize: `${fontSize}px` }}
-      >
+    <>
+      {/* Verse text */}
+      <div className={cn("space-y-0.5", fontClass, spacingClass)} style={{ fontSize: `${fontSize}px` }}>
         {verses.map((verse) => {
           const highlight = highlightMap[verse.id];
-          const isBookmarked = bookmarkSet.has(verse.id);
+          const isSelected = selectedVerseId === verse.id;
 
           return (
             <span
               key={verse.id}
               className={cn(
-                "cursor-pointer hover:bg-muted/50 rounded px-0.5 py-0.5 transition-colors inline",
-                highlight && `highlight-${highlight.color}`,
-                popup.verseId === verse.id && "ring-1 ring-primary/30 rounded"
+                "cursor-pointer transition-colors inline rounded-sm px-0.5",
+                highlight ? `highlight-${highlight.color}` : "",
+                isSelected && !highlight ? "bg-[#F5F5F5] dark:bg-[#2A2A2A]" : "",
+                isSelected && highlight ? "ring-1 ring-offset-0 ring-[#999]/50 dark:ring-white/20 rounded" : "",
+                !isSelected && !highlight ? "hover:bg-black/5 dark:hover:bg-white/5" : "",
               )}
-              onClick={(e) => handleVerseClick(verse, e)}
+              onClick={() => setSelectedVerseId(isSelected ? null : verse.id)}
             >
               {showVerseNumbers && (
-                <span className="verse-number">{verse.verse_number}</span>
+                <sup className="verse-number text-[0.65em] font-semibold text-[#888] mr-[2px] align-super">
+                  {verse.verse_number}
+                </sup>
               )}
               {verse.text}{" "}
             </span>
@@ -191,130 +160,137 @@ export function BibleReader({
         })}
       </div>
 
-      {/* Action Popup */}
-      {popup.verseId && selectedVerse && (
+      {/* Bottom sheet backdrop */}
+      {selectedVerseId && (
         <div
-          className="verse-action-popup absolute z-30"
-          style={{
-            left: Math.max(0, popup.position.x),
-            top: popup.position.y,
-          }}
-        >
-          {popup.mode === "main" ? (
-            <div className="flex items-center gap-1 p-1.5 rounded-xl border bg-popover shadow-xl">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => setPopup((p) => ({ ...p, mode: "highlight" }))}
-                    >
-                      <Highlighter className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Highlight</TooltipContent>
-                </Tooltip>
+          className="fixed inset-0 z-40 bg-black/20 dark:bg-black/50"
+          onClick={closeSheet}
+        />
+      )}
 
-                {highlightMap[popup.verseId] && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        onClick={() => handleRemoveHighlight(popup.verseId!)}
-                        disabled={loading === popup.verseId}
-                      >
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Remove Highlight</TooltipContent>
-                  </Tooltip>
-                )}
+      {/* Bottom sheet */}
+      <div
+        className={cn(
+          "fixed left-0 right-0 z-50 bg-white dark:bg-[#1C1C1C] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out",
+          selectedVerseId ? "translate-y-0" : "translate-y-full"
+        )}
+        style={{
+          bottom: 0,
+          paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-[3px] bg-[#E0E0E0] dark:bg-[#444] rounded-full" />
+        </div>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => handleBookmarkToggle(popup.verseId!)}
-                      disabled={loading === popup.verseId}
-                    >
-                      {bookmarkSet.has(popup.verseId) ? (
-                        <BookmarkCheck className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Bookmark className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {bookmarkSet.has(popup.verseId) ? "Remove Bookmark" : "Bookmark"}
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => { onNote(popup.verseId!); closePopup(); }}
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Add Note</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => handleCopy(selectedVerse)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Copy</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => handleShare(selectedVerse)}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Share</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 p-2 rounded-xl border bg-popover shadow-xl">
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                onClick={() => setPopup((p) => ({ ...p, mode: "main" }))}
+        {selectedVerse && (
+          <>
+            {/* Reference + close */}
+            <div className="flex items-center justify-between px-5 pt-3 pb-1">
+              <p className="text-[13px] font-semibold text-[#888]">{selectedVerse.reference}</p>
+              <button
+                onClick={closeSheet}
+                className="h-7 w-7 flex items-center justify-center rounded-full bg-[#F0F0F0] dark:bg-[#333] cursor-pointer"
+                aria-label="Close"
               >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-              <div className="w-px h-4 bg-border" />
-              {HIGHLIGHT_COLORS.map((color) => (
+                <X className="h-3.5 w-3.5 text-[#666] dark:text-[#CCC]" />
+              </button>
+            </div>
+
+            {/* Verse preview */}
+            <p className="px-5 pb-3 text-[14px] font-serif leading-relaxed line-clamp-2 text-[#444] dark:text-[#BBB]">
+              {selectedVerse.text.trim()}
+            </p>
+
+            {/* Divider */}
+            <div className="h-px bg-[#F0F0F0] dark:bg-[#2A2A2A] mx-5" />
+
+            {/* Color picker */}
+            <div className="flex items-center gap-3 px-5 py-4">
+              {highlightMap[selectedVerse.id] && (
                 <button
-                  key={color.id}
-                  className="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
-                  style={{ backgroundColor: color.hex }}
-                  onClick={() => handleHighlightSelect(color.id as HighlightColor)}
-                  title={color.label}
-                />
+                  onClick={() => handleRemoveHighlight(selectedVerse.id)}
+                  disabled={loading === selectedVerse.id}
+                  className="h-8 w-8 rounded-full border-2 border-[#DDD] dark:border-[#555] flex items-center justify-center cursor-pointer"
+                  title="Remove highlight"
+                >
+                  <X className="h-3.5 w-3.5 text-[#888]" />
+                </button>
+              )}
+              {HIGHLIGHT_COLORS.map((color) => {
+                const isActive = highlightMap[selectedVerse.id]?.color === color.id;
+                return (
+                  <button
+                    key={color.id}
+                    className={cn(
+                      "h-8 w-8 rounded-full border-2 transition-transform active:scale-90 cursor-pointer",
+                      isActive ? "border-[#333] dark:border-white scale-110" : "border-white dark:border-[#1C1C1C]",
+                    )}
+                    style={{ backgroundColor: color.hex, boxShadow: "0 1px 4px rgba(0,0,0,0.18)" }}
+                    onClick={() => handleHighlightSelect(color.id as HighlightColor)}
+                    title={color.label}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-[#F0F0F0] dark:bg-[#2A2A2A]" />
+
+            {/* Action row */}
+            <div className="grid grid-cols-4 divide-x divide-[#F0F0F0] dark:divide-[#2A2A2A]">
+              {[
+                {
+                  icon: bookmarkSet.has(selectedVerse.id) ? BookmarkCheck : Bookmark,
+                  label: bookmarkSet.has(selectedVerse.id) ? "Saved" : "Save",
+                  action: () => handleBookmarkToggle(selectedVerse.id),
+                  active: bookmarkSet.has(selectedVerse.id),
+                },
+                {
+                  icon: MessageSquare,
+                  label: "Note",
+                  action: () => { onNote(selectedVerse.id); closeSheet(); },
+                  active: false,
+                },
+                {
+                  icon: Copy,
+                  label: "Copy",
+                  action: () => handleCopy(selectedVerse),
+                  active: false,
+                },
+                {
+                  icon: Share2,
+                  label: "Share",
+                  action: () => handleShare(selectedVerse),
+                  active: false,
+                },
+              ].map(({ icon: Icon, label, action, active }) => (
+                <button
+                  key={label}
+                  onClick={action}
+                  disabled={loading === selectedVerse.id}
+                  className="flex flex-col items-center gap-1.5 py-4 active:bg-[#F5F5F5] dark:active:bg-[#252525] transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  <Icon
+                    className={cn(
+                      "h-5 w-5",
+                      active ? "text-[#111] dark:text-white" : "text-[#666] dark:text-[#AAA]"
+                    )}
+                    strokeWidth={active ? 2.5 : 1.5}
+                  />
+                  <span className={cn(
+                    "text-[11px] font-medium",
+                    active ? "text-[#111] dark:text-white" : "text-[#666] dark:text-[#AAA]"
+                  )}>
+                    {label}
+                  </span>
+                </button>
               ))}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }

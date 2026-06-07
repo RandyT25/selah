@@ -7,7 +7,7 @@ type CookieItem = { name: string; value: string; options: CookieOptions };
 
 const APP_PROTECTED = [
   "/app/home", "/app/bible", "/app/plans", "/app/prayer",
-  "/app/profile", "/app/journal", "/app/settings", "/app/search",
+  "/app/profile", "/app/journal", "/app/settings", "/app/search", "/app/discover",
 ];
 
 const APP_AUTH = ["/app/login", "/app/register", "/app/forgot-password"];

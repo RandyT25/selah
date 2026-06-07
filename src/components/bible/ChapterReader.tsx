@@ -2,15 +2,12 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
+  Play,
+  MoreHorizontal,
   Settings2,
-  BookOpen,
-  List,
-  MessageSquare,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,14 +67,13 @@ export function ChapterReader({
   navigation,
   basePath = "/bible",
 }: ChapterReaderProps) {
-  const router = useRouter();
   const supabase = createClient();
 
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
-  const [fontSize, setFontSize] = useState(preferences?.font_size ?? 18);
+  const [fontSize, setFontSize] = useState(preferences?.font_size ?? 19);
   const [fontFamily, setFontFamily] = useState<"serif" | "sans" | "mono">(preferences?.font_family ?? "serif");
-  const [lineSpacing, setLineSpacing] = useState<"compact" | "normal" | "relaxed" | "loose">(preferences?.line_spacing ?? "normal");
+  const [lineSpacing, setLineSpacing] = useState<"compact" | "normal" | "relaxed" | "loose">(preferences?.line_spacing ?? "relaxed");
   const [showVerseNumbers, setShowVerseNumbers] = useState(preferences?.show_verse_numbers ?? true);
   const [showSettings, setShowSettings] = useState(false);
   const [showChapterNav, setShowChapterNav] = useState(false);
@@ -87,13 +83,11 @@ export function ChapterReader({
 
   const handleHighlight = async (verseId: string, color: HighlightColor) => {
     if (!userId) { toast.error("Sign in to highlight verses"); return; }
-    // Optimistic update first — visual applies immediately regardless of DB
     const optimistic = { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, color, note: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
     setHighlights(prev => [...prev.filter(h => h.verse_id !== verseId), optimistic]);
-    // Persist to DB (delete+insert avoids upsert conflict)
     await supabase.from("verse_highlights").delete().eq("user_id", userId).eq("verse_id", verseId);
     const { error } = await supabase.from("verse_highlights").insert({ user_id: userId, verse_id: verseId, color });
-    if (error) { console.error("highlight save error:", error); }
+    if (error) console.error("highlight save error:", error);
   };
 
   const handleRemoveHighlight = async (verseId: string) => {
@@ -104,11 +98,10 @@ export function ChapterReader({
 
   const handleBookmark = async (verseId: string) => {
     if (!userId) { toast.error("Sign in to bookmark verses"); return; }
-    // Optimistic update first
     setBookmarks(prev => [...prev, { id: crypto.randomUUID(), user_id: userId, verse_id: verseId, collection_name: "Default", note: null, created_at: new Date().toISOString() }]);
     await supabase.from("verse_bookmarks").delete().eq("user_id", userId).eq("verse_id", verseId);
     const { error } = await supabase.from("verse_bookmarks").insert({ user_id: userId, verse_id: verseId });
-    if (error) { console.error("bookmark save error:", error); }
+    if (error) console.error("bookmark save error:", error);
   };
 
   const handleRemoveBookmark = async (verseId: string) => {
@@ -123,7 +116,7 @@ export function ChapterReader({
     const { error } = await supabase.from("verse_notes").insert({
       user_id: userId, verse_id: noteVerseId, content: noteContent.trim(), is_private: true,
     });
-    if (error) { console.error("note error:", error); toast.error("Failed to save note"); return; }
+    if (error) { toast.error("Failed to save note"); return; }
     toast.success("Note saved");
     setNoteVerseId(null);
     setNoteContent("");
@@ -133,10 +126,7 @@ export function ChapterReader({
     if (!userId) return;
     startTransition(async () => {
       await supabase.from("user_preferences").update({
-        font_size: fontSize,
-        font_family: fontFamily,
-        line_spacing: lineSpacing,
-        show_verse_numbers: showVerseNumbers,
+        font_size: fontSize, font_family: fontFamily, line_spacing: lineSpacing, show_verse_numbers: showVerseNumbers,
       }).eq("user_id", userId);
     });
   };
@@ -156,46 +146,48 @@ export function ChapterReader({
     : null;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#111111]">
-      {/* ── Top bar ── */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-[#FDFBF7]/95 dark:bg-[#111111]/95 backdrop-blur border-b border-black/5 dark:border-white/5">
+    <div className="min-h-screen bg-white dark:bg-black">
+
+      {/* ── Minimal top bar ── */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-2.5 bg-white/95 dark:bg-black/95 backdrop-blur">
+        <Link
+          href={basePath}
+          className="flex items-center justify-center h-9 w-9 rounded-full active:bg-black/8 dark:active:bg-white/8 transition-colors cursor-pointer"
+          aria-label="Back"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Link>
+
         <div className="flex items-center gap-2">
-          <Link
-            href={basePath}
-            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            aria-label="Back to Bible"
-          >
-            <ChevronLeft className="h-5 w-5 text-foreground" />
-          </Link>
-          <button
-            onClick={() => setShowChapterNav(true)}
-            className="flex items-center gap-1.5 bg-black/5 dark:bg-white/8 hover:bg-black/10 dark:hover:bg-white/12 rounded-full px-3 py-1.5 transition-colors cursor-pointer"
-          >
-            <span className="font-semibold text-[14px]">{bookName} {chapterNum}</span>
-            <ChevronRight className="h-3 w-3 text-muted-foreground rotate-90" />
-          </button>
-          <span className="text-[12px] text-muted-foreground font-medium px-2 py-1 rounded-full bg-black/5 dark:bg-white/8">KJV</span>
-        </div>
-        <div className="flex items-center gap-1">
+          {/* Translation pill */}
+          <span className="text-[11px] font-bold text-[#888] border border-[#E0E0E0] dark:border-[#333] rounded-full px-2.5 py-1">
+            KJV
+          </span>
+          {/* Settings */}
           <button
             onClick={() => setShowSettings(true)}
-            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="h-9 w-9 flex items-center justify-center rounded-full active:bg-black/8 dark:active:bg-white/8 transition-colors cursor-pointer"
             aria-label="Reader settings"
           >
-            <span className="text-[13px] font-bold tracking-tight text-foreground">AA</span>
+            <Settings2 className="h-[18px] w-[18px] text-[#888]" strokeWidth={1.5} />
           </button>
           <button
-            onClick={() => setShowSettings(true)}
-            className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="h-9 w-9 flex items-center justify-center rounded-full active:bg-black/8 dark:active:bg-white/8 transition-colors cursor-pointer"
             aria-label="More options"
           >
-            <Settings2 className="h-4 w-4 text-muted-foreground" />
+            <MoreHorizontal className="h-[18px] w-[18px] text-[#888]" strokeWidth={1.5} />
           </button>
         </div>
       </div>
 
-      {/* ── Chapter Content ── */}
-      <div className="max-w-xl mx-auto px-5 pt-8 pb-6">
+      {/* ── Chapter heading ── */}
+      <div className="text-center pt-8 pb-6 px-5">
+        <p className="text-[12px] font-semibold text-[#888] uppercase tracking-[0.15em] mb-1">{bookName}</p>
+        <p className="text-[80px] font-bold leading-none tracking-tight text-[#111] dark:text-white">{chapterNum}</p>
+      </div>
+
+      {/* ── Verse content ── */}
+      <div className="max-w-2xl mx-auto px-5 pb-[160px]">
         <BibleReader
           verses={verses}
           highlights={highlights}
@@ -212,26 +204,58 @@ export function ChapterReader({
         />
       </div>
 
-      {/* ── Chapter Navigation ── */}
-      <div className="border-t border-black/5 dark:border-white/5 px-5 py-4 flex items-center gap-3">
-        {prevHref ? (
-          <Link
-            href={prevHref}
-            className="flex-1 flex items-center justify-center gap-2 min-h-[52px] rounded-2xl border border-border bg-card text-[14px] font-semibold active:scale-[0.97] transition-transform cursor-pointer"
+      {/* ── Bottom pill navigation (fixed, above tab bar) ── */}
+      <div
+        className="fixed left-0 right-0 z-30 flex items-center justify-center gap-3 px-5 pb-3"
+        style={{ bottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}
+      >
+        {/* Play button */}
+        <button
+          className="h-11 w-11 flex items-center justify-center rounded-full bg-[#111] dark:bg-white active:opacity-70 transition-opacity cursor-pointer shadow-lg"
+          aria-label="Audio (coming soon)"
+        >
+          <Play className="h-4 w-4 text-white dark:text-black fill-current ml-0.5" />
+        </button>
+
+        {/* Chapter nav pill */}
+        <div className="flex items-center bg-[#111] dark:bg-white rounded-full shadow-lg overflow-hidden h-11">
+          {prevHref ? (
+            <Link
+              href={prevHref}
+              className="flex items-center justify-center h-11 w-12 active:opacity-70 transition-opacity cursor-pointer"
+              aria-label="Previous chapter"
+            >
+              <ChevronLeft className="h-5 w-5 text-white dark:text-black" strokeWidth={2} />
+            </Link>
+          ) : (
+            <div className="h-11 w-12 flex items-center justify-center opacity-30">
+              <ChevronLeft className="h-5 w-5 text-white dark:text-black" strokeWidth={2} />
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowChapterNav(true)}
+            className="px-3 flex items-center gap-1.5 h-full active:opacity-70 transition-opacity cursor-pointer"
           >
-            <ChevronLeft className="h-4 w-4" />
-            {navigation.prevChapter ? `Chapter ${navigation.prevChapter}` : navigation.prevBook?.name ?? "Prev"}
-          </Link>
-        ) : <div className="flex-1" />}
-        {nextHref ? (
-          <Link
-            href={nextHref}
-            className="flex-1 flex items-center justify-center gap-2 min-h-[52px] rounded-2xl border border-border bg-card text-[14px] font-semibold active:scale-[0.97] transition-transform cursor-pointer"
-          >
-            {navigation.nextChapter ? `Chapter ${navigation.nextChapter}` : navigation.nextBook?.name ?? "Next"}
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        ) : <div className="flex-1" />}
+            <span className="text-[14px] font-semibold text-white dark:text-black whitespace-nowrap">
+              {bookName} {chapterNum}
+            </span>
+          </button>
+
+          {nextHref ? (
+            <Link
+              href={nextHref}
+              className="flex items-center justify-center h-11 w-12 active:opacity-70 transition-opacity cursor-pointer"
+              aria-label="Next chapter"
+            >
+              <ChevronRight className="h-5 w-5 text-white dark:text-black" strokeWidth={2} />
+            </Link>
+          ) : (
+            <div className="h-11 w-12 flex items-center justify-center opacity-30">
+              <ChevronRight className="h-5 w-5 text-white dark:text-black" strokeWidth={2} />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Settings Dialog */}
@@ -243,43 +267,30 @@ export function ChapterReader({
           <div className="space-y-6 py-2">
             <div className="space-y-2">
               <Label>Font Size: {fontSize}px</Label>
-              <Slider
-                min={12}
-                max={32}
-                step={1}
-                value={[fontSize]}
-                onValueChange={([v]) => setFontSize(v)}
-              />
+              <Slider min={14} max={30} step={1} value={[fontSize]} onValueChange={([v]) => setFontSize(v)} />
             </div>
-
             <div className="space-y-2">
               <Label>Font Style</Label>
               <Select value={fontFamily} onValueChange={(v) => setFontFamily(v as typeof fontFamily)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="serif">Serif (Classic)</SelectItem>
                   <SelectItem value="sans">Sans-serif (Modern)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <Label>Line Spacing</Label>
               <Select value={lineSpacing} onValueChange={(v) => setLineSpacing(v as typeof lineSpacing)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="compact">Compact</SelectItem>
                   <SelectItem value="normal">Normal</SelectItem>
                   <SelectItem value="relaxed">Relaxed</SelectItem>
-                  <SelectItem value="loose">Loose</SelectItem>
+                  <SelectItem value="loose">Spacious</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
             <div className="flex items-center justify-between">
               <Label>Show Verse Numbers</Label>
               <Switch checked={showVerseNumbers} onCheckedChange={setShowVerseNumbers} />
@@ -292,21 +303,13 @@ export function ChapterReader({
       <Dialog open={showChapterNav} onOpenChange={setShowChapterNav}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Go to Chapter</DialogTitle>
+            <DialogTitle>{bookName}</DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-64">
             <div className="grid grid-cols-5 gap-2 pr-4">
               {Array.from({ length: bookInfo.chapters }, (_, i) => i + 1).map((ch) => (
-                <Button
-                  key={ch}
-                  variant={ch === chapterNum ? "default" : "outline"}
-                  size="sm"
-                  className="h-10 text-sm"
-                  asChild
-                >
-                  <Link href={`${basePath}/${bookSlug}/${ch}`} onClick={() => setShowChapterNav(false)}>
-                    {ch}
-                  </Link>
+                <Button key={ch} variant={ch === chapterNum ? "default" : "outline"} size="sm" className="h-10 text-sm" asChild>
+                  <Link href={`${basePath}/${bookSlug}/${ch}`} onClick={() => setShowChapterNav(false)}>{ch}</Link>
                 </Button>
               ))}
             </div>
@@ -317,9 +320,7 @@ export function ChapterReader({
       {/* Note Dialog */}
       <Dialog open={!!noteVerseId} onOpenChange={(open) => { if (!open) { setNoteVerseId(null); setNoteContent(""); } }}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Add Note</DialogTitle></DialogHeader>
           {noteVerse && (
             <div className="bg-muted/50 rounded-lg p-3 mb-4">
               <p className="text-xs font-semibold text-muted-foreground mb-1">{noteVerse.reference}</p>
@@ -327,18 +328,14 @@ export function ChapterReader({
             </div>
           )}
           <Textarea
-            placeholder="Write your reflection, commentary, or note..."
+            placeholder="Write your reflection…"
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             className="min-h-[120px]"
           />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setNoteVerseId(null); setNoteContent(""); }}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveNote} disabled={!noteContent.trim()}>
-              Save Note
-            </Button>
+            <Button variant="outline" onClick={() => { setNoteVerseId(null); setNoteContent(""); }}>Cancel</Button>
+            <Button onClick={handleSaveNote} disabled={!noteContent.trim()}>Save Note</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, BookOpen, LayoutList, HandHeart, CircleUser } from "lucide-react";
+import { House, BookOpen, LayoutList, Compass, CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const tabs = [
-  { label: "Home",    href: "/app/home",    icon: House       },
-  { label: "Bible",   href: "/app/bible",   icon: BookOpen    },
-  { label: "Plans",   href: "/app/plans",   icon: LayoutList  },
-  { label: "Prayer",  href: "/app/prayer",  icon: HandHeart   },
-  { label: "Profile", href: "/app/profile", icon: CircleUser  },
+  { label: "Home",     href: "/app/home",     icon: House      },
+  { label: "Bible",    href: "/app/bible",    icon: BookOpen   },
+  { label: "Plans",    href: "/app/plans",    icon: LayoutList },
+  { label: "Discover", href: "/app/discover", icon: Compass    },
+  { label: "You",      href: "/app/profile",  icon: CircleUser },
 ] as const;
 
 export function BottomTabBar() {
@@ -23,7 +23,7 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-2xl border-t border-[#F0F0F0] dark:border-[#222]"
+      className="fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-black/95 backdrop-blur-2xl border-t border-[#F0F0F0] dark:border-[#222]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="flex items-center justify-around px-2 pt-2 pb-1">
@@ -33,7 +33,7 @@ export function BottomTabBar() {
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center gap-[3px] flex-1 py-1"
+              className="flex flex-col items-center gap-[3px] flex-1 py-1 cursor-pointer"
             >
               <Icon
                 className={cn(
