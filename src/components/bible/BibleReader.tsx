@@ -141,6 +141,7 @@ export function BibleReader({
       <div className={cn("space-y-0.5", fontClass, spacingClass)} style={{ fontSize: `${fontSize}px` }}>
         {verses.map((verse) => {
           const highlight = highlightMap[verse.id];
+          const highlightColor = highlight ? HIGHLIGHT_COLORS.find(c => c.id === highlight.color) : null;
           const isSelected = selectedVerseId === verse.id;
 
           return (
@@ -148,11 +149,11 @@ export function BibleReader({
               key={verse.id}
               className={cn(
                 "cursor-pointer transition-colors inline rounded-sm px-0.5",
-                highlight ? `highlight-${highlight.color}` : "",
                 isSelected && !highlight ? "bg-[#F5F5F5] dark:bg-[#2A2A2A]" : "",
-                isSelected && highlight ? "ring-1 ring-offset-0 ring-[#999]/50 dark:ring-white/20 rounded" : "",
+                isSelected && highlight ? "ring-2 ring-offset-0 ring-[#333]/40 dark:ring-white/30 rounded" : "",
                 !isSelected && !highlight ? "hover:bg-black/5 dark:hover:bg-white/5" : "",
               )}
+              style={highlightColor ? { backgroundColor: highlightColor.hex } : undefined}
               onClick={() => setSelectedVerseId(isSelected ? null : verse.id)}
             >
               {showVerseNumbers && (
