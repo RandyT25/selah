@@ -153,7 +153,7 @@ export function BibleReader({
                 isSelected && highlight ? "ring-2 ring-offset-0 ring-[#333]/40 dark:ring-white/30 rounded" : "",
                 !isSelected && !highlight ? "hover:bg-black/5 dark:hover:bg-white/5" : "",
               )}
-              style={highlightColor ? { backgroundColor: highlightColor.hex } : undefined}
+              style={highlightColor ? { backgroundColor: highlightColor.hex, color: "#111" } : undefined}
               onClick={() => setSelectedVerseId(isSelected ? null : verse.id)}
             >
               {showVerseNumbers && (
