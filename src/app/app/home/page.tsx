@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Bell } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { BellButton } from "@/components/home/BellButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils/format";
 import { VerseActions } from "@/components/home/VerseActions";
@@ -11,10 +12,38 @@ type PlanWithProgress = PlanProgress & { reading_plans: ReadingPlan | null };
 
 export const metadata = { title: "Home" };
 
-const FALLBACK_VERSE = {
-  verse_text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.",
-  verse_reference: "Jeremiah 29:11",
-};
+const DAILY_VERSES = [
+  { verse_text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.", verse_reference: "Jeremiah 29:11" },
+  { verse_text: "I can do all things through Christ who strengthens me.", verse_reference: "Philippians 4:13" },
+  { verse_text: "The Lord is my shepherd; I shall not want.", verse_reference: "Psalm 23:1" },
+  { verse_text: "Trust in the Lord with all your heart and lean not on your own understanding.", verse_reference: "Proverbs 3:5" },
+  { verse_text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.", verse_reference: "John 3:16" },
+  { verse_text: "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", verse_reference: "Joshua 1:9" },
+  { verse_text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.", verse_reference: "Romans 8:28" },
+  { verse_text: "Come to me, all you who are weary and burdened, and I will give you rest.", verse_reference: "Matthew 11:28" },
+  { verse_text: "The Lord is my light and my salvation — whom shall I fear?", verse_reference: "Psalm 27:1" },
+  { verse_text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.", verse_reference: "Philippians 4:6" },
+  { verse_text: "For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God.", verse_reference: "Ephesians 2:8" },
+  { verse_text: "Even though I walk through the darkest valley, I will fear no evil, for you are with me.", verse_reference: "Psalm 23:4" },
+  { verse_text: "Love is patient, love is kind. It does not envy, it does not boast, it is not proud.", verse_reference: "1 Corinthians 13:4" },
+  { verse_text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles.", verse_reference: "Isaiah 40:31" },
+  { verse_text: "The name of the Lord is a fortified tower; the righteous run to it and are safe.", verse_reference: "Proverbs 18:10" },
+  { verse_text: "This is the day the Lord has made; we will rejoice and be glad in it.", verse_reference: "Psalm 118:24" },
+  { verse_text: "Jesus said to her, I am the resurrection and the life. The one who believes in me will live, even though they die.", verse_reference: "John 11:25" },
+  { verse_text: "Cast all your anxiety on him because he cares for you.", verse_reference: "1 Peter 5:7" },
+  { verse_text: "My grace is sufficient for you, for my power is made perfect in weakness.", verse_reference: "2 Corinthians 12:9" },
+  { verse_text: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you.", verse_reference: "Zephaniah 3:17" },
+  { verse_text: "Delight yourself in the Lord, and he will give you the desires of your heart.", verse_reference: "Psalm 37:4" },
+  { verse_text: "I am the way and the truth and the life. No one comes to the Father except through me.", verse_reference: "John 14:6" },
+  { verse_text: "If God is for us, who can be against us?", verse_reference: "Romans 8:31" },
+  { verse_text: "Your word is a lamp for my feet, a light on my path.", verse_reference: "Psalm 119:105" },
+  { verse_text: "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you.", verse_reference: "Matthew 7:7" },
+  { verse_text: "Peace I leave with you; my peace I give you. I do not give to you as the world gives.", verse_reference: "John 14:27" },
+  { verse_text: "But seek first his kingdom and his righteousness, and all these things will be given to you as well.", verse_reference: "Matthew 6:33" },
+  { verse_text: "Create in me a pure heart, O God, and renew a steadfast spirit within me.", verse_reference: "Psalm 51:10" },
+  { verse_text: "I have been crucified with Christ and I no longer live, but Christ lives in me.", verse_reference: "Galatians 2:20" },
+  { verse_text: "The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you.", verse_reference: "Numbers 6:24-25" },
+];
 
 // A set of gradient backgrounds for the verse card — cycles by day-of-week
 const VERSE_GRADIENTS = [
@@ -39,7 +68,8 @@ export default async function HomePage() {
   ]);
 
   const profile = profileResult.data as Profile | null;
-  const verse = (verseResult.data as VerseOfDay | null) ?? FALLBACK_VERSE;
+  const fallbackVerse = DAILY_VERSES[new Date().getDate() % DAILY_VERSES.length];
+  const verse = (verseResult.data as VerseOfDay | null) ?? fallbackVerse;
   const activePlans = (plansResult.data ?? []) as unknown as PlanWithProgress[];
 
   const firstName = (profile?.display_name ?? profile?.full_name ?? "Friend").split(" ")[0];
@@ -57,9 +87,7 @@ export default async function HomePage() {
           <h1 className="text-[24px] font-bold tracking-tight leading-tight">{firstName}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button className="h-9 w-9 flex items-center justify-center rounded-full active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors cursor-pointer" aria-label="Notifications">
-            <Bell className="h-5 w-5 text-[#888]" strokeWidth={1.5} />
-          </button>
+          <BellButton />
           <Link href="/app/profile">
             <Avatar className="h-9 w-9">
               <AvatarImage src={profile?.avatar_url ?? undefined} />

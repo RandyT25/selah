@@ -224,6 +224,15 @@ export function ChapterReader({
           <button
             className="h-9 w-9 flex items-center justify-center rounded-full active:bg-black/8 dark:active:bg-white/8 transition-colors cursor-pointer"
             aria-label="More options"
+            onClick={() => {
+              const url = window.location.href;
+              if (navigator.share) {
+                navigator.share({ title: `${bookName} ${chapterNum}`, url });
+              } else {
+                navigator.clipboard.writeText(url);
+                toast.success("Link copied");
+              }
+            }}
           >
             <MoreHorizontal className="h-[18px] w-[18px] text-[#888]" strokeWidth={1.5} />
           </button>
@@ -261,7 +270,8 @@ export function ChapterReader({
       >
         <button
           className="h-11 w-11 flex items-center justify-center rounded-full bg-[#111] dark:bg-white active:opacity-70 transition-opacity cursor-pointer shadow-lg"
-          aria-label="Audio (coming soon)"
+          aria-label="Audio"
+          onClick={() => toast("Audio coming soon", { description: "Bible audio is on the way." })}
         >
           <Play className="h-4 w-4 text-white dark:text-black fill-current ml-0.5" />
         </button>

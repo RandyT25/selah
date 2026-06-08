@@ -41,9 +41,9 @@ export default async function JournalEntryPage({ params }: Props) {
         <Link href="/app/journal" className="text-[#888] cursor-pointer">
           <ChevronLeft className="h-5 w-5" />
         </Link>
-        <button className="text-[#888] cursor-pointer">
+        <Link href={`/app/journal/${entry.id}/edit`} className="text-[#888] cursor-pointer p-1">
           <Pencil className="h-4 w-4" />
-        </button>
+        </Link>
       </div>
 
       {/* Type badge */}

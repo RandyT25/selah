@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, Copy, Share2, BookOpen, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -49,9 +49,14 @@ function parseBibleLink(reference: string): string {
 }
 
 export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
+  const likeKey = `selah_liked_${verseReference}`;
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
   const bibleLink = parseBibleLink(verseReference);
+
+  useEffect(() => {
+    try { setLiked(localStorage.getItem(likeKey) === "1"); } catch {}
+  }, [likeKey]);
 
   const handleCopy = async () => {
     try {
@@ -81,7 +86,11 @@ export function VerseActions({ verseText, verseReference }: VerseActionsProps) {
   return (
     <div className="flex items-center border-t border-white/10 pt-2 -mx-1">
       <button
-        onClick={() => setLiked(l => !l)}
+        onClick={() => {
+          const next = !liked;
+          setLiked(next);
+          try { next ? localStorage.setItem(likeKey, "1") : localStorage.removeItem(likeKey); } catch {}
+        }}
         className="flex-1 flex items-center justify-center gap-1.5 py-2 transition-colors cursor-pointer active:opacity-60"
       >
         <Heart

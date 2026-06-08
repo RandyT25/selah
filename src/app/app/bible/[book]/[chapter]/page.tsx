@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterReader } from "@/components/bible/ChapterReader";
+import { LastReadTracker } from "@/components/bible/LastReadTracker";
 import { getBookByName, getBookNameFromSlug, BIBLE_BOOKS } from "@/lib/bible/books";
 import { verseToId } from "@/lib/bible/verseId";
 import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from "@/types/database";
@@ -87,6 +88,8 @@ export default async function ChapterPage({ params }: PageProps) {
   const nextBook = BIBLE_BOOKS.find((b) => b.number === bookInfo.number + 1);
 
   return (
+    <>
+    <LastReadTracker bookSlug={bookSlug} bookName={bookName} chapter={chapterNum} />
     <ChapterReader
       bookName={bookName}
       bookSlug={bookSlug}
@@ -105,5 +108,6 @@ export default async function ChapterPage({ params }: PageProps) {
       }}
       basePath="/app/bible"
     />
+    </>
   );
 }

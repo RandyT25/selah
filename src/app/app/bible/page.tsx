@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible/books";
+import { ContinueReadingCard } from "@/components/bible/ContinueReadingCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Bible" };
@@ -25,16 +26,6 @@ export default async function BiblePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/app/login");
 
-  const histResult = await supabase
-    .from("reading_history")
-    .select("*, bible_books(name), bible_chapters(chapter_number)")
-    .eq("user_id", user.id)
-    .order("read_at", { ascending: false })
-    .limit(1);
-  const lastRead = histResult.data?.[0] as Record<string, unknown> | null;
-  const lastBook = (lastRead?.bible_books as Record<string, string>)?.name;
-  const lastChapter = (lastRead?.bible_chapters as Record<string, number>)?.chapter_number;
-
   return (
     <div className="min-h-full bg-white dark:bg-black">
 
@@ -44,7 +35,7 @@ export default async function BiblePage() {
       </div>
 
       {/* ── Search ── */}
-      <div className="px-5 mb-6">
+      <div className="px-5 mb-4">
         <Link
           href="/app/search"
           className="flex items-center gap-2.5 bg-[#F5F5F5] dark:bg-[#1A1A1A] rounded-xl px-4 h-[44px] w-full active:opacity-70 transition-opacity"
@@ -54,21 +45,8 @@ export default async function BiblePage() {
         </Link>
       </div>
 
-      {/* ── Continue Reading ── */}
-      {lastRead && lastBook && (
-        <div className="border-t border-[#F0F0F0] dark:border-[#222]">
-          <Link
-            href={`/app/bible/${bookSlug(lastBook)}/${lastChapter ?? 1}`}
-            className="flex items-center px-5 py-4 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors"
-          >
-            <div className="flex-1">
-              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] mb-0.5">Continue</p>
-              <p className="text-[16px] font-semibold">{lastBook} {lastChapter ?? 1}</p>
-            </div>
-            <span className="text-[13px] text-[#888]">Open →</span>
-          </Link>
-        </div>
-      )}
+      {/* ── Continue Reading (localStorage-based, client component) ── */}
+      <ContinueReadingCard />
 
       {/* ── Topics ── */}
       <div className="px-5 py-5 border-t border-[#F0F0F0] dark:border-[#222]">
