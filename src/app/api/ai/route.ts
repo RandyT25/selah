@@ -21,33 +21,31 @@ export async function POST(request: Request) {
     );
   }
 
-  const systemMessage = {
-    role: "system" as const,
-    content: AI_SYSTEM_PROMPTS.bibleAssistant,
+  // Convert messages to Gemini native format (role: user | model)
+  const contents = messages
+    .filter((m) => m.content && m.content.trim().length > 0)
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+  const body = {
+    contents,
+    systemInstruction: {
+      parts: [{ text: AI_SYSTEM_PROMPTS.bibleAssistant }],
+    },
+    generationConfig: {
+      temperature: 0.7,
+    },
   };
 
-  const allMessages = [
-    systemMessage,
-    ...messages
-      .filter((m) => m.content && m.content.trim().length > 0)
-      .map((m) => ({ role: m.role as "user" | "assistant" | "system", content: m.content })),
-  ];
-
-  // Gemini OpenAI-compatible endpoint — same request/response format as OpenAI
+  // Use Gemini native streaming endpoint
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gemini-2.0-flash",
-        messages: allMessages,
-        temperature: 0.7,
-        stream: true,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     }
   );
 
@@ -75,14 +73,14 @@ export async function POST(request: Request) {
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6);
-          if (data === "[DONE]") { controller.close(); return; }
+          const data = line.slice(6).trim();
+          if (!data || data === "[DONE]") continue;
 
           try {
             const parsed = JSON.parse(data);
-            const content = parsed.choices[0]?.delta?.content;
-            if (content) {
-              controller.enqueue(new TextEncoder().encode(content));
+            const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              controller.enqueue(new TextEncoder().encode(text));
             }
           } catch {
             // skip malformed lines
