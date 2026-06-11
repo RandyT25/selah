@@ -38,6 +38,37 @@ export default function MarkCompleteButton({ planId, userId, day, completedDays 
     if (error) {
       toast.error("Failed to mark day complete");
     } else {
+      // Update streak
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("streak_count, longest_streak, last_active_at")
+        .eq("id", userId)
+        .single();
+
+      if (profile) {
+        const now = new Date();
+        const today = now.toDateString();
+        const lastActive = profile.last_active_at ? new Date(profile.last_active_at) : null;
+
+        if (lastActive?.toDateString() !== today) {
+          const yesterday = new Date(now);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const newStreak =
+            lastActive?.toDateString() === yesterday.toDateString()
+              ? (profile.streak_count ?? 0) + 1
+              : 1;
+
+          await supabase
+            .from("profiles")
+            .update({
+              streak_count: newStreak,
+              longest_streak: Math.max(newStreak, profile.longest_streak ?? 0),
+              last_active_at: now.toISOString(),
+            })
+            .eq("id", userId);
+        }
+      }
+
       toast.success(`Day ${day} complete! Well done.`);
       router.refresh();
     }

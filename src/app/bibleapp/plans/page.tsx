@@ -77,7 +77,7 @@ export default async function PlansPage() {
           )}
 
           <Button size="sm" variant={isEnrolled ? "outline" : "gold"} className="w-full mt-auto" asChild>
-            <Link href={`/plans/${plan.id}`}>
+            <Link href={`/bibleapp/plans/${plan.id}`}>
               {isEnrolled ? "Continue Reading" : "Start Plan"}
             </Link>
           </Button>

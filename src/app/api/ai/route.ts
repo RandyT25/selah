@@ -50,9 +50,13 @@ export async function POST(request: Request) {
   );
 
   if (!response.ok) {
-    const err = await response.text().catch(() => "");
-    console.error("[AI route] Gemini error", response.status, err);
-    return NextResponse.json({ error: "AI request failed", detail: err }, { status: response.status });
+    const errText = await response.text().catch(() => "");
+    console.error("[AI route] Gemini error", response.status, errText);
+    let userMessage = "AI request failed";
+    if (response.status === 429) userMessage = "AI service is temporarily unavailable (rate limit). Please try again shortly.";
+    else if (response.status === 400) userMessage = "Invalid request to AI service.";
+    else if (response.status === 401 || response.status === 403) userMessage = "AI service authentication failed. Check GEMINI_API_KEY.";
+    return NextResponse.json({ error: userMessage, detail: errText }, { status: response.status });
   }
 
   const stream = new ReadableStream({
