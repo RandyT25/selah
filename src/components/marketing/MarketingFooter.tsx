@@ -40,9 +40,8 @@ export function MarketingFooter() {
           <div>
             <h4 className="font-semibold text-sm mb-3">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
-              <li><Link href="/devotionals" className="hover:text-foreground transition-colors">Devotionals</Link></li>
-              <li><Link href="/plans" className="hover:text-foreground transition-colors">Reading Plans</Link></li>
+              <li><Link href="/bibleapp/devotionals" className="hover:text-foreground transition-colors">Devotionals</Link></li>
+              <li><Link href="/bibleapp/plans" className="hover:text-foreground transition-colors">Reading Plans</Link></li>
             </ul>
           </div>
 

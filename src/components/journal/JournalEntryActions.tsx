@@ -38,7 +38,7 @@ export default function JournalEntryActions({ entryId, isFavorite }: { entryId: 
       toast.error("Failed to delete entry");
     } else {
       toast.success("Entry deleted");
-      router.push("/journal");
+      router.push("/bibleapp/journal");
     }
   };
 
@@ -55,7 +55,7 @@ export default function JournalEntryActions({ entryId, isFavorite }: { entryId: 
       </Button>
 
       <Button variant="outline" size="sm" asChild>
-        <Link href={`/journal/edit/${entryId}`}>
+        <Link href={`/bibleapp/journal/edit/${entryId}`}>
           <Pencil className="h-4 w-4 mr-1" />
           Edit
         </Link>

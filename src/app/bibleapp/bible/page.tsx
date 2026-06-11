@@ -36,7 +36,7 @@ export default async function BiblePage() {
       {books.map((book) => (
         <Link
           key={book.number}
-          href={`/bible/${book.name.toLowerCase().replace(/\s+/g, "-")}/1`}
+          href={`/bibleapp/bible/${book.name.toLowerCase().replace(/\s+/g, "-")}/1`}
           className="group"
         >
           <Card className="card-hover h-full">
@@ -83,7 +83,7 @@ export default async function BiblePage() {
               return (
                 <Link
                   key={history.id as string}
-                  href={`/bible/${book.name.toLowerCase().replace(/\s+/g, "-")}/${chapter.chapter_number}`}
+                  href={`/bibleapp/bible/${book.name.toLowerCase().replace(/\s+/g, "-")}/${chapter.chapter_number}`}
                   className="shrink-0"
                 >
                   <Card className="card-hover w-40">

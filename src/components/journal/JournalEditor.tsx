@@ -124,7 +124,7 @@ export function JournalEditor({ initialEntry }: JournalEditorProps) {
 
         if (error) throw error;
         toast.success("Entry updated");
-        router.push(`/journal/${initialEntry.id}`);
+        router.push(`/bibleapp/journal/${initialEntry.id}`);
       } else {
         const { data, error } = await supabase.from("journal_entries").insert({
           user_id: user.id,
@@ -139,7 +139,7 @@ export function JournalEditor({ initialEntry }: JournalEditorProps) {
 
         if (error) throw error;
         toast.success("Entry saved");
-        router.push(`/journal/${data.id}`);
+        router.push(`/bibleapp/journal/${data.id}`);
       }
     } catch {
       toast.error("Failed to save entry");
@@ -172,7 +172,7 @@ export function JournalEditor({ initialEntry }: JournalEditorProps) {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/journal">
+          <Link href="/bibleapp/journal">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Journal
           </Link>

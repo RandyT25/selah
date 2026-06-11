@@ -26,7 +26,7 @@ export function ContinueReadingCard() {
     <div className="border-t border-[#F0F0F0] dark:border-[#222]">
       <p className="text-[11px] font-semibold text-[#888] uppercase tracking-[0.12em] px-5 pt-4 pb-2">Continue Reading</p>
       <Link
-        href={`/app/bible/${lastRead.bookSlug}/${lastRead.chapter}`}
+        href={`/bibleapp/bible/${lastRead.bookSlug}/${lastRead.chapter}`}
         className="flex items-center px-5 py-3.5 active:bg-[#F5F5F5] dark:active:bg-[#111] transition-colors cursor-pointer"
       >
         <div className="h-10 w-10 rounded-xl bg-[#111] dark:bg-white flex items-center justify-center mr-4 flex-shrink-0">

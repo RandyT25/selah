@@ -44,7 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <div className="p-3 border-t">
-          <Link href="/dashboard" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-2">
+          <Link href="/bibleapp/dashboard" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-2">
             ← Back to App
           </Link>
         </div>
