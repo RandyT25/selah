@@ -11,15 +11,15 @@ export function MarketingFooter() {
               <Image
                 src="/logo-wordmark-transparent.png"
                 alt="Selah"
-                width={240}
-                height={75}
+                width={392}
+                height={120}
                 className="dark:hidden"
               />
               <Image
                 src="/logo-wordmark-white.png"
                 alt="Selah"
-                width={240}
-                height={75}
+                width={392}
+                height={120}
                 className="hidden dark:block"
               />
             </div>
