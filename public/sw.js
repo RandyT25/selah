@@ -73,8 +73,9 @@ self.addEventListener("fetch", (event) => {
   // Network first for HTML pages
   if (request.headers.get("Accept")?.includes("text/html")) {
     event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match(request) ?? caches.match("/");
+      fetch(request).catch(async () => {
+        const cached = await caches.match(request) || await caches.match("/bibleapp/dashboard");
+        return cached || new Response("You are offline", { status: 503, headers: { "Content-Type": "text/html" } });
       })
     );
     return;

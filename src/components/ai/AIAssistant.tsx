@@ -25,6 +25,7 @@ export function AIAssistant() {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,7 +36,8 @@ export function AIAssistant() {
 
   const sendMessage = async (text?: string) => {
     const userMessage = text ?? input.trim();
-    if (!userMessage || loading) return;
+    if (!userMessage || loadingRef.current) return;
+    loadingRef.current = true;
 
     const userMsg: AIMessage = {
       role: "user",
@@ -99,6 +101,7 @@ export function AIAssistant() {
         ];
       });
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
   };
