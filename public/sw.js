@@ -1,18 +1,18 @@
-const CACHE_NAME = "selah-v1";
-const BIBLE_CACHE = "selah-bible-v1";
-const STATIC_CACHE = "selah-static-v1";
+const CACHE_NAME = "selah-v2";
+const BIBLE_CACHE = "selah-bible-v2";
+const STATIC_CACHE = "selah-static-v2";
 
 const STATIC_ASSETS = [
   "/",
-  "/dashboard",
-  "/bible",
-  "/journal",
-  "/plans",
-  "/devotionals",
+  "/bibleapp/dashboard",
+  "/bibleapp/bible",
+  "/bibleapp/journal",
+  "/bibleapp/plans",
+  "/bibleapp/devotionals",
   "/manifest.json",
 ];
 
-const BIBLE_URLS = /\/bible\//;
+const BIBLE_URLS = /\/bibleapp\/bible\//;
 
 // Install - cache static assets
 self.addEventListener("install", (event) => {
@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activate - clean up old caches
+// Activate - clean up ALL old caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -103,7 +103,7 @@ self.addEventListener("push", (event) => {
       body: data.body ?? "Time for your daily Scripture reading.",
       icon: "/icons/icon-192x192.png",
       badge: "/icons/icon-96x96.png",
-      data: { url: data.url ?? "/dashboard" },
+      data: { url: data.url ?? "/bibleapp/dashboard" },
       actions: [
         { action: "open", title: "Open Selah" },
         { action: "dismiss", title: "Dismiss" },
@@ -117,7 +117,7 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   if (event.action === "dismiss") return;
 
-  const url = event.notification.data?.url ?? "/dashboard";
+  const url = event.notification.data?.url ?? "/bibleapp/dashboard";
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
       for (const client of windowClients) {
