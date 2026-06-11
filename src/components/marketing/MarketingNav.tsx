@@ -44,9 +44,24 @@ export function MarketingNav() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-6 flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo-mark.png" alt="Selah" width={32} height={32} className="rounded-sm" />
-          <span className="font-bold text-xl">Selah</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo-wordmark.png"
+            alt="Selah"
+            width={120}
+            height={38}
+            className="dark:hidden"
+            style={{ mixBlendMode: "multiply" }}
+            priority
+          />
+          <Image
+            src="/logo-wordmark.png"
+            alt="Selah"
+            width={120}
+            height={38}
+            className="hidden dark:block brightness-0 invert"
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}

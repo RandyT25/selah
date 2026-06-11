@@ -7,14 +7,24 @@ export function MarketingFooter() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <Image src="/logo-mark.png" alt="Selah" width={28} height={28} className="rounded-sm" />
-              <span className="font-bold text-lg">Selah</span>
+            <div className="mb-4">
+              <Image
+                src="/logo-wordmark.png"
+                alt="Selah"
+                width={148}
+                height={46}
+                className="dark:hidden"
+                style={{ mixBlendMode: "multiply" }}
+              />
+              <Image
+                src="/logo-wordmark.png"
+                alt="Selah"
+                width={148}
+                height={46}
+                className="hidden dark:block brightness-0 invert"
+              />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Pause. Reflect. Grow.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px]">
               A modern Bible companion for your faith journey.
             </p>
           </div>
