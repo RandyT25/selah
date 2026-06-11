@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { getInitials, formatRelativeTime } from "@/lib/utils/format";
 import type { PrayerRequest } from "@/types/database";
@@ -62,7 +61,6 @@ interface PrayerWallProps {
 }
 
 export function PrayerWall({ publicPrayers, myPrayers, prayedForIds, userId }: PrayerWallProps) {
-  const supabase = createClient();
   const [showForm, setShowForm] = useState(false);
   const [prayedFor, setPrayedFor] = useState(prayedForIds);
   const [prayers, setPrayers] = useState(publicPrayers);
@@ -79,11 +77,18 @@ export function PrayerWall({ publicPrayers, myPrayers, prayedForIds, userId }: P
     if (!userId) { toast.error("Sign in to pray for others"); return; }
 
     if (prayedFor.has(prayerId)) {
-      await supabase.from("prayer_interactions").delete()
-        .eq("prayer_request_id", prayerId).eq("user_id", userId);
+      await fetch("/api/prayers", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prayerRequestId: prayerId }),
+      });
       setPrayedFor(prev => { const s = new Set(prev); s.delete(prayerId); return s; });
     } else {
-      await supabase.from("prayer_interactions").insert({ prayer_request_id: prayerId, user_id: userId });
+      await fetch("/api/prayers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "interaction", prayerRequestId: prayerId }),
+      });
       setPrayedFor(prev => new Set(Array.from(prev).concat(prayerId)));
       setPrayers(prev => prev.map(p => p.id === prayerId ? { ...p, prayer_count: p.prayer_count + 1 } : p));
       toast.success("🙏 Praying with you");
@@ -93,16 +98,13 @@ export function PrayerWall({ publicPrayers, myPrayers, prayedForIds, userId }: P
   const onSubmit = async (data: PrayerForm) => {
     if (!userId) { toast.error("Sign in to submit a prayer request"); return; }
 
-    const { error } = await supabase.from("prayer_requests").insert({
-      user_id: userId,
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      is_anonymous: data.isAnonymous,
-      is_public: data.isPublic,
+    const res = await fetch("/api/prayers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
 
-    if (error) { toast.error("Failed to submit prayer request"); return; }
+    if (!res.ok) { toast.error("Failed to submit prayer request"); return; }
 
     toast.success("Prayer request submitted 🙏");
     reset();

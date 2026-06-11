@@ -27,7 +27,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/cn";
 import { JOURNAL_MOODS } from "@/types/app";
@@ -58,7 +57,6 @@ const ENTRY_TYPES = [
 
 export function JournalEditor({ initialEntry }: JournalEditorProps) {
   const router = useRouter();
-  const supabase = createClient();
 
   const [title, setTitle] = useState(initialEntry?.title ?? "");
   const [entryType, setEntryType] = useState(initialEntry?.type ?? "reflection");
@@ -100,44 +98,39 @@ export function JournalEditor({ initialEntry }: JournalEditorProps) {
   };
 
   const handleSave = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { toast.error("Please sign in"); return; }
-
     const content = editor?.getText() ?? "";
     const contentHtml = editor?.getHTML() ?? "";
-
     if (!content.trim()) { toast.error("Please write something first"); return; }
 
     setSaving(true);
     try {
-      if (initialEntry?.id) {
-        const { error } = await supabase.from("journal_entries").update({
-          title: title || null,
-          content,
-          content_html: contentHtml,
-          type: entryType as "reflection" | "prayer" | "gratitude" | "sermon_notes" | "study" | "general",
-          mood: mood || null,
-          tags,
-          is_private: isPrivate,
-          updated_at: new Date().toISOString(),
-        }).eq("id", initialEntry.id);
+      const payload = {
+        title: title || null,
+        content,
+        content_html: contentHtml,
+        type: entryType,
+        mood: mood || null,
+        tags,
+        is_private: isPrivate,
+      };
 
-        if (error) throw error;
+      if (initialEntry?.id) {
+        const res = await fetch("/api/journal", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: initialEntry.id, ...payload }),
+        });
+        if (!res.ok) throw new Error(await res.text());
         toast.success("Entry updated");
         router.push(`/bibleapp/journal/${initialEntry.id}`);
       } else {
-        const { data, error } = await supabase.from("journal_entries").insert({
-          user_id: user.id,
-          title: title || null,
-          content,
-          content_html: contentHtml,
-          type: entryType as "reflection" | "prayer" | "gratitude" | "sermon_notes" | "study" | "general",
-          mood: mood || null,
-          tags,
-          is_private: isPrivate,
-        }).select().single();
-
-        if (error) throw error;
+        const res = await fetch("/api/journal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const { data } = await res.json();
         toast.success("Entry saved");
         router.push(`/bibleapp/journal/${data.id}`);
       }

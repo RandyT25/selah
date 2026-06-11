@@ -22,6 +22,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+const api = (path: string, method: string, body: object) =>
+  fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 import { getInitials } from "@/lib/utils/format";
 
 const profileSchema = z.object({
@@ -50,11 +53,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      const { data: prefsData } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).single();
+      const res = await fetch("/api/profile");
+      if (!res.ok) return;
+      const { profile: profileData, prefs: prefsData } = await res.json();
 
       if (profileData) {
         setProfile(profileData);
@@ -77,27 +78,21 @@ export default function SettingsPage() {
 
   const saveProfile = async (data: ProfileForm) => {
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { error } = await supabase.from("profiles").update({
+    const res = await api("/api/profile", "PATCH", {
       full_name: data.fullName,
       display_name: data.displayName || null,
       bio: data.bio || null,
       location: data.location || null,
       website: data.website || null,
-    }).eq("id", user.id);
-
+    });
     setSaving(false);
-    if (error) { toast.error("Failed to save profile"); return; }
+    if (!res.ok) { toast.error("Failed to save profile"); return; }
     toast.success("Profile updated");
     router.refresh();
   };
 
   const savePreference = async (key: string, value: unknown) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("user_preferences").update({ [key]: value } as Record<never, never>).eq("user_id", user.id);
+    await api("/api/preferences", "PATCH", { [key]: value });
     toast.success("Preference saved");
   };
 
