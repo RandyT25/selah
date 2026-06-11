@@ -13,10 +13,10 @@ export async function POST(request: Request) {
 
   const { messages } = await request.json() as { messages: AIMessage[] };
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "AI service not configured. Add OPENAI_API_KEY to your environment variables." },
+      { error: "AI service not configured. Add GEMINI_API_KEY to your environment variables." },
       { status: 503 }
     );
   }
@@ -31,23 +31,28 @@ export async function POST(request: Request) {
     ...messages.map((m) => ({ role: m.role as "user" | "assistant" | "system", content: m.content })),
   ];
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: process.env.AI_MODEL ?? "gpt-4o-mini",
-      messages: allMessages,
-      temperature: 0.7,
-      max_tokens: 1500,
-      stream: true,
-    }),
-  });
+  // Gemini OpenAI-compatible endpoint — same request/response format as OpenAI
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gemini-2.0-flash",
+        messages: allMessages,
+        temperature: 0.7,
+        max_tokens: 1500,
+        stream: true,
+      }),
+    }
+  );
 
   if (!response.ok) {
-    return NextResponse.json({ error: "AI request failed" }, { status: response.status });
+    const err = await response.text().catch(() => "");
+    return NextResponse.json({ error: "AI request failed", detail: err }, { status: response.status });
   }
 
   const stream = new ReadableStream({

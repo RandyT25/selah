@@ -11,7 +11,7 @@ class OpenAIProvider implements AIProvider {
   }
 
   async chat(messages: AIMessage[], options?: AIOptions): Promise<string> {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +34,7 @@ class OpenAIProvider implements AIProvider {
   }
 
   async *stream(messages: AIMessage[], options?: AIOptions): AsyncIterable<string> {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,16 +81,8 @@ class OpenAIProvider implements AIProvider {
 }
 
 export function createAIProvider(): AIProvider {
-  const provider = process.env.AI_PROVIDER ?? "openai";
-  const apiKey = process.env.OPENAI_API_KEY ?? "";
-  const model = process.env.AI_MODEL ?? "gpt-4o-mini";
-
-  switch (provider) {
-    case "openai":
-      return new OpenAIProvider(apiKey, model);
-    default:
-      return new OpenAIProvider(apiKey, model);
-  }
+  const apiKey = process.env.GEMINI_API_KEY ?? "";
+  return new OpenAIProvider(apiKey, "gemini-2.0-flash");
 }
 
 export const AI_SYSTEM_PROMPTS = {
