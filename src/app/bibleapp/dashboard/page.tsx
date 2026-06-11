@@ -167,10 +167,10 @@ export default async function DashboardPage() {
           {/* Quick Actions */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { href: "/bible", icon: BookOpen, label: "Read Bible", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
-              { href: "/journal/new", icon: NotebookPen, label: "New Journal", color: "text-green-500 bg-green-50 dark:bg-green-950/30" },
-              { href: "/community/prayer", icon: HandHeart, label: "Prayer Wall", color: "text-rose-500 bg-rose-50 dark:bg-rose-950/30" },
-              { href: "/ai", icon: Sparkles, label: "Ask AI", color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30" },
+              { href: "/bibleapp/bible", icon: BookOpen, label: "Read Bible", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
+              { href: "/bibleapp/journal/new", icon: NotebookPen, label: "New Journal", color: "text-green-500 bg-green-50 dark:bg-green-950/30" },
+              { href: "/bibleapp/community/prayer", icon: HandHeart, label: "Prayer Wall", color: "text-rose-500 bg-rose-50 dark:bg-rose-950/30" },
+              { href: "/bibleapp/ai", icon: Sparkles, label: "Ask AI", color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30" },
             ].map(({ href, icon: Icon, label, color }) => (
               <Link
                 key={href}
@@ -240,7 +240,7 @@ export default async function DashboardPage() {
             <CardContent className="pb-4 space-y-3">
               {recentJournal.length > 0 ? (
                 recentJournal.map((entry) => (
-                  <Link key={entry.id} href={`/journal/${entry.id}`} className="block group">
+                  <Link key={entry.id} href={`/bibleapp/journal/${entry.id}`} className="block group">
                     <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-1">
                       {entry.title ?? "Untitled Entry"}
                     </p>
