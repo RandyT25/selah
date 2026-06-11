@@ -142,7 +142,7 @@ export default async function DashboardPage() {
                       </div>
                       <Progress value={pct} className="h-1.5" />
                       <Button size="sm" className="mt-3 w-full" variant="outline" asChild>
-                        <Link href={`/plans/${progress.plan_id}`}>
+                        <Link href={`/bibleapp/plans/${progress.plan_id}`}>
                           Continue Reading
                         </Link>
                       </Button>

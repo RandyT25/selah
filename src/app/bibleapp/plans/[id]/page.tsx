@@ -183,7 +183,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
                           {day.passages.map(passage => (
                             <Link
                               key={passage}
-                              href={`/bible?passage=${encodeURIComponent(passage)}`}
+                              href={`/bibleapp/bible?passage=${encodeURIComponent(passage)}`}
                               className="flex items-center gap-1 text-xs text-primary hover:underline"
                             >
                               <BookOpen className="h-3 w-3" />

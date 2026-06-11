@@ -30,21 +30,21 @@ function parseBibleLink(reference: string): string {
   try {
     // Format: "Jeremiah 29:11" | "1 John 4:7" | "Psalm 23:1" | "Song of Solomon 1:2"
     const colonIdx = reference.indexOf(":");
-    if (colonIdx === -1) return "/app/bible";
+    if (colonIdx === -1) return "/bibleapp/bible";
 
     const bookAndChapter = reference.slice(0, colonIdx).trim(); // "Jeremiah 29"
     const parts = bookAndChapter.split(" ");
     const chapter = parseInt(parts[parts.length - 1], 10);
     const rawBook = parts.slice(0, -1).join(" "); // "Jeremiah"
 
-    if (isNaN(chapter) || !rawBook) return "/app/bible";
+    if (isNaN(chapter) || !rawBook) return "/bibleapp/bible";
 
     const slug = findBookSlug(rawBook);
-    if (!slug) return "/app/bible";
+    if (!slug) return "/bibleapp/bible";
 
-    return `/app/bible/${slug}/${chapter}`;
+    return `/bibleapp/bible/${slug}/${chapter}`;
   } catch {
-    return "/app/bible";
+    return "/bibleapp/bible";
   }
 }
 
