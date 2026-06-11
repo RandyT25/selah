@@ -28,16 +28,19 @@ export async function PATCH(request: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    console.log("[/api/profile PATCH] body keys:", Object.keys(body), "userId:", user.id);
 
     const admin = createAdminClient();
-    const { error, data } = await admin.from("profiles").update(body).eq("id", user.id).select();
+    const { error } = await admin.from("profiles").upsert({
+      id: user.id,
+      email: user.email ?? "",
+      ...body,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "id" });
 
     if (error) {
       console.error("[/api/profile PATCH] supabase error:", error.message, error.code, error.details);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    console.log("[/api/profile PATCH] updated rows:", data?.length ?? 0);
     return NextResponse.json({ ok: true });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Server error";

@@ -86,7 +86,12 @@ export default function SettingsPage() {
       website: data.website || null,
     });
     setSaving(false);
-    if (!res.ok) { toast.error("Failed to save profile"); return; }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      toast.error(body.error || "Failed to save profile");
+      console.error("[saveProfile]", body.error);
+      return;
+    }
     toast.success("Profile updated");
     router.refresh();
   };
