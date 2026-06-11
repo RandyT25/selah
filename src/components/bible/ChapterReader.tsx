@@ -30,7 +30,6 @@ import {
 } from "@/components/ui/select";
 import { BibleReader } from "./BibleReader";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from "@/types/database";
 import type { HighlightColor } from "@/types/app";
 import type { BookInfo } from "@/lib/bible/books";
@@ -67,8 +66,6 @@ export function ChapterReader({
   navigation,
   basePath = "/bible",
 }: ChapterReaderProps) {
-  const supabase = createClient();
-
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [fontSize, setFontSize] = useState(preferences?.font_size ?? 19);
@@ -177,9 +174,11 @@ export function ChapterReader({
   const savePreferences = () => {
     if (!userId) return;
     startTransition(async () => {
-      await supabase.from("user_preferences").update({
-        font_size: fontSize, font_family: fontFamily, line_spacing: lineSpacing, show_verse_numbers: showVerseNumbers,
-      }).eq("user_id", userId);
+      await fetch("/api/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ font_size: fontSize, font_family: fontFamily, line_spacing: lineSpacing, show_verse_numbers: showVerseNumbers }),
+      });
     });
   };
 
