@@ -48,16 +48,16 @@ export function MarketingNav() {
           <Image
             src="/logo-wordmark-transparent.png"
             alt="Selah"
-            width={140}
-            height={44}
+            width={200}
+            height={63}
             className="dark:hidden"
             priority
           />
           <Image
             src="/logo-wordmark-white.png"
             alt="Selah"
-            width={140}
-            height={44}
+            width={200}
+            height={63}
             className="hidden dark:block"
             priority
           />
