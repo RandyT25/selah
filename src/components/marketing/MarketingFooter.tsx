@@ -9,19 +9,18 @@ export function MarketingFooter() {
           <div className="col-span-2 md:col-span-1">
             <div className="mb-4">
               <Image
-                src="/logo-wordmark.png"
+                src="/logo-wordmark-transparent.png"
                 alt="Selah"
-                width={148}
-                height={46}
+                width={160}
+                height={50}
                 className="dark:hidden"
-                style={{ mixBlendMode: "multiply" }}
               />
               <Image
-                src="/logo-wordmark.png"
+                src="/logo-wordmark-white.png"
                 alt="Selah"
-                width={148}
-                height={46}
-                className="hidden dark:block brightness-0 invert"
+                width={160}
+                height={50}
+                className="hidden dark:block"
               />
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px]">
