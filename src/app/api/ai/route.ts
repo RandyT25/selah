@@ -28,7 +28,9 @@ export async function POST(request: Request) {
 
   const allMessages = [
     systemMessage,
-    ...messages.map((m) => ({ role: m.role as "user" | "assistant" | "system", content: m.content })),
+    ...messages
+      .filter((m) => m.content && m.content.trim().length > 0)
+      .map((m) => ({ role: m.role as "user" | "assistant" | "system", content: m.content })),
   ];
 
   // Gemini OpenAI-compatible endpoint — same request/response format as OpenAI
@@ -52,6 +54,7 @@ export async function POST(request: Request) {
 
   if (!response.ok) {
     const err = await response.text().catch(() => "");
+    console.error("[AI route] Gemini error", response.status, err);
     return NextResponse.json({ error: "AI request failed", detail: err }, { status: response.status });
   }
 

@@ -56,7 +56,10 @@ export function AIAssistant() {
         }),
       });
 
-      if (!response.ok) throw new Error("AI request failed");
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail || body.error || "AI request failed");
+      }
 
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream");
@@ -81,15 +84,20 @@ export function AIAssistant() {
           { ...assistantMsg },
         ]);
       }
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "I'm sorry, I encountered an error. Please check your API configuration and try again.",
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "Unknown error";
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        const withoutEmptyAssistant = last?.role === "assistant" && !last.content ? prev.slice(0, -1) : prev;
+        return [
+          ...withoutEmptyAssistant,
+          {
+            role: "assistant" as const,
+            content: `Error: ${detail}`,
+            timestamp: new Date().toISOString(),
+          },
+        ];
+      });
     } finally {
       setLoading(false);
     }
