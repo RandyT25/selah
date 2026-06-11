@@ -77,7 +77,7 @@ export default async function JournalPage() {
           {entries.map((entry) => {
             const mood = JOURNAL_MOODS.find(m => m.id === entry.mood);
             return (
-              <Link key={entry.id} href={`/journal/${entry.id}`}>
+              <Link key={entry.id} href={`/bibleapp/journal/${entry.id}`}>
                 <Card className="card-hover">
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
