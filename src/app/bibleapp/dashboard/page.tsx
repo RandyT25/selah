@@ -215,7 +215,7 @@ export default async function DashboardPage() {
                         <span>{devo.reading_time_minutes} min read</span>
                       </div>
                       <Button size="sm" asChild>
-                        <Link href={`/devotionals/${devo.slug}`}>Read Now</Link>
+                        <Link href={`/bibleapp/devotionals/${devo.slug}`}>Read Now</Link>
                       </Button>
                     </div>
                   </CardContent>

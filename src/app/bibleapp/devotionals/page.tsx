@@ -37,7 +37,7 @@ export default async function DevotionalsPage() {
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {featured.map((devo) => (
-              <Link key={devo.id} href={`/devotionals/${devo.slug}`}>
+              <Link key={devo.id} href={`/bibleapp/devotionals/${devo.slug}`}>
                 <Card className="card-hover h-full">
                   <CardContent className="p-5 h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-3">
@@ -76,7 +76,7 @@ export default async function DevotionalsPage() {
         </h2>
         <div className="space-y-3">
           {recent?.map((devo) => (
-            <Link key={devo.id} href={`/devotionals/${devo.slug}`}>
+            <Link key={devo.id} href={`/bibleapp/devotionals/${devo.slug}`}>
               <Card className="card-hover">
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className="flex-1 min-w-0">
