@@ -106,6 +106,15 @@ export const translations = {
       save: "Save Changes",
       saved: "Changes saved",
     },
+    nav: {
+      home: "Home",
+      bible: "Bible",
+      plans: "Plans",
+      journal: "Journal",
+      prayer: "Prayer",
+      community: "Community",
+      settings: "Settings",
+    },
     common: {
       save: "Save",
       cancel: "Cancel",
@@ -232,6 +241,15 @@ export const translations = {
       push_notifications: "Notifikasi Push",
       save: "Simpan Perubahan",
       saved: "Perubahan tersimpan",
+    },
+    nav: {
+      home: "Beranda",
+      bible: "Alkitab",
+      plans: "Rencana",
+      journal: "Jurnal",
+      prayer: "Doa",
+      community: "Komunitas",
+      settings: "Pengaturan",
     },
     common: {
       save: "Simpan",

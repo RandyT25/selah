@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const api = (path: string, method: string, body: object) =>
   fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -41,6 +42,7 @@ export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
 
   const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null; email: string; bio: string | null; location: string | null; website: string | null; avatar_url: string | null } | null>(null);
   const [prefs, setPrefs] = useState<{ font_size: number; font_family: string; theme: string; reading_reminder_enabled: boolean; prayer_reminder_enabled: boolean; push_notifications_enabled: boolean; email_notifications_enabled: boolean } | null>(null);
@@ -196,6 +198,25 @@ export default function SettingsPage() {
           <Card>
             <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
             <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label>Language / Bahasa</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { code: "en" as const, label: "English", flag: "🇺🇸" },
+                    { code: "id" as const, label: "Bahasa Indonesia", flag: "🇮🇩" },
+                  ].map(({ code, label, flag }) => (
+                    <button
+                      key={code}
+                      onClick={() => setLanguage(code)}
+                      className={`p-3 rounded-xl border-2 flex items-center gap-2 text-sm font-medium transition-all ${language === code ? "border-primary bg-primary/5" : "border-border"}`}
+                    >
+                      <span className="text-xl">{flag}</span>
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <Label>Theme</Label>
                 <div className="grid grid-cols-3 gap-3">

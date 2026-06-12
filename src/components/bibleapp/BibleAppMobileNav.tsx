@@ -10,17 +10,19 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const mobileNavItems = [
-  { label: "Home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
-  { label: "Bible", href: "/bibleapp/bible", icon: BookOpen },
-  { label: "Journal", href: "/bibleapp/journal", icon: NotebookPen },
-  { label: "Prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
-  { label: "More", href: "/bibleapp/settings", icon: Settings },
-];
+const MOBILE_NAV = [
+  { key: "home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
+  { key: "bible", href: "/bibleapp/bible", icon: BookOpen },
+  { key: "journal", href: "/bibleapp/journal", icon: NotebookPen },
+  { key: "prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
+  { key: "settings", href: "/bibleapp/settings", icon: Settings },
+] as const;
 
 export function BibleAppMobileNav() {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const isActive = (href: string) => {
     if (href === "/bibleapp/dashboard") return pathname === "/bibleapp/dashboard";
@@ -30,7 +32,7 @@ export function BibleAppMobileNav() {
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-bottom">
       <div className="flex items-center justify-around px-2 py-2">
-        {mobileNavItems.map((item) => {
+        {MOBILE_NAV.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
           return (
@@ -42,10 +44,8 @@ export function BibleAppMobileNav() {
                 active ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <Icon
-                className={cn("h-5 w-5", active && "fill-primary/10")}
-              />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon className={cn("h-5 w-5", active && "fill-primary/10")} />
+              <span className="text-[10px] font-medium">{t("nav", item.key)}</span>
             </Link>
           );
         })}

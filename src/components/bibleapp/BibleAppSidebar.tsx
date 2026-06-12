@@ -22,15 +22,16 @@ import {
 } from "@/components/ui/tooltip";
 import type { Profile } from "@/types/database";
 import { getInitials } from "@/lib/utils/format";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const navItems = [
-  { label: "Home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
-  { label: "Bible", href: "/bibleapp/bible", icon: BookOpen },
-  { label: "Plans", href: "/bibleapp/plans", icon: Calendar },
-  { label: "Journal", href: "/bibleapp/journal", icon: NotebookPen },
-  { label: "Prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
-  { label: "Community", href: "/bibleapp/community", icon: Users },
-];
+const NAV_KEYS = [
+  { key: "home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
+  { key: "bible", href: "/bibleapp/bible", icon: BookOpen },
+  { key: "plans", href: "/bibleapp/plans", icon: Calendar },
+  { key: "journal", href: "/bibleapp/journal", icon: NotebookPen },
+  { key: "prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
+  { key: "community", href: "/bibleapp/community", icon: Users },
+] as const;
 
 interface CompactSidebarProps {
   profile: Profile | null;
@@ -38,6 +39,7 @@ interface CompactSidebarProps {
 
 export function BibleAppSidebar({ profile }: CompactSidebarProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const isActive = (href: string) => {
     if (href === "/bibleapp/dashboard") return pathname === "/bibleapp/dashboard";
@@ -60,9 +62,10 @@ export function BibleAppSidebar({ profile }: CompactSidebarProps) {
 
         {/* Nav items */}
         <nav className="flex flex-col items-center gap-1 flex-1">
-          {navItems.map((item) => {
+          {NAV_KEYS.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const label = t("nav", item.key);
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
@@ -76,10 +79,10 @@ export function BibleAppSidebar({ profile }: CompactSidebarProps) {
                     )}
                   >
                     <Icon className="h-5 w-5" />
-                    <span className="sr-only">{item.label}</span>
+                    <span className="sr-only">{label}</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">{item.label}</TooltipContent>
+                <TooltipContent side="right">{label}</TooltipContent>
               </Tooltip>
             );
           })}
@@ -99,10 +102,10 @@ export function BibleAppSidebar({ profile }: CompactSidebarProps) {
                 )}
               >
                 <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
+                <span className="sr-only">{t("nav", "settings")}</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
+            <TooltipContent side="right">{t("nav", "settings")}</TooltipContent>
           </Tooltip>
 
           <Tooltip>
