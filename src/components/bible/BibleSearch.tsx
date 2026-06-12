@@ -20,21 +20,27 @@ interface BibleSearchProps {
 interface ParsedQuery {
   book: BookInfo | null;
   chapter: number | null;
+  verseRange: string | null; // e.g. "5" or "5-10"
 }
 
 function parseQuery(query: string, books: BookInfo[]): ParsedQuery {
   const q = query.trim();
-  if (!q) return { book: null, chapter: null };
+  if (!q) return { book: null, chapter: null, verseRange: null };
 
-  // Try to match "Book Chapter" or "Book Chapter:Verse"
-  const refMatch = q.match(/^(.+?)\s+(\d+)(?::\d+)?$/);
+  // Handles: "Matius 8 : 5-10", "John 3:16", "Gen 1 : 1", "Amsal 3:5-6"
+  // Spaces around colon are optional; verse range (N-M) or single verse (N)
+  const refMatch = q.match(/^(.+?)\s+(\d+)\s*(?::\s*(\d+(?:\s*-\s*\d+)?))?$/);
   if (refMatch) {
-    const [, bookPart, chapterStr] = refMatch;
-    const matched = findBook(bookPart, books);
-    if (matched) return { book: matched, chapter: parseInt(chapterStr) };
+    const [, bookPart, chapterStr, verseStr] = refMatch;
+    const matched = findBook(bookPart.trim(), books);
+    if (matched) {
+      const chapter = parseInt(chapterStr);
+      const verseRange = verseStr ? verseStr.replace(/\s/g, "") : null;
+      return { book: matched, chapter, verseRange };
+    }
   }
 
-  return { book: findBook(q, books), chapter: null };
+  return { book: findBook(q, books), chapter: null, verseRange: null };
 }
 
 function findBook(query: string, books: BookInfo[]): BookInfo | null {
@@ -91,13 +97,24 @@ export function BibleSearch({
 
   const displayName = (book: BookInfo) => isIndo ? book.name_id : book.name;
 
-  // Show go-to pill when there's an exact book match with a chapter
-  const goToHref =
+  const validChapter =
     parsed.book && parsed.chapter && parsed.chapter >= 1 && parsed.chapter <= parsed.book.chapters
-      ? `/bibleapp/bible/${bookSlug(parsed.book)}/${parsed.chapter}`
-      : parsed.book
-      ? `/bibleapp/bible/${bookSlug(parsed.book)}/1`
+      ? parsed.chapter
       : null;
+
+  const goToHref = parsed.book
+    ? `/bibleapp/bible/${bookSlug(parsed.book)}/${validChapter ?? 1}`
+    : null;
+
+  const goToLabel2 = parsed.book
+    ? [
+        displayName(parsed.book),
+        validChapter ? `· ${chapterLabel} ${validChapter}` : "",
+        validChapter && parsed.verseRange ? `: ${parsed.verseRange}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : "";
 
   return (
     <div className="space-y-4">
@@ -129,10 +146,7 @@ export function BibleSearch({
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <ArrowRight className="h-4 w-4" />
-          {goToLabel} {displayName(parsed.book!)}
-          {parsed.chapter && parsed.chapter >= 1 && parsed.chapter <= parsed.book!.chapters
-            ? ` · ${chapterLabel} ${parsed.chapter}`
-            : ""}
+          {goToLabel} {goToLabel2}
         </Link>
       )}
 
