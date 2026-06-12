@@ -19,6 +19,7 @@ export function NotificationBell({ userId, initialCount, variant = "header" }: P
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelName = useRef(`notifications:${userId}:${Math.random().toString(36).slice(2)}`);
 
   // Reset count when user visits the notifications page
   useEffect(() => {
@@ -30,7 +31,7 @@ export function NotificationBell({ userId, initialCount, variant = "header" }: P
   // Realtime: listen for new notifications for this user
   useEffect(() => {
     const channel = supabase
-      .channel(`notifications:${userId}`)
+      .channel(channelName.current)
       .on(
         "postgres_changes",
         {
