@@ -767,6 +767,8 @@ export interface Database {
           logo_url: string | null;
           is_verified: boolean;
           member_count: number;
+          latitude: number | null;
+          longitude: number | null;
           created_by: string;
           created_at: string;
           updated_at: string;
@@ -783,6 +785,8 @@ export interface Database {
           website?: string | null;
           logo_url?: string | null;
           is_verified?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
           created_by: string;
         };
         Update: {
@@ -796,6 +800,8 @@ export interface Database {
           website?: string | null;
           logo_url?: string | null;
           is_verified?: boolean;
+          latitude?: number | null;
+          longitude?: number | null;
           updated_at?: string;
         };
         Relationships: never[];

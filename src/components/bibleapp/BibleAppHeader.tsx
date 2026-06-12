@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBell } from "@/components/bibleapp/NotificationBell";
 import type { Profile } from "@/types/database";
 import { getInitials } from "@/lib/utils/format";
 import { createClient } from "@/lib/supabase/client";
@@ -18,11 +18,12 @@ import { useRouter } from "next/navigation";
 
 interface AppHeaderProps {
   profile: Profile | null;
+  userId: string;
   title?: string;
   unreadNotifications?: number;
 }
 
-export function BibleAppHeader({ profile, title, unreadNotifications = 0 }: AppHeaderProps) {
+export function BibleAppHeader({ profile, userId, title, unreadNotifications = 0 }: AppHeaderProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -44,16 +45,7 @@ export function BibleAppHeader({ profile, title, unreadNotifications = 0 }: AppH
 
         {/* Right actions */}
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-sm" className="relative" asChild>
-            <Link href="/bibleapp/notifications">
-              <Bell className="h-4 w-4" />
-              {unreadNotifications > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
-                </span>
-              )}
-            </Link>
-          </Button>
+          <NotificationBell userId={userId} initialCount={unreadNotifications} variant="header" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

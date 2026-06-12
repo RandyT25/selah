@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus } from "lucide-react";
+import { Plus, Navigation, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,17 +28,39 @@ type FormData = z.infer<typeof schema>;
 
 export function CreateChurchModal() {
   const [open, setOpen] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const router = useRouter();
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported by your browser");
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setGeoLoading(false);
+        toast.success("Location captured!");
+      },
+      () => {
+        setGeoLoading(false);
+        toast.error("Could not get location. Check browser permissions.");
+      },
+      { timeout: 8000 }
+    );
+  };
+
   const onSubmit = async (data: FormData) => {
     const res = await fetch("/api/churches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, latitude: coords?.lat ?? null, longitude: coords?.lng ?? null }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -48,6 +70,7 @@ export function CreateChurchModal() {
     const { data: church } = await res.json();
     toast.success("Church created! You are now the admin.");
     reset();
+    setCoords(null);
     setOpen(false);
     router.push(`/bibleapp/community/churches/${church.id}`);
   };
@@ -91,6 +114,29 @@ export function CreateChurchModal() {
             <div className="space-y-1.5">
               <Label>Address</Label>
               <Input placeholder="Jl. Sudirman No. 1" {...register("address")} />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleUseMyLocation}
+                disabled={geoLoading}
+                className="gap-1.5 text-xs"
+              >
+                {geoLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Navigation className="h-3.5 w-3.5" />
+                )}
+                {coords ? "Location set ✓" : "Use My Location"}
+              </Button>
+              {coords && (
+                <span className="text-xs text-muted-foreground">
+                  {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">

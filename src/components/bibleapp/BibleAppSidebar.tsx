@@ -12,6 +12,7 @@ import {
   Users,
   Settings,
 } from "lucide-react";
+import { NotificationBell } from "@/components/bibleapp/NotificationBell";
 import { cn } from "@/lib/utils/cn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -35,9 +36,11 @@ const NAV_KEYS = [
 
 interface CompactSidebarProps {
   profile: Profile | null;
+  userId: string;
+  unreadNotifications?: number;
 }
 
-export function BibleAppSidebar({ profile }: CompactSidebarProps) {
+export function BibleAppSidebar({ profile, userId, unreadNotifications = 0 }: CompactSidebarProps) {
   const pathname = usePathname();
   const { t } = useLanguage();
 
@@ -88,8 +91,14 @@ export function BibleAppSidebar({ profile }: CompactSidebarProps) {
           })}
         </nav>
 
-        {/* Bottom: Settings + Avatar */}
+        {/* Bottom: Notifications + Settings + Avatar */}
         <div className="flex flex-col items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <NotificationBell userId={userId} initialCount={unreadNotifications} variant="sidebar" />
+            </TooltipTrigger>
+            <TooltipContent side="right">Notifications</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link

@@ -31,9 +31,9 @@ export default async function BibleAppLayout({
   return (
     <AppShell initialLanguage={initialLanguage}>
       <div className="flex min-h-screen bg-background">
-        <BibleAppSidebar profile={profile} />
+        <BibleAppSidebar profile={profile} userId={user.id} unreadNotifications={unreadCount ?? 0} />
         <div className="flex-1 flex flex-col min-w-0">
-          <BibleAppHeader profile={profile} unreadNotifications={unreadCount ?? 0} />
+          <BibleAppHeader profile={profile} userId={user.id} unreadNotifications={unreadCount ?? 0} />
           <main className="flex-1 pb-20 lg:pb-0">
             {children}
           </main>

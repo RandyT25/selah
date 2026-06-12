@@ -21,6 +21,8 @@ export async function POST(request: Request) {
         denomination: body.denomination || null,
         pastor_name: body.pastorName || null,
         website: body.website || null,
+        latitude: typeof body.latitude === "number" ? body.latitude : null,
+        longitude: typeof body.longitude === "number" ? body.longitude : null,
         created_by: user.id,
       })
       .select()
