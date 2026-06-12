@@ -45,6 +45,21 @@ async function fetchKjv(bookName: string, chapterNum: number): Promise<BibleVers
   return null;
 }
 
+type AytContentItem = string | { text?: string; noteId?: number; lineBreak?: boolean; [key: string]: unknown };
+type AytChapterItem = { type: string; number?: number; content?: AytContentItem[] };
+
+function extractAytText(content: AytContentItem[]): string {
+  return content
+    .map(c => {
+      if (typeof c === "string") return c;
+      if (typeof c === "object" && c !== null && typeof c.text === "string") return c.text;
+      return "";
+    })
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function fetchAyt(bookNumber: number, chapterNum: number): Promise<BibleVerse[] | null> {
   const bookId = USFM_BOOK_IDS[bookNumber - 1];
   if (!bookId) return null;
@@ -53,7 +68,7 @@ async function fetchAyt(bookNumber: number, chapterNum: number): Promise<BibleVe
     const resp = await fetch(url, { next: { revalidate: 86400 } });
     if (!resp.ok) return null;
     const data = await resp.json();
-    const content: { type: string; number?: number; content?: { text: string }[] }[] = data?.chapter?.content ?? [];
+    const content: AytChapterItem[] = data?.chapter?.content ?? [];
     const base = { book_id: "", chapter_id: "", translation: "AYT", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
     return content
       .filter(item => item.type === "verse")
@@ -61,7 +76,7 @@ async function fetchAyt(bookNumber: number, chapterNum: number): Promise<BibleVe
         ...base,
         id: verseToId(bookId, chapterNum, item.number!),
         verse_number: item.number!,
-        text: (item.content ?? []).map(c => c.text).join(" "),
+        text: extractAytText(item.content ?? []),
         reference: `${bookId} ${chapterNum}:${item.number}`,
       }));
   } catch {
