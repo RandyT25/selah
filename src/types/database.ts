@@ -753,6 +753,115 @@ export interface Database {
         };
         Relationships: never[];
       };
+      churches: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          address: string | null;
+          city: string;
+          province: string | null;
+          denomination: string | null;
+          pastor_name: string | null;
+          website: string | null;
+          logo_url: string | null;
+          is_verified: boolean;
+          member_count: number;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          address?: string | null;
+          city: string;
+          province?: string | null;
+          denomination?: string | null;
+          pastor_name?: string | null;
+          website?: string | null;
+          logo_url?: string | null;
+          is_verified?: boolean;
+          created_by: string;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          address?: string | null;
+          city?: string;
+          province?: string | null;
+          denomination?: string | null;
+          pastor_name?: string | null;
+          website?: string | null;
+          logo_url?: string | null;
+          is_verified?: boolean;
+          updated_at?: string;
+        };
+        Relationships: never[];
+      };
+      church_members: {
+        Row: {
+          id: string;
+          church_id: string;
+          user_id: string;
+          role: "admin" | "member";
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          church_id: string;
+          user_id: string;
+          role?: "admin" | "member";
+        };
+        Update: {
+          role?: "admin" | "member";
+        };
+        Relationships: never[];
+      };
+      church_events: {
+        Row: {
+          id: string;
+          church_id: string;
+          title: string;
+          description: string | null;
+          event_date: string;
+          event_time: string | null;
+          location: string | null;
+          is_online: boolean;
+          online_url: string | null;
+          is_recurring: boolean;
+          recurrence_type: "weekly" | "biweekly" | "monthly" | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          church_id: string;
+          title: string;
+          description?: string | null;
+          event_date: string;
+          event_time?: string | null;
+          location?: string | null;
+          is_online?: boolean;
+          online_url?: string | null;
+          is_recurring?: boolean;
+          recurrence_type?: "weekly" | "biweekly" | "monthly" | null;
+          created_by: string;
+        };
+        Update: {
+          title?: string;
+          description?: string | null;
+          event_date?: string;
+          event_time?: string | null;
+          location?: string | null;
+          is_online?: boolean;
+          online_url?: string | null;
+          is_recurring?: boolean;
+          recurrence_type?: "weekly" | "biweekly" | "monthly" | null;
+        };
+        Relationships: never[];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -795,3 +904,6 @@ export type AnalyticsEvent = Tables<"analytics_events">;
 export type ReadingHistory = Tables<"reading_history">;
 export type VerseOfDay = Tables<"verse_of_day">;
 export type AiConversation = Tables<"ai_conversations">;
+export type Church = Tables<"churches">;
+export type ChurchMember = Tables<"church_members">;
+export type ChurchEvent = Tables<"church_events">;

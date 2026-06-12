@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { HandHeart, Users, Plus, UserPlus } from "lucide-react";
+import { HandHeart, Users, Plus, UserPlus, Church, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,13 +25,15 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [prayersResult, friendsResult] = await Promise.all([
+  const [prayersResult, friendsResult, churchesResult] = await Promise.all([
     supabase.from("prayer_requests").select("*, profiles(id, full_name, display_name, avatar_url)").eq("is_public", true).order("created_at", { ascending: false }).limit(10),
     supabase.from("friendships").select("*, profiles!friendships_addressee_id_fkey(id, full_name, display_name, avatar_url)").eq("requester_id", user.id).eq("status", "accepted").limit(10),
+    supabase.from("churches").select("id, name, city, denomination, member_count, logo_url, is_verified").order("member_count", { ascending: false }).limit(4),
   ]);
 
   const publicPrayers = (prayersResult.data ?? []) as unknown as PrayerWithAuthor[];
   const friends = (friendsResult.data ?? []) as unknown as FriendWithProfile[];
+  const featuredChurches = churchesResult.data ?? [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -108,6 +110,60 @@ export default async function CommunityPage() {
           )}
         </div>
 
+        {/* Churches + Friends sidebar */}
+        <div className="space-y-6">
+
+        {/* Churches preview */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold flex items-center gap-2">
+              <Church className="h-5 w-5 text-primary" />Churches
+            </h2>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/bibleapp/community/churches">View All</Link>
+            </Button>
+          </div>
+          {featuredChurches.length > 0 ? (
+            <div className="space-y-2">
+              {featuredChurches.map((church) => (
+                <Link key={church.id} href={`/bibleapp/community/churches/${church.id}`}>
+                  <Card className="card-hover">
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <Avatar className="h-9 w-9 rounded-lg shrink-0">
+                        <AvatarImage src={church.logo_url ?? undefined} />
+                        <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold text-sm">
+                          {church.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{church.name}</p>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{church.city}</span>
+                          {church.denomination && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 ml-0.5">{church.denomination}</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">{church.member_count} m</span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-6 text-center">
+                <Church className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-xs text-muted-foreground">No churches yet</p>
+                <Button size="sm" variant="gold" className="mt-2" asChild>
+                  <Link href="/bibleapp/community/churches">Add Church</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
         {/* Friends */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -148,6 +204,8 @@ export default async function CommunityPage() {
             </CardContent>
           </Card>
         </div>
+
+        </div>{/* end sidebar */}
       </div>
     </div>
   );
