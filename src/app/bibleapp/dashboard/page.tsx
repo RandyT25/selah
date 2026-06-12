@@ -139,11 +139,13 @@ export default async function DashboardPage() {
             {formatDate(new Date())} · {formatStreakDays(profile?.streak_count ?? 0)}
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-2">
-          <Flame className="h-5 w-5 text-amber-500" />
-          <div className="text-right">
-            <p className="text-xl font-bold text-amber-600 leading-none">{profile?.streak_count ?? 0}</p>
-            <p className="text-xs text-amber-600/70">{t("home", "streak")}</p>
+        <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-2.5">
+          <div className="bg-amber-100 dark:bg-amber-900/40 rounded-xl p-2">
+            <Flame className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-amber-600 leading-none">{profile?.streak_count ?? 0}</p>
+            <p className="text-[11px] text-amber-600/70 mt-0.5 font-medium">{t("home", "streak")}</p>
           </div>
         </div>
       </div>
