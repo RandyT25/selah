@@ -55,22 +55,31 @@ export default async function PlanDetailPage({ params }: PageProps) {
     : 0;
 
   const dailyReadings: DayReading[] = (() => {
+    let days: DayReading[] = [];
     try {
       const parsed = JSON.parse(typeof plan.content === "string" ? plan.content : JSON.stringify(plan.content));
-      if (!Array.isArray(parsed)) throw new Error("not an array");
-      return (parsed as DayReading[]).map((d, i) => ({
-        day: d?.day ?? i + 1,
-        title: d?.title ?? `Day ${i + 1}`,
-        passages: Array.isArray(d?.passages) ? d.passages : [],
-        reflection: d?.reflection,
-      }));
+      if (Array.isArray(parsed)) {
+        days = (parsed as DayReading[]).map((d, i) => ({
+          day: d?.day ?? i + 1,
+          title: d?.title ?? `Day ${i + 1}`,
+          passages: Array.isArray(d?.passages) ? d.passages : [],
+          reflection: d?.reflection,
+        }));
+      }
     } catch {
-      return Array.from({ length: plan.duration_days }, (_, i) => ({
-        day: i + 1,
-        title: `Day ${i + 1}`,
-        passages: [],
-      }));
+      // fall through to padding
     }
+    // Pad to duration_days if content is incomplete
+    if (days.length < plan.duration_days) {
+      const existingDayNums = new Set(days.map(d => d.day));
+      for (let i = 1; i <= plan.duration_days; i++) {
+        if (!existingDayNums.has(i)) {
+          days.push({ day: i, title: `Day ${i}`, passages: [] });
+        }
+      }
+      days.sort((a, b) => a.day - b.day);
+    }
+    return days;
   })();
 
   const DIFFICULTY_COLORS: Record<string, string> = {
