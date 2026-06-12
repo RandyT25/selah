@@ -200,16 +200,16 @@ export default function SettingsPage() {
                 <Label>Theme</Label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: "light", label: "Light", bg: "bg-white border-2" },
-                    { value: "dark", label: "Dark", bg: "bg-slate-900 border-2" },
-                    { value: "system", label: "System", bg: "bg-gradient-to-r from-white to-slate-900 border-2" },
-                  ].map(({ value, label, bg }) => (
+                    { value: "light", label: "Light", bg: "bg-white border-2", textClass: "text-gray-900" },
+                    { value: "dark", label: "Dark", bg: "bg-slate-900 border-2", textClass: "text-white" },
+                    { value: "system", label: "System", bg: "bg-gradient-to-br from-white to-slate-900 border-2", textClass: "text-gray-700" },
+                  ].map(({ value, label, bg, textClass }) => (
                     <button
                       key={value}
                       onClick={() => { setTheme(value); savePreference("theme", value); }}
                       className={`p-4 rounded-xl ${bg} ${theme === value ? "border-primary" : "border-border"} transition-all text-sm font-medium`}
                     >
-                      <span className={value === "dark" ? "text-white" : ""}>{label}</span>
+                      <span className={textClass}>{label}</span>
                     </button>
                   ))}
                 </div>
@@ -322,7 +322,7 @@ export default function SettingsPage() {
             <Card className="border-destructive/20">
               <CardHeader><CardTitle className="text-destructive">Danger Zone</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10" onClick={handleSignOut}>
+                <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>

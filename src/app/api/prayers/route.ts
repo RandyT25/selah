@@ -37,14 +37,58 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const body = await request.json();
+    const admin = createAdminClient();
+
+    const { data, error } = await admin
+      .from("prayer_requests")
+      .update({
+        title: body.title,
+        description: body.description,
+        category: body.category,
+        is_anonymous: body.isAnonymous,
+        is_public: body.isPublic,
+      })
+      .eq("id", body.id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Server error";
+    console.error("[/api/prayers PATCH]", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { prayerRequestId } = await request.json();
+    const { prayerRequestId, type } = await request.json();
     const admin = createAdminClient();
+
+    if (type === "request") {
+      const { error } = await admin
+        .from("prayer_requests")
+        .delete()
+        .eq("id", prayerRequestId)
+        .eq("user_id", user.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: true });
+    }
+
+    // Default: remove prayer interaction
     const { error } = await admin.from("prayer_interactions")
       .delete()
       .eq("prayer_request_id", prayerRequestId)
