@@ -22,6 +22,7 @@ import { isToday, isYesterday, format } from "date-fns";
 import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, Devotional, VerseOfDay } from "@/types/database";
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
 import { getServerT } from "@/lib/utils/server-i18n";
+import { fetchAytVerse, localizeVerseReference } from "@/lib/bible/ayt";
 import { cookies } from "next/headers";
 
 // Fallback verses used when the verse_of_day table has no entry for today.
@@ -122,8 +123,11 @@ export default async function DashboardPage() {
   const verseRaw = verseResult.data as VerseOfDay | null;
   const fallbackVerse = getDailyFallbackVerse();
   const verseOfDay = verseRaw ?? fallbackVerse;
-  const verseText = isIndo && verseRaw?.verse_text_id ? verseRaw.verse_text_id : verseOfDay.verse_text;
-  const verseReflection = "reflection" in verseOfDay ? (isIndo && verseRaw?.reflection_id ? verseRaw.reflection_id : verseOfDay.reflection) : null;
+
+  const aytVerseText = isIndo ? await fetchAytVerse(verseOfDay.verse_reference) : null;
+  const verseText = aytVerseText ?? verseOfDay.verse_text;
+  const verseReference = isIndo ? localizeVerseReference(verseOfDay.verse_reference) : verseOfDay.verse_reference;
+  const verseReflection = "reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null;
   const activePlans = (plansResult.data ?? []) as unknown as PlanProgressWithPlan[];
   const recentJournal = (journalResult.data ?? []) as JournalEntry[];
   const publicPrayers = (prayersResult.data ?? []) as unknown as PrayerWithProfile[];
@@ -171,7 +175,7 @@ export default async function DashboardPage() {
           <blockquote className="font-serif text-xl leading-relaxed text-foreground mb-3">
             "{verseText}"
           </blockquote>
-          <p className="text-sm font-semibold text-primary">— {verseOfDay.verse_reference}</p>
+          <p className="text-sm font-semibold text-primary">— {verseReference}</p>
           {verseReflection && (
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed line-clamp-3">
               {verseReflection}
@@ -290,7 +294,7 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between mt-4">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3.5 w-3.5" />
-                        <span>{devo.reading_time_minutes} min read</span>
+                        <span>{devo.reading_time_minutes} {t("home", "min_read")}</span>
                       </div>
                       <Button size="sm" asChild>
                         <Link href={`/bibleapp/devotionals/${devo.slug}`}>{t("home", "read_now")}</Link>
@@ -320,7 +324,7 @@ export default async function DashboardPage() {
                 recentJournal.map((entry) => (
                   <Link key={entry.id} href={`/bibleapp/journal/${entry.id}`} className="block group">
                     <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-1">
-                      {entry.title ?? "Untitled Entry"}
+                      {entry.title ?? t("journal", "untitled")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {formatDate(entry.created_at)} · {entry.word_count} {t("common", "words")}
@@ -363,7 +367,7 @@ export default async function DashboardPage() {
                       <div>
                         <p className="text-sm font-medium line-clamp-1">{prayer.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {prayer.prayer_count} people praying
+                          {prayer.prayer_count} {t("home", "people_praying")}
                         </p>
                       </div>
                     </div>

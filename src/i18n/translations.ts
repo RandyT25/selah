@@ -26,6 +26,8 @@ export const translations = {
       view_requests: "View All Requests",
       read_now: "Read Now",
       journal_reflection: "Journal Reflection",
+      people_praying: "people praying",
+      min_read: "min read",
     },
     bible: {
       title: "Bible",
@@ -212,6 +214,8 @@ export const translations = {
       view_requests: "Lihat Semua Permintaan",
       read_now: "Baca Sekarang",
       journal_reflection: "Tulis Refleksi",
+      people_praying: "orang berdoa",
+      min_read: "mnt baca",
     },
     bible: {
       title: "Alkitab",
