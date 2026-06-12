@@ -35,7 +35,7 @@ BEGIN
   SELECT user_id, title
     INTO v_owner_id, v_prayer_title
     FROM public.prayer_requests
-   WHERE id = NEW.prayer_id;
+   WHERE id = NEW.prayer_request_id;
 
   -- Skip if praying for own request
   IF v_owner_id IS NULL OR v_owner_id = NEW.user_id THEN
@@ -53,7 +53,7 @@ BEGIN
     'prayer_prayed',
     v_actor_name || ' prayed for you',
     '"' || LEFT(v_prayer_title, 60) || '" received a prayer',
-    jsonb_build_object('prayer_id', NEW.prayer_id)
+    jsonb_build_object('prayer_id', NEW.prayer_request_id)
   );
 
   RETURN NEW;
@@ -64,7 +64,6 @@ DROP TRIGGER IF EXISTS on_prayer_interaction_insert ON public.prayer_interaction
 CREATE TRIGGER on_prayer_interaction_insert
   AFTER INSERT ON public.prayer_interactions
   FOR EACH ROW
-  WHEN (NEW.type = 'pray')
   EXECUTE FUNCTION public.notify_prayer_prayed();
 
 -- ============================================================
