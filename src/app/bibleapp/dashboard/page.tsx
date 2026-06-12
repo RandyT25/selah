@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { formatDate, formatStreakDays, getInitials } from "@/lib/utils/format";
+import { formatDate, getInitials } from "@/lib/utils/format";
+import { isToday, isYesterday, format } from "date-fns";
 import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, Devotional, VerseOfDay } from "@/types/database";
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
 import { getServerT } from "@/lib/utils/server-i18n";
@@ -126,6 +127,10 @@ export default async function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t("home", "greeting_morning") : hour < 17 ? t("home", "greeting_afternoon") : t("home", "greeting_evening");
 
+  const now = new Date();
+  const dateLabel = isToday(now) ? t("common", "today") : isYesterday(now) ? t("common", "yesterday") : format(now, "MMMM d, yyyy");
+  const streakLabel = `${profile?.streak_count ?? 0} ${t("home", "streak")}`;
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
       <DailyCheckIn />
@@ -136,7 +141,7 @@ export default async function DashboardPage() {
             {greeting}, {displayName.split(" ")[0]} 👋
           </h1>
           <p className="text-muted-foreground mt-1">
-            {formatDate(new Date())} · {formatStreakDays(profile?.streak_count ?? 0)}
+            {dateLabel} · {streakLabel}
           </p>
         </div>
         <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-2.5">
@@ -222,10 +227,10 @@ export default async function DashboardPage() {
             <Card className="border-dashed">
               <CardContent className="p-6 text-center">
                 <Calendar className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm font-medium">No active reading plans</p>
-                <p className="text-xs text-muted-foreground mt-1">Start a plan to track your progress</p>
+                <p className="text-sm font-medium">{t("plans", "no_active_plans")}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("plans", "start_track")}</p>
                 <Button size="sm" variant="gold" className="mt-4" asChild>
-                  <Link href="/bibleapp/plans">Browse Plans</Link>
+                  <Link href="/bibleapp/plans">{t("home", "browse_plans")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -312,7 +317,7 @@ export default async function DashboardPage() {
                       {entry.title ?? "Untitled Entry"}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {formatDate(entry.created_at)} · {entry.word_count} words
+                      {formatDate(entry.created_at)} · {entry.word_count} {t("common", "words")}
                     </p>
                     <Separator className="mt-3" />
                   </Link>

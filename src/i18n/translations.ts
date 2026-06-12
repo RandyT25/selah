@@ -184,6 +184,7 @@ export const translations = {
       yesterday: "Yesterday",
       verse: "verse",
       chapter: "chapter",
+      words: "words",
     },
   },
   id: {
@@ -369,6 +370,7 @@ export const translations = {
       yesterday: "Kemarin",
       verse: "ayat",
       chapter: "pasal",
+      words: "kata",
     },
   },
 } as const;
