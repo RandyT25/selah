@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterReader } from "@/components/bible/ChapterReader";
-import { getBookByName, getBookNameFromSlug, BIBLE_BOOKS } from "@/lib/bible/books";
+import { getBookByName, getBookNameFromSlug, BIBLE_BOOKS, USFM_BOOK_IDS } from "@/lib/bible/books";
 import { verseToId } from "@/lib/bible/verseId";
 import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from "@/types/database";
 import type { Metadata } from "next";
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: `${bookName} ${chapter}` };
 }
 
-async function fetchFromApi(bookName: string, chapterNum: number): Promise<BibleVerse[] | null> {
+async function fetchKjv(bookName: string, chapterNum: number): Promise<BibleVerse[] | null> {
   const slug = bookName.toLowerCase().replace(/\s+/g, "+");
   const url = `https://bible-api.com/${slug}+${chapterNum}?translation=kjv`;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -44,6 +45,30 @@ async function fetchFromApi(bookName: string, chapterNum: number): Promise<Bible
   return null;
 }
 
+async function fetchAyt(bookNumber: number, chapterNum: number): Promise<BibleVerse[] | null> {
+  const bookId = USFM_BOOK_IDS[bookNumber - 1];
+  if (!bookId) return null;
+  const url = `https://bible.helloao.org/api/ind_ayt/${bookId}/${chapterNum}.json`;
+  try {
+    const resp = await fetch(url, { next: { revalidate: 86400 } });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const content: { type: string; number?: number; content?: { text: string }[] }[] = data?.chapter?.content ?? [];
+    const base = { book_id: "", chapter_id: "", translation: "AYT", api_id: null, cached_at: new Date().toISOString(), created_at: new Date().toISOString() };
+    return content
+      .filter(item => item.type === "verse")
+      .map(item => ({
+        ...base,
+        id: verseToId(bookId, chapterNum, item.number!),
+        verse_number: item.number!,
+        text: (item.content ?? []).map(c => c.text).join(" "),
+        reference: `${bookId} ${chapterNum}:${item.number}`,
+      }));
+  } catch {
+    return null;
+  }
+}
+
 export default async function ChapterPage({ params }: PageProps) {
   const { book: bookSlug, chapter: chapterStr } = await params;
   const bookName = getBookNameFromSlug(bookSlug);
@@ -54,11 +79,14 @@ export default async function ChapterPage({ params }: PageProps) {
   const bookInfo = getBookByName(bookName);
   if (!bookInfo || chapterNum > bookInfo.chapters) notFound();
 
+  const cookieStore = await cookies();
+  const isIndo = cookieStore.get("selah_language")?.value === "id";
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const [verses, { data: highlights }, { data: bookmarks }, { data: prefs }] = await Promise.all([
-    fetchFromApi(bookName, chapterNum),
+    isIndo ? fetchAyt(bookInfo.number, chapterNum) : fetchKjv(bookName, chapterNum),
     user ? supabase.from("verse_highlights").select("*").eq("user_id", user.id) : { data: [] as VerseHighlight[] },
     user ? supabase.from("verse_bookmarks").select("*").eq("user_id", user.id) : { data: [] as VerseBookmark[] },
     user ? supabase.from("user_preferences").select("*").eq("user_id", user.id).single() : { data: null as UserPreferences | null },
@@ -94,6 +122,7 @@ export default async function ChapterPage({ params }: PageProps) {
       bookmarks={bookmarks ?? []}
       preferences={prefs ?? null}
       userId={user?.id}
+      translation={isIndo ? "AYT" : "KJV"}
       navigation={{
         prevChapter,
         nextChapter,

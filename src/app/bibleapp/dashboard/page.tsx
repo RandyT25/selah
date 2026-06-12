@@ -22,6 +22,7 @@ import { isToday, isYesterday, format } from "date-fns";
 import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, Devotional, VerseOfDay } from "@/types/database";
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
 import { getServerT } from "@/lib/utils/server-i18n";
+import { cookies } from "next/headers";
 
 // Fallback verses used when the verse_of_day table has no entry for today.
 // Cycles by day-of-year so each visit within the same day shows the same verse.
@@ -96,7 +97,8 @@ type PrayerWithProfile = PrayerRequest & {
 export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
-  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
+  const [supabase, t, cookieStore] = await Promise.all([createClient(), getServerT(), cookies()]);
+  const isIndo = cookieStore.get("selah_language")?.value === "id";
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/bibleapp/login");
 
@@ -117,7 +119,11 @@ export default async function DashboardPage() {
   ]);
 
   const profile = profileResult.data as Profile | null;
-  const verseOfDay = (verseResult.data as VerseOfDay | null) ?? getDailyFallbackVerse();
+  const verseRaw = verseResult.data as VerseOfDay | null;
+  const fallbackVerse = getDailyFallbackVerse();
+  const verseOfDay = verseRaw ?? fallbackVerse;
+  const verseText = isIndo && verseRaw?.verse_text_id ? verseRaw.verse_text_id : verseOfDay.verse_text;
+  const verseReflection = "reflection" in verseOfDay ? (isIndo && verseRaw?.reflection_id ? verseRaw.reflection_id : verseOfDay.reflection) : null;
   const activePlans = (plansResult.data ?? []) as unknown as PlanProgressWithPlan[];
   const recentJournal = (journalResult.data ?? []) as JournalEntry[];
   const publicPrayers = (prayersResult.data ?? []) as unknown as PrayerWithProfile[];
@@ -163,12 +169,12 @@ export default async function DashboardPage() {
             <span className="text-sm font-semibold uppercase tracking-wide">{t("home", "daily_verse")}</span>
           </div>
           <blockquote className="font-serif text-xl leading-relaxed text-foreground mb-3">
-            "{verseOfDay.verse_text}"
+            "{verseText}"
           </blockquote>
           <p className="text-sm font-semibold text-primary">— {verseOfDay.verse_reference}</p>
-          {"reflection" in verseOfDay && verseOfDay.reflection && (
+          {verseReflection && (
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed line-clamp-3">
-              {verseOfDay.reflection}
+              {verseReflection}
             </p>
           )}
           <div className="mt-4 flex gap-2">

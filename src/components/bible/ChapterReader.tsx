@@ -51,6 +51,7 @@ interface ChapterReaderProps {
     nextBook: { name: string; slug: string } | null;
   };
   basePath?: string;
+  translation?: string;
 }
 
 export function ChapterReader({
@@ -65,6 +66,7 @@ export function ChapterReader({
   userId,
   navigation,
   basePath = "/bible",
+  translation = "KJV",
 }: ChapterReaderProps) {
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
@@ -211,7 +213,7 @@ export function ChapterReader({
 
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold text-[#888] border border-[#E0E0E0] dark:border-[#333] rounded-full px-2.5 py-1">
-            KJV
+            {translation}
           </span>
           <button
             onClick={() => setShowSettings(true)}

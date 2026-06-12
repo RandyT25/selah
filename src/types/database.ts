@@ -377,6 +377,10 @@ export interface Database {
           cover_image_url: string | null;
           key_verse: string | null;
           key_verse_reference: string | null;
+          title_id: string | null;
+          excerpt_id: string | null;
+          content_id: string | null;
+          key_verse_id: string | null;
           author_id: string | null;
           category: string;
           tags: string[];
@@ -705,6 +709,8 @@ export interface Database {
           verse_reference: string;
           verse_text: string;
           reflection: string | null;
+          verse_text_id: string | null;
+          reflection_id: string | null;
           scheduled_date: string;
           created_by: string | null;
           created_at: string;
@@ -714,6 +720,8 @@ export interface Database {
           verse_reference: string;
           verse_text: string;
           reflection?: string | null;
+          verse_text_id?: string | null;
+          reflection_id?: string | null;
           scheduled_date: string;
           created_by?: string | null;
         };
@@ -721,6 +729,8 @@ export interface Database {
           verse_reference?: string;
           verse_text?: string;
           reflection?: string | null;
+          verse_text_id?: string | null;
+          reflection_id?: string | null;
           scheduled_date?: string;
         };
         Relationships: never[];
