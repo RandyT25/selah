@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { ChevronRight, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible/books";
 import { getServerT } from "@/lib/utils/server-i18n";
@@ -11,7 +11,8 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "Bible" };
 
 export default async function BiblePage() {
-  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
+  const [supabase, t, cookieStore] = await Promise.all([createClient(), getServerT(), cookies()]);
+  const isIndo = cookieStore.get("selah_language")?.value === "id";
   const { data: { user } } = await supabase.auth.getUser();
 
   const histResult = user ? await supabase
@@ -43,7 +44,7 @@ export default async function BiblePage() {
           <Card className="card-hover h-full">
             <CardContent className="p-3">
               <p className="font-semibold text-sm group-hover:text-primary transition-colors leading-tight">
-                {book.name}
+                {isIndo ? book.name_id : book.name}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {book.chapters} {t("bible", "chapters")}
@@ -66,7 +67,7 @@ export default async function BiblePage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">{t("bible", "title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("bible", "books_count")} · KJV</p>
+          <p className="text-sm text-muted-foreground">{t("bible", "books_count")} · {isIndo ? "AYT" : "KJV"}</p>
         </div>
       </div>
 

@@ -113,7 +113,7 @@ export default async function ChapterPage({ params }: PageProps) {
 
   return (
     <ChapterReader
-      bookName={bookName}
+      bookName={isIndo ? bookInfo.name_id : bookName}
       bookSlug={bookSlug}
       bookInfo={bookInfo}
       chapterNum={chapterNum}
