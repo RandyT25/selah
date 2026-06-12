@@ -825,6 +825,27 @@ export interface Database {
         };
         Relationships: never[];
       };
+      church_announcements: {
+        Row: {
+          id: string;
+          church_id: string;
+          author_id: string;
+          content: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          church_id: string;
+          author_id: string;
+          content: string;
+        };
+        Update: {
+          content?: string;
+          updated_at?: string;
+        };
+        Relationships: never[];
+      };
       church_events: {
         Row: {
           id: string;
@@ -913,3 +934,4 @@ export type AiConversation = Tables<"ai_conversations">;
 export type Church = Tables<"churches">;
 export type ChurchMember = Tables<"church_members">;
 export type ChurchEvent = Tables<"church_events">;
+export type ChurchAnnouncement = Tables<"church_announcements">;

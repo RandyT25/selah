@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Bell, HandHeart, Users, Church, Star, UserPlus, BookOpen, CheckCheck } from "lucide-react";
+import { Bell, HandHeart, Users, Church, Star, UserPlus, BookOpen, CheckCheck, Megaphone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils/format";
@@ -25,8 +25,9 @@ const TYPE_META: Record<string, { icon: React.ElementType; color: string; href?:
   prayer_reminder:      { icon: HandHeart,  color: "text-rose-500" },
   friend_request:       { icon: UserPlus,   color: "text-blue-500" },
   friend_accepted:      { icon: Users,      color: "text-blue-500" },
-  church_joined:        { icon: Church,     color: "text-amber-500",  href: (d) => d.church_id ? `/bibleapp/community/churches/${d.church_id}` : "#" },
-  church_event:         { icon: Church,     color: "text-amber-500" },
+  church_joined:        { icon: Church,     color: "text-amber-500",  href: (d) => d.church_id ? `/bibleapp/community/churches/${d.church_id}?tab=members` : "#" },
+  church_event:         { icon: Church,     color: "text-amber-500",  href: (d) => d.church_id ? `/bibleapp/community/churches/${d.church_id}?tab=events` : "#" },
+  church_announcement:  { icon: Megaphone,  color: "text-amber-500",  href: (d) => d.church_id ? `/bibleapp/community/churches/${d.church_id}?tab=announcements` : "#" },
   streak_milestone:     { icon: Star,       color: "text-yellow-500" },
   plan_completed:       { icon: BookOpen,   color: "text-green-500" },
   reading_reminder:     { icon: BookOpen,   color: "text-green-500" },
