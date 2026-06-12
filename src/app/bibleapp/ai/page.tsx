@@ -1,8 +1,5 @@
-import { AIAssistant } from "@/components/ai/AIAssistant";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = { title: "AI Bible Assistant" };
+import { redirect } from "next/navigation";
 
 export default function AIPage() {
-  return <AIAssistant />;
+  redirect("/bibleapp/dashboard");
 }

@@ -10,7 +10,6 @@ import {
   NotebookPen,
   HandHeart,
   Users,
-  Sparkles,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -31,7 +30,6 @@ const navItems = [
   { label: "Journal", href: "/bibleapp/journal", icon: NotebookPen },
   { label: "Prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
   { label: "Community", href: "/bibleapp/community", icon: Users },
-  { label: "AI", href: "/bibleapp/ai", icon: Sparkles },
 ];
 
 interface CompactSidebarProps {
