@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ book: string; chapter: string }>;
+  searchParams: Promise<{ highlight?: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -70,8 +71,8 @@ async function fetchAyt(bookNumber: number, chapterNum: number): Promise<BibleVe
   }
 }
 
-export default async function ChapterPage({ params }: PageProps) {
-  const { book: bookSlug, chapter: chapterStr } = await params;
+export default async function ChapterPage({ params, searchParams }: PageProps) {
+  const [{ book: bookSlug, chapter: chapterStr }, { highlight }] = await Promise.all([params, searchParams]);
   const bookName = getBookNameFromSlug(bookSlug);
   const chapterNum = parseInt(chapterStr);
 
@@ -131,6 +132,7 @@ export default async function ChapterPage({ params }: PageProps) {
         nextBook: nextBook ? { name: nextBook.name, slug: nextBook.name.toLowerCase().replace(/\s+/g, "-") } : null,
       }}
       basePath="/bibleapp/bible"
+      highlightParam={highlight}
     />
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -52,6 +52,7 @@ interface ChapterReaderProps {
   };
   basePath?: string;
   translation?: string;
+  highlightParam?: string;
 }
 
 export function ChapterReader({
@@ -67,9 +68,32 @@ export function ChapterReader({
   navigation,
   basePath = "/bible",
   translation = "KJV",
+  highlightParam,
 }: ChapterReaderProps) {
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
+
+  // Parse "5-10" or "16" from the ?highlight= query param
+  const highlightVerses = useMemo<Set<number>>(() => {
+    if (!highlightParam) return new Set();
+    const m = highlightParam.match(/^(\d+)(?:-(\d+))?$/);
+    if (!m) return new Set();
+    const start = parseInt(m[1]);
+    const end = m[2] ? parseInt(m[2]) : start;
+    const s = new Set<number>();
+    for (let i = start; i <= end; i++) s.add(i);
+    return s;
+  }, [highlightParam]);
+
+  // Scroll to first highlighted verse after mount
+  useEffect(() => {
+    if (highlightVerses.size === 0) return;
+    const first = Math.min(...highlightVerses);
+    const timer = setTimeout(() => {
+      document.getElementById(`verse-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [highlightVerses]);
   const [fontSize, setFontSize] = useState(preferences?.font_size ?? 19);
   const [fontFamily, setFontFamily] = useState<"serif" | "sans" | "mono">(preferences?.font_family ?? "serif");
   const [lineSpacing, setLineSpacing] = useState<"compact" | "normal" | "relaxed" | "loose">(preferences?.line_spacing ?? "relaxed");
@@ -261,6 +285,7 @@ export function ChapterReader({
           fontFamily={fontFamily}
           lineSpacing={lineSpacing}
           showVerseNumbers={showVerseNumbers}
+          highlightVerses={highlightVerses}
         />
       </div>
 

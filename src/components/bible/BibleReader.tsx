@@ -27,6 +27,7 @@ interface BibleReaderProps {
   fontFamily: "serif" | "sans" | "mono";
   lineSpacing: "compact" | "normal" | "relaxed" | "loose";
   showVerseNumbers: boolean;
+  highlightVerses?: Set<number>;
 }
 
 export function BibleReader({
@@ -42,6 +43,7 @@ export function BibleReader({
   fontFamily,
   lineSpacing,
   showVerseNumbers,
+  highlightVerses = new Set(),
 }: BibleReaderProps) {
   const [selectedVerseId, setSelectedVerseId] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -137,21 +139,41 @@ export function BibleReader({
 
   return (
     <>
+      {/* Glow animation keyframes */}
+      {highlightVerses.size > 0 && (
+        <style>{`
+          @keyframes verse-glow {
+            0%   { background-color: rgba(251,191,36,0.55); box-shadow: 0 0 0px transparent; }
+            30%  { background-color: rgba(251,191,36,0.15); box-shadow: 0 0 18px 4px rgba(251,191,36,0.45); }
+            55%  { background-color: rgba(251,191,36,0.55); box-shadow: 0 0 8px 2px rgba(251,191,36,0.3); }
+            80%  { background-color: rgba(251,191,36,0.15); box-shadow: 0 0 18px 4px rgba(251,191,36,0.45); }
+            100% { background-color: transparent; box-shadow: none; }
+          }
+          .verse-glow-anim {
+            animation: verse-glow 2.8s ease-in-out forwards;
+            border-radius: 4px;
+          }
+        `}</style>
+      )}
+
       {/* Verse text */}
       <div className={cn("space-y-0.5", fontClass, spacingClass)} style={{ fontSize: `${fontSize}px` }}>
         {verses.map((verse) => {
           const highlight = highlightMap[verse.id];
           const highlightColor = highlight ? HIGHLIGHT_COLORS.find(c => c.id === highlight.color) : null;
           const isSelected = selectedVerseId === verse.id;
+          const isGlowing = highlightVerses.has(verse.verse_number);
 
           return (
             <span
               key={verse.id}
+              id={`verse-${verse.verse_number}`}
               className={cn(
                 "cursor-pointer transition-colors inline rounded-sm px-0.5",
+                isGlowing ? "verse-glow-anim" : "",
                 isSelected && !highlight ? "bg-[#F5F5F5] dark:bg-[#2A2A2A]" : "",
                 isSelected && highlight ? "ring-2 ring-offset-0 ring-[#333]/40 dark:ring-white/30 rounded" : "",
-                !isSelected && !highlight ? "hover:bg-black/5 dark:hover:bg-white/5" : "",
+                !isSelected && !highlight && !isGlowing ? "hover:bg-black/5 dark:hover:bg-white/5" : "",
               )}
               style={highlightColor ? { backgroundColor: highlightColor.hex, color: "#111" } : undefined}
               onClick={() => setSelectedVerseId(isSelected ? null : verse.id)}

@@ -103,7 +103,7 @@ export function BibleSearch({
       : null;
 
   const goToHref = parsed.book
-    ? `/bibleapp/bible/${bookSlug(parsed.book)}/${validChapter ?? 1}`
+    ? `/bibleapp/bible/${bookSlug(parsed.book)}/${validChapter ?? 1}${parsed.verseRange && validChapter ? `?highlight=${parsed.verseRange}` : ""}`
     : null;
 
   const goToLabel2 = parsed.book
