@@ -54,12 +54,17 @@ export default async function PlanDetailPage({ params }: PageProps) {
     ? Math.round((completedDays.size / plan.duration_days) * 100)
     : 0;
 
-  // Parse the plan's reading schedule from the content field
   const dailyReadings: DayReading[] = (() => {
     try {
-      return JSON.parse(typeof plan.content === "string" ? plan.content : JSON.stringify(plan.content)) as DayReading[];
+      const parsed = JSON.parse(typeof plan.content === "string" ? plan.content : JSON.stringify(plan.content));
+      if (!Array.isArray(parsed)) throw new Error("not an array");
+      return (parsed as DayReading[]).map((d, i) => ({
+        day: d?.day ?? i + 1,
+        title: d?.title ?? `Day ${i + 1}`,
+        passages: Array.isArray(d?.passages) ? d.passages : [],
+        reflection: d?.reflection,
+      }));
     } catch {
-      // Fallback: generate placeholder days
       return Array.from({ length: plan.duration_days }, (_, i) => ({
         day: i + 1,
         title: `Day ${i + 1}`,
@@ -178,9 +183,9 @@ export default async function PlanDetailPage({ params }: PageProps) {
                         {isDone && <span className="text-xs text-green-600 font-medium">Completed</span>}
                       </div>
                       <p className="font-medium text-sm">{day.title}</p>
-                      {day.passages.length > 0 && (
+                      {(day.passages ?? []).length > 0 && (
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {day.passages.map(passage => (
+                          {(day.passages ?? []).map(passage => (
                             <Link
                               key={passage}
                               href={`/bibleapp/bible?passage=${encodeURIComponent(passage)}`}
