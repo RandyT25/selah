@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { translations, type Language } from "@/i18n/translations";
 
 interface LanguageContextType {
@@ -22,6 +23,7 @@ export function LanguageProvider({
   children: React.ReactNode;
   initial?: Language;
 }) {
+  const router = useRouter();
   const [language, setLanguageState] = useState<Language>(initial);
 
   useEffect(() => {
@@ -35,7 +37,8 @@ export function LanguageProvider({
     setLanguageState(lang);
     localStorage.setItem("selah_language", lang);
     document.cookie = `selah_language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
-  }, []);
+    router.refresh();
+  }, [router]);
 
   const t = useCallback(
     (section: string, key: string): string => {
