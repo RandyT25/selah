@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate, formatStreakDays, getInitials } from "@/lib/utils/format";
 import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, Devotional, VerseOfDay } from "@/types/database";
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
+import { getServerT } from "@/lib/utils/server-i18n";
 
 // Fallback verses used when the verse_of_day table has no entry for today.
 // Cycles by day-of-year so each visit within the same day shows the same verse.
@@ -94,7 +95,7 @@ type PrayerWithProfile = PrayerRequest & {
 export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
+  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/bibleapp/login");
 
@@ -123,7 +124,7 @@ export default async function DashboardPage() {
 
   const displayName = profile?.display_name ?? profile?.full_name ?? "Friend";
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? t("home", "greeting_morning") : hour < 17 ? t("home", "greeting_afternoon") : t("home", "greeting_evening");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
@@ -142,7 +143,7 @@ export default async function DashboardPage() {
           <Flame className="h-5 w-5 text-amber-500" />
           <div className="text-right">
             <p className="text-xl font-bold text-amber-600 leading-none">{profile?.streak_count ?? 0}</p>
-            <p className="text-xs text-amber-600/70">day streak</p>
+            <p className="text-xs text-amber-600/70">{t("home", "streak")}</p>
           </div>
         </div>
       </div>
@@ -152,7 +153,7 @@ export default async function DashboardPage() {
         <CardContent className="p-6">
           <div className="flex items-center gap-2 text-primary mb-4">
             <Sun className="h-4 w-4" />
-            <span className="text-sm font-semibold uppercase tracking-wide">Verse of the Day</span>
+            <span className="text-sm font-semibold uppercase tracking-wide">{t("home", "daily_verse")}</span>
           </div>
           <blockquote className="font-serif text-xl leading-relaxed text-foreground mb-3">
             "{verseOfDay.verse_text}"
@@ -165,10 +166,10 @@ export default async function DashboardPage() {
           )}
           <div className="mt-4 flex gap-2">
             <Button size="sm" variant="gold" asChild>
-              <Link href="/bibleapp/bible">Read Bible</Link>
+              <Link href="/bibleapp/bible">{t("home", "read_bible")}</Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <Link href="/bibleapp/journal/new">Journal Reflection</Link>
+              <Link href="/bibleapp/journal/new">{t("home", "journal_reflection")}</Link>
             </Button>
           </div>
         </CardContent>
@@ -178,10 +179,10 @@ export default async function DashboardPage() {
         {/* Active Reading Plans */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Reading Plans</h2>
+            <h2 className="text-lg font-semibold">{t("home", "active_plans")}</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/bibleapp/plans" className="text-primary">
-                Browse Plans <ChevronRight className="h-4 w-4 ml-1" />
+                {t("home", "browse_plans")} <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
           </div>
@@ -199,7 +200,7 @@ export default async function DashboardPage() {
                         <div>
                           <h3 className="font-semibold text-sm">{plan.title}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            Day {progress.current_day} of {plan.duration_days}
+                            {t("plans", "day")} {progress.current_day} {t("plans", "of")} {plan.duration_days}
                           </p>
                         </div>
                         <Badge variant="gold">{pct}%</Badge>
@@ -207,7 +208,7 @@ export default async function DashboardPage() {
                       <Progress value={pct} className="h-1.5" />
                       <Button size="sm" className="mt-3 w-full" variant="outline" asChild>
                         <Link href={`/bibleapp/plans/${progress.plan_id}`}>
-                          Continue Reading
+                          {t("home", "continue_reading")}
                         </Link>
                       </Button>
                     </CardContent>
@@ -231,10 +232,10 @@ export default async function DashboardPage() {
           {/* Quick Actions */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { href: "/bibleapp/bible", icon: BookOpen, label: "Read Bible", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
-              { href: "/bibleapp/journal/new", icon: NotebookPen, label: "New Journal", color: "text-green-500 bg-green-50 dark:bg-green-950/30" },
-              { href: "/bibleapp/community/prayer", icon: HandHeart, label: "Prayer Wall", color: "text-rose-500 bg-rose-50 dark:bg-rose-950/30" },
-              { href: "/bibleapp/plans", icon: Calendar, label: "Plans", color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30" },
+              { href: "/bibleapp/bible", icon: BookOpen, label: t("home", "read_bible"), color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30" },
+              { href: "/bibleapp/journal/new", icon: NotebookPen, label: t("home", "new_journal"), color: "text-green-500 bg-green-50 dark:bg-green-950/30" },
+              { href: "/bibleapp/community/prayer", icon: HandHeart, label: t("home", "prayer_wall"), color: "text-rose-500 bg-rose-50 dark:bg-rose-950/30" },
+              { href: "/bibleapp/plans", icon: Calendar, label: t("nav", "plans"), color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30" },
             ].map(({ href, icon: Icon, label, color }) => (
               <Link
                 key={href}
@@ -253,10 +254,10 @@ export default async function DashboardPage() {
           {featuredDevotionals.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold">Today's Devotional</h2>
+                <h2 className="text-lg font-semibold">{t("home", "devotional")}</h2>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/bibleapp/devotionals" className="text-primary">
-                    All Devotionals <ChevronRight className="h-4 w-4 ml-1" />
+                    {t("home", "all_devotionals")} <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </Button>
               </div>
@@ -279,7 +280,7 @@ export default async function DashboardPage() {
                         <span>{devo.reading_time_minutes} min read</span>
                       </div>
                       <Button size="sm" asChild>
-                        <Link href={`/bibleapp/devotionals/${devo.slug}`}>Read Now</Link>
+                        <Link href={`/bibleapp/devotionals/${devo.slug}`}>{t("home", "read_now")}</Link>
                       </Button>
                     </div>
                   </CardContent>
@@ -295,7 +296,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Recent Journal</CardTitle>
+                <CardTitle className="text-base">{t("home", "recent_journal")}</CardTitle>
                 <Button variant="ghost" size="icon-sm" asChild>
                   <Link href="/bibleapp/journal"><ChevronRight className="h-4 w-4" /></Link>
                 </Button>
@@ -316,9 +317,9 @@ export default async function DashboardPage() {
                 ))
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-xs text-muted-foreground">No entries yet</p>
+                  <p className="text-xs text-muted-foreground">{t("home", "no_entries")}</p>
                   <Button size="sm" variant="ghost" className="mt-2 text-primary" asChild>
-                    <Link href="/bibleapp/journal/new">Write your first entry</Link>
+                    <Link href="/bibleapp/journal/new">{t("home", "write_first")}</Link>
                   </Button>
                 </div>
               )}
@@ -329,7 +330,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Prayer Wall</CardTitle>
+                <CardTitle className="text-base">{t("home", "prayer_wall")}</CardTitle>
                 <Button variant="ghost" size="icon-sm" asChild>
                   <Link href="/bibleapp/community/prayer"><ChevronRight className="h-4 w-4" /></Link>
                 </Button>
@@ -357,10 +358,10 @@ export default async function DashboardPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-muted-foreground text-center py-2">No prayer requests</p>
+                <p className="text-xs text-muted-foreground text-center py-2">{t("home", "no_prayer_requests")}</p>
               )}
               <Button size="sm" className="w-full" variant="outline" asChild>
-                <Link href="/bibleapp/community/prayer">View All Requests</Link>
+                <Link href="/bibleapp/community/prayer">{t("home", "view_requests")}</Link>
               </Button>
             </CardContent>
           </Card>

@@ -5,12 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible/books";
+import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Bible" };
 
 export default async function BiblePage() {
-  const supabase = await createClient();
+  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
 
   const histResult = user ? await supabase
@@ -45,7 +46,7 @@ export default async function BiblePage() {
                 {book.name}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {book.chapters} chapters
+                {book.chapters} {t("bible", "chapters")}
               </p>
               <span className={`inline-block mt-2 px-1.5 py-0.5 rounded text-[10px] font-medium ${genreColors[book.genre] ?? "bg-gray-100 text-gray-800"}`}>
                 {book.genre}
@@ -64,8 +65,8 @@ export default async function BiblePage() {
           <BookOpen className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Bible</h1>
-          <p className="text-sm text-muted-foreground">66 books · KJV</p>
+          <h1 className="text-2xl font-bold">{t("bible", "title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("bible", "books_count")} · KJV</p>
         </div>
       </div>
 
@@ -73,7 +74,7 @@ export default async function BiblePage() {
       {readingHistory && readingHistory.length > 0 && (
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Continue Reading
+            {t("bible", "continue_reading")}
           </h2>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {readingHistory.map((history: Record<string, unknown>) => {
@@ -90,10 +91,10 @@ export default async function BiblePage() {
                     <CardContent className="p-3">
                       <p className="font-medium text-sm truncate">{book.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        Chapter {chapter.chapter_number}
+                        {t("bible", "chapter")} {chapter.chapter_number}
                       </p>
                       <div className="flex items-center gap-1 mt-2 text-primary text-xs font-medium">
-                        <span>Continue</span>
+                        <span>{t("bible", "continue")}</span>
                         <ChevronRight className="h-3 w-3" />
                       </div>
                     </CardContent>
@@ -108,8 +109,8 @@ export default async function BiblePage() {
       {/* Book Navigator */}
       <Tabs defaultValue="ot">
         <TabsList className="mb-4">
-          <TabsTrigger value="ot">Old Testament</TabsTrigger>
-          <TabsTrigger value="nt">New Testament</TabsTrigger>
+          <TabsTrigger value="ot">{t("bible", "old_testament")}</TabsTrigger>
+          <TabsTrigger value="nt">{t("bible", "new_testament")}</TabsTrigger>
         </TabsList>
         <TabsContent value="ot">
           <BookList books={OLD_TESTAMENT} />

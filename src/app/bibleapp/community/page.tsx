@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { getInitials, formatRelativeTime } from "@/lib/utils/format";
+import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 import type { PrayerRequest } from "@/types/database";
 
@@ -25,6 +26,7 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  const t = await getServerT();
   const [prayersResult, friendsResult, churchesResult] = await Promise.all([
     supabase.from("prayer_requests").select("*, profiles(id, full_name, display_name, avatar_url)").eq("is_public", true).order("created_at", { ascending: false }).limit(10),
     supabase.from("friendships").select("*, profiles!friendships_addressee_id_fkey(id, full_name, display_name, avatar_url)").eq("requester_id", user.id).eq("status", "accepted").limit(10),
@@ -39,8 +41,8 @@ export default async function CommunityPage() {
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Community</h1>
-          <p className="text-muted-foreground text-sm mt-1">Grow together in faith</p>
+          <h1 className="text-2xl font-bold">{t("community", "title")}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t("community", "grow_together")}</p>
         </div>
       </div>
 
@@ -50,16 +52,16 @@ export default async function CommunityPage() {
           <div className="flex items-center justify-between">
             <h2 className="font-semibold flex items-center gap-2">
               <HandHeart className="h-5 w-5 text-primary" />
-              Prayer Wall
+              {t("community", "prayer_wall")}
             </h2>
             <div className="flex gap-2">
               <Button size="sm" variant="gold" asChild>
                 <Link href="/bibleapp/community/prayer?action=new">
-                  <Plus className="h-4 w-4 mr-1" />Add Request
+                  <Plus className="h-4 w-4 mr-1" />{t("community", "add_request")}
                 </Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
-                <Link href="/bibleapp/community/prayer">View All</Link>
+                <Link href="/bibleapp/community/prayer">{t("community", "view_all")}</Link>
               </Button>
             </div>
           </div>
@@ -80,7 +82,7 @@ export default async function CommunityPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium">
-                              {prayer.is_anonymous ? "Anonymous" : (author?.display_name ?? author?.full_name ?? "Someone")}
+                              {prayer.is_anonymous ? t("prayer", "anonymous") : (author?.display_name ?? author?.full_name ?? "Someone")}
                             </span>
                             <Badge variant="outline" className="text-[10px]">{prayer.category}</Badge>
                           </div>
@@ -101,9 +103,9 @@ export default async function CommunityPage() {
             <Card className="border-dashed">
               <CardContent className="py-10 text-center">
                 <HandHeart className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">No public prayers yet</p>
+                <p className="text-sm text-muted-foreground">{t("community", "no_public_prayers")}</p>
                 <Button size="sm" variant="gold" className="mt-3" asChild>
-                  <Link href="/bibleapp/community/prayer?action=new">Be the first to pray</Link>
+                  <Link href="/bibleapp/community/prayer?action=new">{t("community", "be_first_pray")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -117,10 +119,10 @@ export default async function CommunityPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold flex items-center gap-2">
-              <Church className="h-5 w-5 text-primary" />Churches
+              <Church className="h-5 w-5 text-primary" />{t("community", "churches")}
             </h2>
             <Button size="sm" variant="outline" asChild>
-              <Link href="/bibleapp/community/churches">View All</Link>
+              <Link href="/bibleapp/community/churches">{t("community", "view_all")}</Link>
             </Button>
           </div>
           {featuredChurches.length > 0 ? (
@@ -155,9 +157,9 @@ export default async function CommunityPage() {
             <Card className="border-dashed">
               <CardContent className="py-6 text-center">
                 <Church className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-xs text-muted-foreground">No churches yet</p>
+                <p className="text-xs text-muted-foreground">{t("community", "no_churches")}</p>
                 <Button size="sm" variant="gold" className="mt-2" asChild>
-                  <Link href="/bibleapp/community/churches">Add Church</Link>
+                  <Link href="/bibleapp/community/churches">{t("community", "add_church")}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -168,7 +170,7 @@ export default async function CommunityPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />My Friends
+              <Users className="h-5 w-5 text-primary" />{t("community", "my_friends")}
             </h2>
             <Button size="sm" variant="ghost" className="text-primary">
               <UserPlus className="h-4 w-4 mr-1" />Add
@@ -197,8 +199,8 @@ export default async function CommunityPage() {
               ) : (
                 <div className="text-center py-6">
                   <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No friends yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">Connect with others in your faith community</p>
+                  <p className="text-sm text-muted-foreground">{t("community", "no_friends")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("community", "connect")}</p>
                 </div>
               )}
             </CardContent>

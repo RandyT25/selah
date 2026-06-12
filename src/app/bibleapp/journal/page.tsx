@@ -8,23 +8,24 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { formatDate, formatWordCount } from "@/lib/utils/format";
 import { JOURNAL_MOODS } from "@/types/app";
+import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Journal" };
 
-const TYPE_LABELS: Record<string, string> = {
-  reflection: "Reflection",
-  prayer: "Prayer",
-  gratitude: "Gratitude",
-  sermon_notes: "Sermon Notes",
-  study: "Bible Study",
-  general: "General",
-};
-
 export default async function JournalPage() {
-  const supabase = await createClient();
+  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
+
+  const TYPE_LABELS: Record<string, string> = {
+    reflection: t("journal", "reflection"),
+    prayer: t("journal", "prayer"),
+    gratitude: t("journal", "gratitude"),
+    sermon_notes: t("journal", "sermon"),
+    study: t("journal", "study"),
+    general: t("journal", "general"),
+  };
 
   const { data: rawEntries, count } = await supabase
     .from("journal_entries")
@@ -42,7 +43,7 @@ export default async function JournalPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">My Journal</h1>
+          <h1 className="text-2xl font-bold">{t("journal", "my_journal")}</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {count ?? 0} entries · {totalWords.toLocaleString()} words · {journalDays} days
           </p>
@@ -50,7 +51,7 @@ export default async function JournalPage() {
         <Button variant="gold" asChild>
           <Link href="/bibleapp/journal/new">
             <Plus className="h-4 w-4" />
-            New Entry
+            {t("journal", "new_entry")}
           </Link>
         </Button>
       </div>
@@ -58,9 +59,9 @@ export default async function JournalPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Total Entries", value: count ?? 0 },
-          { label: "Words Written", value: totalWords.toLocaleString() },
-          { label: "Days Journaled", value: journalDays },
+          { label: t("journal", "total_entries"), value: count ?? 0 },
+          { label: t("journal", "words_written"), value: totalWords.toLocaleString() },
+          { label: t("journal", "days_journaled"), value: journalDays },
         ].map(({ label, value }) => (
           <Card key={label}>
             <CardContent className="p-4 text-center">
@@ -90,11 +91,11 @@ export default async function JournalPage() {
                             {TYPE_LABELS[entry.type] ?? entry.type}
                           </Badge>
                           {entry.is_favorite && (
-                            <Badge variant="gold" className="text-[10px]">★ Favorite</Badge>
+                            <Badge variant="gold" className="text-[10px]">★ {t("journal", "favorite")}</Badge>
                           )}
                         </div>
                         <h3 className="font-semibold text-sm line-clamp-1">
-                          {entry.title ?? "Untitled Entry"}
+                          {entry.title ?? t("journal", "untitled")}
                         </h3>
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                           {entry.content.replace(/<[^>]*>/g, "").slice(0, 160)}
@@ -130,14 +131,14 @@ export default async function JournalPage() {
         <Card className="border-dashed">
           <CardContent className="py-16 text-center">
             <PenLine className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2">Start your journal</h3>
+            <h3 className="font-semibold text-lg mb-2">{t("journal", "start_your")}</h3>
             <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
-              Capture your reflections, prayers, and spiritual insights. Your journal is a sacred space.
+              {t("journal", "capture_thoughts")}
             </p>
             <Button variant="gold" asChild>
               <Link href="/bibleapp/journal/new">
                 <Plus className="h-4 w-4 mr-2" />
-                Write Your First Entry
+                {t("journal", "write_first")}
               </Link>
             </Button>
           </CardContent>

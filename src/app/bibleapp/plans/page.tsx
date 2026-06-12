@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ReadingPlan, PlanProgress } from "@/types/database";
+import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Reading Plans" };
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Reading Plans" };
 type ProgressWithPlan = PlanProgress & { reading_plans: ReadingPlan | null };
 
 export default async function PlansPage() {
-  const supabase = await createClient();
+  const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
 
   const [plansResult, progressResult] = await Promise.all([
@@ -46,7 +47,7 @@ export default async function PlansPage() {
           {plan.is_featured && (
             <div className="flex items-center gap-1 text-primary mb-2">
               <Star className="h-3.5 w-3.5 fill-primary" />
-              <span className="text-xs font-semibold">Featured</span>
+              <span className="text-xs font-semibold">{t("plans", "featured").replace(" Plans", "")}</span>
             </div>
           )}
           <h3 className="font-semibold text-base mb-1 line-clamp-2">{plan.title}</h3>
@@ -78,7 +79,7 @@ export default async function PlansPage() {
 
           <Button size="sm" variant={isEnrolled ? "outline" : "gold"} className="w-full mt-auto" asChild>
             <Link href={`/bibleapp/plans/${plan.id}`}>
-              {isEnrolled ? "Continue Reading" : "Start Plan"}
+              {isEnrolled ? t("home", "continue_reading") : t("plans", "enroll")}
             </Link>
           </Button>
         </CardContent>
@@ -90,14 +91,14 @@ export default async function PlansPage() {
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Reading Plans</h1>
-          <p className="text-muted-foreground text-sm mt-1">Structured journeys through Scripture</p>
+          <h1 className="text-2xl font-bold">{t("plans", "reading_plans")}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t("plans", "structured")}</p>
         </div>
       </div>
 
       <Tabs defaultValue="discover">
         <TabsList className="mb-6">
-          <TabsTrigger value="discover">Discover</TabsTrigger>
+          <TabsTrigger value="discover">{t("plans", "discover")}</TabsTrigger>
           <TabsTrigger value="active">
             Active
             {activePlans.length > 0 && (
@@ -106,13 +107,13 @@ export default async function PlansPage() {
               </span>
             )}
           </TabsTrigger>
-          {completedPlans.length > 0 && <TabsTrigger value="completed">Completed</TabsTrigger>}
+          {completedPlans.length > 0 && <TabsTrigger value="completed">{t("plans", "complete")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="discover">
           {featured.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Featured Plans</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t("plans", "featured")}</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {featured.map(plan => (
                   <PlanCard key={plan.id} plan={plan} progress={myProgress.find(p => p.plan_id === plan.id)} />
@@ -121,7 +122,7 @@ export default async function PlansPage() {
             </div>
           )}
           <div>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">All Plans</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t("plans", "all_plans")}</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {plans.map(plan => (
                 <PlanCard key={plan.id} plan={plan} progress={myProgress.find(p => p.plan_id === plan.id)} />
@@ -142,8 +143,8 @@ export default async function PlansPage() {
           ) : (
             <div className="text-center py-16">
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-semibold mb-2">No active plans</h3>
-              <p className="text-muted-foreground text-sm">Start a reading plan to track your progress</p>
+              <h3 className="font-semibold mb-2">{t("plans", "no_active_plans")}</h3>
+              <p className="text-muted-foreground text-sm">{t("plans", "start_track")}</p>
             </div>
           )}
         </TabsContent>

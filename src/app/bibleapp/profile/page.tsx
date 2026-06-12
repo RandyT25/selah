@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getInitials, formatDate, formatStreakDays } from "@/lib/utils/format";
+import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -20,6 +21,7 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/bibleapp/login");
 
+  const t = await getServerT();
   const [profileResult, journalResult, prayerResult, plansResult] = await Promise.all([
     supabase.from("profiles").select("*, subscriptions(plan, status)").eq("id", user.id).single(),
     supabase.from("journal_entries").select("*", { count: "exact", head: true }).eq("user_id", user.id),
@@ -74,7 +76,7 @@ export default async function ProfilePage() {
         <Button variant="outline" size="sm" asChild>
           <Link href="/bibleapp/settings">
             <Settings className="h-4 w-4 mr-1" />
-            Edit Profile
+            {t("profile", "edit_profile")}
           </Link>
         </Button>
       </div>
@@ -82,10 +84,10 @@ export default async function ProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { icon: Flame, label: "Day Streak", value: profile.streak_count, color: "text-amber-500" },
-          { icon: Calendar, label: "Longest Streak", value: profile.longest_streak, color: "text-blue-500" },
-          { icon: NotebookPen, label: "Journal Entries", value: journalCount ?? 0, color: "text-purple-500" },
-          { icon: BookOpen, label: "Prayer Requests", value: prayerCount ?? 0, color: "text-pink-500" },
+          { icon: Flame, label: t("profile", "streak"), value: profile.streak_count, color: "text-amber-500" },
+          { icon: Calendar, label: t("profile", "longest_streak"), value: profile.longest_streak, color: "text-blue-500" },
+          { icon: NotebookPen, label: t("profile", "journal_entries"), value: journalCount ?? 0, color: "text-purple-500" },
+          { icon: BookOpen, label: t("profile", "prayer_requests"), value: prayerCount ?? 0, color: "text-pink-500" },
         ].map(({ icon: Icon, label, value, color }) => (
           <Card key={label}>
             <CardContent className="p-4 text-center">
@@ -100,7 +102,7 @@ export default async function ProfilePage() {
       {/* Completed Plans */}
       {completedPlans && completedPlans.length > 0 && (
         <div>
-          <h2 className="font-semibold mb-3">Completed Reading Plans</h2>
+          <h2 className="font-semibold mb-3">{t("profile", "completed_plans")}</h2>
           <div className="space-y-2">
             {completedPlans.map((progress) => {
               const plan = progress.reading_plans;
@@ -112,7 +114,7 @@ export default async function ProfilePage() {
                   <div>
                     <p className="font-medium text-sm">{plan?.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      Completed {progress.completed_at ? formatDate(progress.completed_at) : ""}
+                      {t("profile", "completed_on")} {progress.completed_at ? formatDate(progress.completed_at) : ""}
                     </p>
                   </div>
                 </div>
