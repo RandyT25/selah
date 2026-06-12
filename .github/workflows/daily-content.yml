@@ -1,0 +1,25 @@
+name: Daily Content Notifications
+
+on:
+  schedule:
+    # 01:00 UTC = 08:00 WIB every day
+    - cron: "0 1 * * *"
+  workflow_dispatch: # allow manual trigger from GitHub Actions UI
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send daily content notifications
+        run: |
+          response=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://selah-randy-t-s-projects.vercel.app/api/cron/daily-content)
+
+          cat /tmp/resp.json
+          echo ""
+
+          if [ "$response" != "200" ]; then
+            echo "ERROR: HTTP $response"
+            exit 1
+          fi
