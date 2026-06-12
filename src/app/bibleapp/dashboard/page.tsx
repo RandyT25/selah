@@ -124,14 +124,32 @@ export default async function DashboardPage() {
   const fallbackVerse = getDailyFallbackVerse();
   const verseOfDay = verseRaw ?? fallbackVerse;
 
-  const aytVerseText = isIndo ? await fetchAytVerse(verseOfDay.verse_reference) : null;
+  const featuredDevotionals = (devosResult.data ?? []) as Devotional[];
+  const devo = featuredDevotionals[0] ?? null;
+
+  // Fetch AYT Indonesian text in parallel for verse of day + devotional key verse
+  const [aytVerseText, aytDevoKeyVerse] = await Promise.all([
+    isIndo ? fetchAytVerse(verseOfDay.verse_reference) : Promise.resolve(null),
+    isIndo && devo?.key_verse_reference ? fetchAytVerse(devo.key_verse_reference) : Promise.resolve(null),
+  ]);
+
   const verseText = aytVerseText ?? verseOfDay.verse_text;
   const verseReference = isIndo ? localizeVerseReference(verseOfDay.verse_reference) : verseOfDay.verse_reference;
-  const verseReflection = "reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null;
+  // Hide English reflection in Indonesian mode — no dynamic translation available
+  const verseReflection = isIndo ? null : ("reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null);
+
+  // Devotional localization: use _id DB fields when populated, otherwise hide in Indonesian mode
+  const devoTitle = devo ? (isIndo ? (devo.title_id ?? null) : devo.title) : null;
+  const devoExcerpt = devo ? (isIndo ? (devo.excerpt_id ?? null) : devo.excerpt) : null;
+  const devoKeyVerse = devo ? (isIndo ? (aytDevoKeyVerse ?? devo.key_verse_id ?? null) : devo.key_verse) : null;
+  const devoKeyVerseRef = devo?.key_verse_reference
+    ? (isIndo ? localizeVerseReference(devo.key_verse_reference) : devo.key_verse_reference)
+    : null;
+  const showDevo = devo !== null && devoTitle !== null;
+
   const activePlans = (plansResult.data ?? []) as unknown as PlanProgressWithPlan[];
   const recentJournal = (journalResult.data ?? []) as JournalEntry[];
   const publicPrayers = (prayersResult.data ?? []) as unknown as PrayerWithProfile[];
-  const featuredDevotionals = (devosResult.data ?? []) as Devotional[];
 
   const displayName = profile?.display_name ?? profile?.full_name ?? "Friend";
   const hour = new Date().getHours();
@@ -268,7 +286,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Featured Devotionals */}
-          {featuredDevotionals.length > 0 && (
+          {showDevo && devo && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold">{t("home", "devotional")}</h2>
@@ -278,31 +296,31 @@ export default async function DashboardPage() {
                   </Link>
                 </Button>
               </div>
-              {featuredDevotionals.slice(0, 1).map((devo) => (
-                <Card key={devo.id} className="card-hover">
-                  <CardContent className="p-5">
-                    <Badge variant="gold" className="mb-3">{devo.category}</Badge>
-                    <h3 className="font-semibold text-base mb-2">{devo.title}</h3>
-                    {devo.key_verse && (
-                      <p className="text-sm text-muted-foreground italic mb-2">
-                        "{devo.key_verse}" — {devo.key_verse_reference}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {devo.excerpt}
+              <Card className="card-hover">
+                <CardContent className="p-5">
+                  <Badge variant="gold" className="mb-3">{devo.category}</Badge>
+                  <h3 className="font-semibold text-base mb-2">{devoTitle}</h3>
+                  {devoKeyVerse && devoKeyVerseRef && (
+                    <p className="text-sm text-muted-foreground italic mb-2">
+                      "{devoKeyVerse}" — {devoKeyVerseRef}
                     </p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{devo.reading_time_minutes} {t("home", "min_read")}</span>
-                      </div>
-                      <Button size="sm" asChild>
-                        <Link href={`/bibleapp/devotionals/${devo.slug}`}>{t("home", "read_now")}</Link>
-                      </Button>
+                  )}
+                  {devoExcerpt && (
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {devoExcerpt}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{devo.reading_time_minutes} {t("home", "min_read")}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <Button size="sm" asChild>
+                      <Link href={`/bibleapp/devotionals/${devo.slug}`}>{t("home", "read_now")}</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>
