@@ -131,7 +131,7 @@ export default async function DevotionalPage({ params }: PageProps) {
               <Link href="/bibleapp/journal/new">Journal Your Reflection</Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/bibleapp/ai">Ask AI Assistant</Link>
+              <Link href="/bibleapp/bible">Read the Bible</Link>
             </Button>
           </div>
         </div>
