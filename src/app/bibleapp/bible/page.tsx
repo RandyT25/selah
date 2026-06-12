@@ -3,8 +3,8 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { ChevronRight, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OLD_TESTAMENT, NEW_TESTAMENT } from "@/lib/bible/books";
+import { BIBLE_BOOKS } from "@/lib/bible/books";
+import { BibleSearch } from "@/components/bible/BibleSearch";
 import { getServerT } from "@/lib/utils/server-i18n";
 import type { Metadata } from "next";
 
@@ -32,32 +32,6 @@ export default async function BiblePage() {
     Gospel: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
     Epistle: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
   };
-
-  const BookList = ({ books }: { books: typeof OLD_TESTAMENT }) => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-      {books.map((book) => (
-        <Link
-          key={book.number}
-          href={`/bibleapp/bible/${book.name.toLowerCase().replace(/\s+/g, "-")}/1`}
-          className="group"
-        >
-          <Card className="card-hover h-full">
-            <CardContent className="p-3">
-              <p className="font-semibold text-sm group-hover:text-primary transition-colors leading-tight">
-                {isIndo ? book.name_id : book.name}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {book.chapters} {t("bible", "chapters")}
-              </p>
-              <span className={`inline-block mt-2 px-1.5 py-0.5 rounded text-[10px] font-medium ${genreColors[book.genre] ?? "bg-gray-100 text-gray-800"}`}>
-                {book.genre}
-              </span>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
-  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -107,19 +81,16 @@ export default async function BiblePage() {
         </div>
       )}
 
-      {/* Book Navigator */}
-      <Tabs defaultValue="ot">
-        <TabsList className="mb-4">
-          <TabsTrigger value="ot">{t("bible", "old_testament")}</TabsTrigger>
-          <TabsTrigger value="nt">{t("bible", "new_testament")}</TabsTrigger>
-        </TabsList>
-        <TabsContent value="ot">
-          <BookList books={OLD_TESTAMENT} />
-        </TabsContent>
-        <TabsContent value="nt">
-          <BookList books={NEW_TESTAMENT} />
-        </TabsContent>
-      </Tabs>
+      {/* Search + Book Grid */}
+      <BibleSearch
+        books={BIBLE_BOOKS}
+        isIndo={isIndo}
+        placeholder={t("bible", "search_placeholder")}
+        chaptersLabel={t("bible", "chapters")}
+        goToLabel={t("bible", "search_go_to")}
+        chapterLabel={t("bible", "chapter")}
+        genreColors={genreColors}
+      />
     </div>
   );
 }

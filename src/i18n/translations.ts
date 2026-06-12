@@ -40,6 +40,7 @@ export const translations = {
       no_history: "Start reading to see your history here",
       continue: "Continue",
       books_count: "66 books",
+      search_go_to: "Go to",
     },
     plans: {
       title: "Plans",
@@ -228,6 +229,7 @@ export const translations = {
       no_history: "Mulai membaca untuk melihat riwayat di sini",
       continue: "Lanjutkan",
       books_count: "66 kitab",
+      search_go_to: "Pergi ke",
     },
     plans: {
       title: "Rencana",
