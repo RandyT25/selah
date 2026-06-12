@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell } from "lucide-react";
@@ -17,7 +17,7 @@ interface Props {
 export function NotificationBell({ userId, initialCount, variant = "header" }: Props) {
   const [count, setCount] = useState(initialCount);
   const pathname = usePathname();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Reset count when user visits the notifications page
@@ -50,7 +50,7 @@ export function NotificationBell({ userId, initialCount, variant = "header" }: P
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, supabase]);
+  }, [userId]);
 
   if (variant === "sidebar") {
     const isActive = pathname === "/bibleapp/notifications";
