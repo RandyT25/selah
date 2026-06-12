@@ -105,7 +105,7 @@ export default async function PlanDetailPage({ params }: PageProps) {
           <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${DIFFICULTY_COLORS[plan.difficulty] ?? ""}`}>
             {plan.difficulty}
           </span>
-          {plan.tags.map(tag => (
+          {(plan.tags ?? []).map(tag => (
             <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
           ))}
         </div>
