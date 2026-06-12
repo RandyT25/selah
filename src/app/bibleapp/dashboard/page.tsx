@@ -23,6 +23,7 @@ import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, D
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
 import { getServerT } from "@/lib/utils/server-i18n";
 import { fetchAytVerse, localizeVerseReference } from "@/lib/bible/ayt";
+import { translateAllToId } from "@/lib/utils/translate";
 import { cookies } from "next/headers";
 
 // Fallback verses used when the verse_of_day table has no entry for today.
@@ -127,25 +128,33 @@ export default async function DashboardPage() {
   const featuredDevotionals = (devosResult.data ?? []) as Devotional[];
   const devo = featuredDevotionals[0] ?? null;
 
-  // Fetch AYT Indonesian text in parallel for verse of day + devotional key verse
-  const [aytVerseText, aytDevoKeyVerse] = await Promise.all([
+  const rawReflection = "reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null;
+
+  // Fetch AYT verse + translate English editorial content — all in parallel
+  const [
+    aytVerseText,
+    aytDevoKeyVerse,
+    [translatedReflection, translatedDevoTitle, translatedDevoExcerpt],
+  ] = await Promise.all([
     isIndo ? fetchAytVerse(verseOfDay.verse_reference) : Promise.resolve(null),
     isIndo && devo?.key_verse_reference ? fetchAytVerse(devo.key_verse_reference) : Promise.resolve(null),
+    isIndo
+      ? translateAllToId([rawReflection, devo?.title ?? null, devo?.excerpt ?? null])
+      : Promise.resolve([rawReflection, devo?.title ?? null, devo?.excerpt ?? null]),
   ]);
 
   const verseText = aytVerseText ?? verseOfDay.verse_text;
   const verseReference = isIndo ? localizeVerseReference(verseOfDay.verse_reference) : verseOfDay.verse_reference;
-  // Hide English reflection in Indonesian mode — no dynamic translation available
-  const verseReflection = isIndo ? null : ("reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null);
+  const verseReflection = translatedReflection;
 
-  // Devotional localization: use _id DB fields when populated, otherwise hide in Indonesian mode
-  const devoTitle = devo ? (isIndo ? (devo.title_id ?? null) : devo.title) : null;
-  const devoExcerpt = devo ? (isIndo ? (devo.excerpt_id ?? null) : devo.excerpt) : null;
-  const devoKeyVerse = devo ? (isIndo ? (aytDevoKeyVerse ?? devo.key_verse_id ?? null) : devo.key_verse) : null;
+  // Devotional: prefer manually translated DB fields (_id), fall back to auto-translated
+  const devoTitle = devo ? (isIndo ? (devo.title_id ?? translatedDevoTitle ?? devo.title) : devo.title) : null;
+  const devoExcerpt = devo ? (isIndo ? (devo.excerpt_id ?? translatedDevoExcerpt ?? devo.excerpt) : devo.excerpt) : null;
+  const devoKeyVerse = devo ? (isIndo ? (aytDevoKeyVerse ?? devo.key_verse_id ?? devo.key_verse) : devo.key_verse) : null;
   const devoKeyVerseRef = devo?.key_verse_reference
     ? (isIndo ? localizeVerseReference(devo.key_verse_reference) : devo.key_verse_reference)
     : null;
-  const showDevo = devo !== null && devoTitle !== null;
+  const showDevo = devo !== null;
 
   const activePlans = (plansResult.data ?? []) as unknown as PlanProgressWithPlan[];
   const recentJournal = (journalResult.data ?? []) as JournalEntry[];
