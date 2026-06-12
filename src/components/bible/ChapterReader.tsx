@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from "@/types/database";
 import type { HighlightColor } from "@/types/app";
 import type { BookInfo } from "@/lib/bible/books";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChapterReaderProps {
   bookName: string;
@@ -70,6 +71,7 @@ export function ChapterReader({
   translation = "KJV",
   highlightParam,
 }: ChapterReaderProps) {
+  const { t } = useLanguage();
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
 
@@ -345,36 +347,36 @@ export function ChapterReader({
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={(open) => { setShowSettings(open); if (!open) savePreferences(); }}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Reader Settings</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("settings", "reading_prefs")}</DialogTitle></DialogHeader>
           <div className="space-y-6 py-2">
             <div className="space-y-2">
-              <Label>Font Size: {fontSize}px</Label>
+              <Label>{t("settings", "font_size")}: {fontSize}px</Label>
               <Slider min={14} max={30} step={1} value={[fontSize]} onValueChange={([v]) => setFontSize(v)} />
             </div>
             <div className="space-y-2">
-              <Label>Font Style</Label>
+              <Label>{t("settings", "font_family")}</Label>
               <Select value={fontFamily} onValueChange={(v) => setFontFamily(v as typeof fontFamily)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="serif">Serif (Classic)</SelectItem>
-                  <SelectItem value="sans">Sans-serif (Modern)</SelectItem>
+                  <SelectItem value="serif">{t("settings", "font_serif")}</SelectItem>
+                  <SelectItem value="sans">{t("settings", "font_sans")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Line Spacing</Label>
+              <Label>{t("settings", "line_spacing")}</Label>
               <Select value={lineSpacing} onValueChange={(v) => setLineSpacing(v as typeof lineSpacing)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="compact">Compact</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="relaxed">Relaxed</SelectItem>
-                  <SelectItem value="loose">Spacious</SelectItem>
+                  <SelectItem value="compact">{t("settings", "spacing_compact")}</SelectItem>
+                  <SelectItem value="normal">{t("settings", "spacing_normal")}</SelectItem>
+                  <SelectItem value="relaxed">{t("settings", "spacing_relaxed")}</SelectItem>
+                  <SelectItem value="loose">{t("settings", "spacing_loose")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex items-center justify-between">
-              <Label>Show Verse Numbers</Label>
+              <Label>{t("settings", "verse_numbers")}</Label>
               <Switch checked={showVerseNumbers} onCheckedChange={setShowVerseNumbers} />
             </div>
           </div>
@@ -400,7 +402,7 @@ export function ChapterReader({
       {/* Note Dialog */}
       <Dialog open={!!noteVerseId} onOpenChange={(open) => { if (!open) { setNoteVerseId(null); setNoteContent(""); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Note</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("journal", "reflection")}</DialogTitle></DialogHeader>
           {noteVerse && (
             <div className="bg-muted/50 rounded-lg p-3 mb-4">
               <p className="text-xs font-semibold text-muted-foreground mb-1">{noteVerse.reference}</p>
@@ -408,14 +410,14 @@ export function ChapterReader({
             </div>
           )}
           <Textarea
-            placeholder="Write your reflection…"
+            placeholder={t("journal", "write_here")}
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             className="min-h-[120px]"
           />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setNoteVerseId(null); setNoteContent(""); }}>Cancel</Button>
-            <Button onClick={handleSaveNote} disabled={!noteContent.trim()}>Save Note</Button>
+            <Button variant="outline" onClick={() => { setNoteVerseId(null); setNoteContent(""); }}>{t("common", "cancel")}</Button>
+            <Button onClick={handleSaveNote} disabled={!noteContent.trim()}>{t("journal", "save")}</Button>
           </div>
         </DialogContent>
       </Dialog>

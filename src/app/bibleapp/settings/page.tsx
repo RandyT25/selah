@@ -5,9 +5,7 @@ import { useTheme } from "next-themes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  User, Palette, Bell, BookOpen, Shield, LogOut, Save, Loader2
-} from "lucide-react";
+import { User, Palette, Bell, BookOpen, Shield, LogOut, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,29 +20,35 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getInitials } from "@/lib/utils/format";
 
 const api = (path: string, method: string, body: object) =>
   fetch(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-import { getInitials } from "@/lib/utils/format";
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
+  fullName: z.string().min(2),
   displayName: z.string().optional(),
-  bio: z.string().max(200, "Bio must be under 200 characters").optional(),
+  bio: z.string().max(200).optional(),
   location: z.string().optional(),
-  website: z.string().url("Enter a valid URL").optional().or(z.literal("")),
+  website: z.string().url().optional().or(z.literal("")),
 });
-
 type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
-  const [profile, setProfile] = useState<{ full_name: string | null; display_name: string | null; email: string; bio: string | null; location: string | null; website: string | null; avatar_url: string | null } | null>(null);
-  const [prefs, setPrefs] = useState<{ font_size: number; font_family: string; theme: string; reading_reminder_enabled: boolean; prayer_reminder_enabled: boolean; push_notifications_enabled: boolean; email_notifications_enabled: boolean } | null>(null);
+  const [profile, setProfile] = useState<{
+    full_name: string | null; display_name: string | null; email: string;
+    bio: string | null; location: string | null; website: string | null; avatar_url: string | null;
+  } | null>(null);
+  const [prefs, setPrefs] = useState<{
+    font_size: number; font_family: string; theme: string;
+    reading_reminder_enabled: boolean; prayer_reminder_enabled: boolean;
+    push_notifications_enabled: boolean; email_notifications_enabled: boolean;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
   const [fontSize, setFontSize] = useState(18);
 
@@ -57,23 +60,9 @@ export default function SettingsPage() {
     const load = async () => {
       const res = await fetch("/api/profile");
       if (!res.ok) return;
-      const { profile: profileData, prefs: prefsData } = await res.json();
-
-      if (profileData) {
-        setProfile(profileData);
-        reset({
-          fullName: profileData.full_name ?? "",
-          displayName: profileData.display_name ?? "",
-          bio: profileData.bio ?? "",
-          location: profileData.location ?? "",
-          website: profileData.website ?? "",
-        });
-      }
-
-      if (prefsData) {
-        setPrefs(prefsData);
-        setFontSize(prefsData.font_size);
-      }
+      const { profile: p, prefs: pr } = await res.json();
+      if (p) { setProfile(p); reset({ fullName: p.full_name ?? "", displayName: p.display_name ?? "", bio: p.bio ?? "", location: p.location ?? "", website: p.website ?? "" }); }
+      if (pr) { setPrefs(pr); setFontSize(pr.font_size); }
     };
     load();
   }, []);
@@ -81,62 +70,47 @@ export default function SettingsPage() {
   const saveProfile = async (data: ProfileForm) => {
     setSaving(true);
     const res = await api("/api/profile", "PATCH", {
-      full_name: data.fullName,
-      display_name: data.displayName || null,
-      bio: data.bio || null,
-      location: data.location || null,
-      website: data.website || null,
+      full_name: data.fullName, display_name: data.displayName || null,
+      bio: data.bio || null, location: data.location || null, website: data.website || null,
     });
     setSaving(false);
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      toast.error(body.error || "Failed to save profile");
-      console.error("[saveProfile]", body.error);
-      return;
-    }
-    toast.success("Profile updated");
+    if (!res.ok) { toast.error("Failed to save"); return; }
+    toast.success(t("settings", "saved"));
     router.refresh();
   };
 
   const savePreference = async (key: string, value: unknown) => {
     await api("/api/preferences", "PATCH", { [key]: value });
-    toast.success("Preference saved");
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+    toast.success(t("settings", "saved"));
   };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("settings", "title")}</h1>
 
       <Tabs defaultValue="profile">
         <TabsList className="mb-6 flex-wrap h-auto">
           <TabsTrigger value="profile" className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" />Profile
+            <User className="h-3.5 w-3.5" />{t("settings", "profile")}
           </TabsTrigger>
           <TabsTrigger value="appearance" className="flex items-center gap-1.5">
-            <Palette className="h-3.5 w-3.5" />Appearance
+            <Palette className="h-3.5 w-3.5" />{t("settings", "appearance")}
           </TabsTrigger>
           <TabsTrigger value="reading" className="flex items-center gap-1.5">
-            <BookOpen className="h-3.5 w-3.5" />Reading
+            <BookOpen className="h-3.5 w-3.5" />{t("settings", "reading")}
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-1.5">
-            <Bell className="h-3.5 w-3.5" />Notifications
+            <Bell className="h-3.5 w-3.5" />{t("settings", "notifications")}
           </TabsTrigger>
           <TabsTrigger value="account" className="flex items-center gap-1.5">
-            <Shield className="h-3.5 w-3.5" />Account
+            <Shield className="h-3.5 w-3.5" />{t("settings", "account")}
           </TabsTrigger>
         </TabsList>
 
-        {/* Profile Tab */}
+        {/* Profile */}
         <TabsContent value="profile">
           <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>{t("settings", "profile_info")}</CardTitle></CardHeader>
             <CardContent>
               {profile && (
                 <div className="flex items-center gap-4 mb-6">
@@ -152,54 +126,50 @@ export default function SettingsPage() {
                   </div>
                 </div>
               )}
-
               <form onSubmit={handleSubmit(saveProfile)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Full Name</Label>
+                    <Label>{t("settings", "full_name")}</Label>
                     <Input {...register("fullName")} />
                     {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Display Name</Label>
-                    <Input {...register("displayName")} placeholder="Optional nickname" />
+                    <Label>{t("settings", "display_name")}</Label>
+                    <Input {...register("displayName")} placeholder={t("settings", "display_name_hint")} />
                   </div>
                 </div>
-
                 <div className="space-y-1.5">
-                  <Label>Bio</Label>
-                  <Textarea {...register("bio")} placeholder="Tell the community about yourself..." rows={3} />
+                  <Label>{t("settings", "bio")}</Label>
+                  <Textarea {...register("bio")} placeholder={t("settings", "bio_hint")} rows={3} />
                   {errors.bio && <p className="text-xs text-destructive">{errors.bio.message}</p>}
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Location</Label>
-                    <Input {...register("location")} placeholder="City, Country" />
+                    <Label>{t("settings", "location")}</Label>
+                    <Input {...register("location")} placeholder={t("settings", "location_hint")} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Website</Label>
+                    <Label>{t("settings", "website")}</Label>
                     <Input {...register("website")} type="url" placeholder="https://" />
                     {errors.website && <p className="text-xs text-destructive">{errors.website.message}</p>}
                   </div>
                 </div>
-
-                <Button type="submit" variant="gold" loading={saving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  Save Profile
+                <Button type="submit" variant="gold" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+                  {t("settings", "save")}
                 </Button>
               </form>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Appearance Tab */}
+        {/* Appearance */}
         <TabsContent value="appearance">
           <Card>
-            <CardHeader><CardTitle>Appearance</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("settings", "appearance")}</CardTitle></CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <Label>Language / Bahasa</Label>
+                <Label>{t("settings", "language_label")}</Label>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { code: "en" as const, label: "English", flag: "🇺🇸" },
@@ -216,14 +186,13 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
-
               <div className="space-y-3">
-                <Label>Theme</Label>
+                <Label>{t("settings", "theme_label")}</Label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: "light", label: "Light", bg: "bg-white border-2", textClass: "text-gray-900" },
-                    { value: "dark", label: "Dark", bg: "bg-slate-900 border-2", textClass: "text-white" },
-                    { value: "system", label: "System", bg: "bg-gradient-to-br from-white to-slate-900 border-2", textClass: "text-gray-700" },
+                    { value: "light", label: t("settings", "theme_light"), bg: "bg-white border-2", textClass: "text-gray-900" },
+                    { value: "dark",  label: t("settings", "theme_dark"),  bg: "bg-slate-900 border-2", textClass: "text-white" },
+                    { value: "system",label: t("settings", "theme_system"),bg: "bg-gradient-to-br from-white to-slate-900 border-2", textClass: "text-gray-700" },
                   ].map(({ value, label, bg, textClass }) => (
                     <button
                       key={value}
@@ -239,58 +208,37 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Reading Tab */}
+        {/* Reading */}
         <TabsContent value="reading">
           <Card>
-            <CardHeader><CardTitle>Bible Reading Preferences</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("settings", "reading_prefs")}</CardTitle></CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Font Size: {fontSize}px</Label>
-                </div>
-                <Slider
-                  min={12}
-                  max={32}
-                  step={1}
-                  value={[fontSize]}
-                  onValueChange={([v]) => setFontSize(v)}
-                  onValueCommit={([v]) => savePreference("font_size", v)}
-                />
+                <Label>{t("settings", "font_size")}: {fontSize}px</Label>
+                <Slider min={12} max={32} step={1} value={[fontSize]} onValueChange={([v]) => setFontSize(v)} onValueCommit={([v]) => savePreference("font_size", v)} />
                 <p className="font-serif text-sm" style={{ fontSize: `${fontSize}px` }}>
                   And God said, Let there be light.
                 </p>
               </div>
-
               <div className="space-y-2">
-                <Label>Font Style</Label>
-                <Select
-                  defaultValue={prefs?.font_family ?? "serif"}
-                  onValueChange={(v) => savePreference("font_family", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>{t("settings", "font_family")}</Label>
+                <Select defaultValue={prefs?.font_family ?? "serif"} onValueChange={(v) => savePreference("font_family", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="serif">Serif (Classic)</SelectItem>
-                    <SelectItem value="sans">Sans-serif (Modern)</SelectItem>
+                    <SelectItem value="serif">{t("settings", "font_serif")}</SelectItem>
+                    <SelectItem value="sans">{t("settings", "font_sans")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
-                <Label>Line Spacing</Label>
-                <Select
-                  defaultValue={prefs ? "normal" : "normal"}
-                  onValueChange={(v) => savePreference("line_spacing", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>{t("settings", "line_spacing")}</Label>
+                <Select defaultValue="normal" onValueChange={(v) => savePreference("line_spacing", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="compact">Compact</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="relaxed">Relaxed</SelectItem>
-                    <SelectItem value="loose">Loose</SelectItem>
+                    <SelectItem value="compact">{t("settings", "spacing_compact")}</SelectItem>
+                    <SelectItem value="normal">{t("settings", "spacing_normal")}</SelectItem>
+                    <SelectItem value="relaxed">{t("settings", "spacing_relaxed")}</SelectItem>
+                    <SelectItem value="loose">{t("settings", "spacing_loose")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -298,21 +246,21 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Notifications Tab */}
+        {/* Notifications */}
         <TabsContent value="notifications">
           <Card>
-            <CardHeader><CardTitle>Notifications</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t("settings", "notifications")}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               {[
-                { key: "reading_reminder_enabled", label: "Daily Reading Reminder", description: "Get reminded to read your Bible each day" },
-                { key: "prayer_reminder_enabled", label: "Prayer Reminder", description: "Daily reminder to spend time in prayer" },
-                { key: "push_notifications_enabled", label: "Push Notifications", description: "Receive notifications on this device" },
-                { key: "email_notifications_enabled", label: "Email Notifications", description: "Receive updates and encouragement by email" },
-              ].map(({ key, label, description }) => (
+                { key: "reading_reminder_enabled",    label: t("settings", "daily_reminder"),      desc: t("settings", "daily_reminder_desc") },
+                { key: "prayer_reminder_enabled",     label: t("settings", "prayer_reminder"),     desc: t("settings", "prayer_reminder_desc") },
+                { key: "push_notifications_enabled",  label: t("settings", "push_notifications"),  desc: t("settings", "push_notifications_desc") },
+                { key: "email_notifications_enabled", label: t("settings", "email_notifications"), desc: t("settings", "email_notifications_desc") },
+              ].map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium text-sm">{label}</p>
-                    <p className="text-xs text-muted-foreground">{description}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
                   </div>
                   <Switch
                     defaultChecked={prefs?.[key as keyof typeof prefs] as boolean ?? false}
@@ -324,28 +272,28 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Account Tab */}
+        {/* Account */}
         <TabsContent value="account">
           <div className="space-y-4">
             <Card>
-              <CardHeader><CardTitle>Subscription</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("settings", "subscription")}</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">Free Plan</p>
-                    <p className="text-sm text-muted-foreground">All core features included</p>
+                    <p className="font-semibold">{t("settings", "free_plan")}</p>
+                    <p className="text-sm text-muted-foreground">{t("settings", "free_plan_desc")}</p>
                   </div>
-                  <Button variant="gold">Upgrade to Premium</Button>
+                  <Button variant="gold">{t("settings", "upgrade")}</Button>
                 </div>
               </CardContent>
             </Card>
-
             <Card className="border-destructive/20">
-              <CardHeader><CardTitle className="text-destructive">Danger Zone</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={handleSignOut}>
+              <CardHeader><CardTitle className="text-destructive">{t("settings", "danger_zone")}</CardTitle></CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={async () => { await supabase.auth.signOut(); router.push("/"); }}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  {t("settings", "sign_out")}
                 </Button>
               </CardContent>
             </Card>
