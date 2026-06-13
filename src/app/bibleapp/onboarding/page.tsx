@@ -6,6 +6,7 @@ import { BookOpen, Globe, Church, Bell, ChevronRight, ChevronLeft, Check } from 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { toast } from "sonner";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const DENOMINATIONS = [
   "Protestant",
@@ -45,6 +46,7 @@ function ProgressBar({ step }: { step: number }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { capture } = useAnalytics();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -60,9 +62,14 @@ export default function OnboardingPage() {
     if (!("Notification" in window) || !("serviceWorker" in navigator)) return;
     try {
       const permission = await Notification.requestPermission();
-      if (permission === "granted") setNotificationsEnabled(true);
+      if (permission === "granted") {
+        setNotificationsEnabled(true);
+        capture("push_permission_granted");
+      } else {
+        capture("push_permission_denied");
+      }
     } catch {
-      // Permission denied or unavailable
+      capture("push_permission_denied");
     }
   };
 
@@ -82,6 +89,13 @@ export default function OnboardingPage() {
 
       // Save language cookie so the server picks it up immediately
       document.cookie = `selah_language=${language};path=/;max-age=31536000`;
+
+      capture("onboarding_finished", {
+        denomination: denomination ?? "unknown",
+        language,
+        reading_goal: readingGoal,
+        found_church: false,
+      });
 
       router.replace("/bibleapp/dashboard");
     } catch {

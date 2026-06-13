@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
+
+const DISMISS_KEY = "selah_pwa_dismissed_at";
+const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function usePWA() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -17,13 +20,16 @@ export function usePWA() {
 
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
+    // Respect 7-day dismiss cooldown
+    const dismissedAt = localStorage.getItem(DISMISS_KEY);
+    const cooledDown = !dismissedAt || Date.now() - parseInt(dismissedAt) > COOLDOWN_MS;
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
+      if (cooledDown) setInstallPrompt(e as BeforeInstallPromptEvent);
     };
 
     const handleAppInstalled = () => {
@@ -50,14 +56,19 @@ export function usePWA() {
     };
   }, []);
 
-  const install = async () => {
-    if (!installPrompt) return false;
+  const install = useCallback(async (): Promise<"accepted" | "dismissed"> => {
+    if (!installPrompt) return "dismissed";
     await installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === "accepted") setIsInstalled(true);
     setInstallPrompt(null);
-    return outcome === "accepted";
-  };
+    return outcome;
+  }, [installPrompt]);
 
-  return { installPrompt, isInstalled, isOnline, install };
+  const dismissInstall = useCallback(() => {
+    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    setInstallPrompt(null);
+  }, []);
+
+  return { installPrompt, isInstalled, isOnline, install, dismissInstall };
 }

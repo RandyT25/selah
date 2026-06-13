@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Shield, Zap, BookOpen, FileText, Headphones, BarChart3, Loader2 } from "lucide-react";
 import { PricingCard } from "@/components/billing/PricingCard";
 import { usePremium } from "@/hooks/usePremium";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function UpgradePage() {
   const { isPremium, plan } = usePremium();
+  const { capture } = useAnalytics();
   const [portalLoading, setPortalLoading] = useState(false);
+
+  useEffect(() => {
+    capture("upgrade_page_viewed", { source: "direct" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openPortal = async () => {
     setPortalLoading(true);

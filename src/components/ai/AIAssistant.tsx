@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils/cn";
 import type { AIMessage } from "@/types/app";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const SUGGESTED_PROMPTS = [
   "What does John 3:16 mean?",
@@ -22,6 +23,7 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export function AIAssistant() {
+  const { capture } = useAnalytics();
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,8 +62,12 @@ export function AIAssistant() {
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
+        if (response.status === 429 || body.code === "RATE_LIMITED") {
+          capture("ai_limit_reached", { limit: body.limit ?? 3 });
+        }
         throw new Error(body.detail || body.error || "AI request failed");
       }
+      capture("ai_query_sent", { is_premium: false, query_count_today: messages.filter(m => m.role === "user").length + 1 });
 
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream");

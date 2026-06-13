@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useMemo } from "react";
+import { useState, useTransition, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -34,6 +34,7 @@ import type { BibleVerse, VerseHighlight, VerseBookmark, UserPreferences } from 
 import type { HighlightColor } from "@/types/app";
 import type { BookInfo } from "@/lib/bible/books";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface ChapterReaderProps {
   bookName: string;
@@ -72,8 +73,23 @@ export function ChapterReader({
   highlightParam,
 }: ChapterReaderProps) {
   const { t } = useLanguage();
+  const { capture } = useAnalytics();
+  const readStartRef = useRef<number>(Date.now());
   const [highlights, setHighlights] = useState(initialHighlights);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
+
+  // Fire bible_chapter_read on mount, record duration on unmount
+  useEffect(() => {
+    readStartRef.current = Date.now();
+    capture("bible_chapter_read", { book: bookName, chapter: chapterNum });
+    return () => {
+      const duration = Math.round((Date.now() - readStartRef.current) / 1000);
+      if (duration > 5) {
+        capture("bible_chapter_read", { book: bookName, chapter: chapterNum, duration_seconds: duration });
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookName, chapterNum]);
 
   // Parse "5-10" or "16" from the ?highlight= query param
   const highlightVerses = useMemo<Set<number>>(() => {

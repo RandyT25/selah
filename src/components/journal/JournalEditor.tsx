@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -57,6 +58,7 @@ const ENTRY_TYPES = [
 
 export function JournalEditor({ initialEntry }: JournalEditorProps) {
   const router = useRouter();
+  const { capture } = useAnalytics();
 
   const [title, setTitle] = useState(initialEntry?.title ?? "");
   const [entryType, setEntryType] = useState(initialEntry?.type ?? "reflection");
@@ -132,6 +134,10 @@ export function JournalEditor({ initialEntry }: JournalEditorProps) {
         if (!res.ok) throw new Error(await res.text());
         const { data } = await res.json();
         toast.success("Entry saved");
+        capture("journal_entry_created", {
+          type: entryType,
+          has_verse_reference: false,
+        });
         router.push(`/bibleapp/journal/${data.id}`);
       }
     } catch {
