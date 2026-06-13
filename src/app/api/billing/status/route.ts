@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { Plan, SubscriptionStatus } from "@/lib/billing/plans";
+import { requirePaymentsEnabled } from "@/lib/billing/paymentsEnabled";
 
 export async function GET() {
+  const gate = requirePaymentsEnabled();
+  if (gate) return gate;
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

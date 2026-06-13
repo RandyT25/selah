@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient, createRawAdminClient } from "@/lib/supabase/server";
 import { AI_SYSTEM_PROMPTS } from "@/lib/ai/provider";
+import { canAccess } from "@/lib/billing/features";
 import type { AIMessage } from "@/types/app";
 
-const FREE_DAILY_LIMIT = 10;
+const FREE_DAILY_LIMIT = 3;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -23,17 +24,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // Check subscription plan
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
+  // Check subscription via centralized canAccess()
+  const isUnlimited = await canAccess("ai_unlimited");
 
   // Rate limiting — free users only
-  if (!isPremium) {
+  if (!isUnlimited) {
     const rawAdmin = createRawAdminClient();
     const today = new Date().toISOString().slice(0, 10);
 

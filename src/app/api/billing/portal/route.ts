@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getStripe, stripeConfigured } from "@/lib/billing/stripe";
+import { requirePaymentsEnabled } from "@/lib/billing/paymentsEnabled";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function POST() {
+  const gate = requirePaymentsEnabled();
+  if (gate) return gate;
+
   try {
     if (!stripeConfigured()) {
       return NextResponse.json({ error: "Billing is not configured yet." }, { status: 503 });

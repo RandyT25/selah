@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { formatDate } from "@/lib/utils/format";
+import { canAccess } from "@/lib/billing/features";
 import type { JournalEntry } from "@/types/database";
 
 export const metadata = { title: "Journal Export — Selah" };
@@ -21,15 +22,8 @@ export default async function JournalExportPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/bibleapp/login");
 
-  // Verify premium
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
-  if (!isPremium) redirect("/bibleapp/upgrade");
+  const canExport = await canAccess("journal_pdf_export");
+  if (!canExport) redirect("/bibleapp/upgrade");
 
   const { data: profile } = await supabase
     .from("profiles")

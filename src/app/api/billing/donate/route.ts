@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createRawAdminClient } from "@/lib/supabase/server";
 import { getStripe, stripeConfigured } from "@/lib/billing/stripe";
+import { requirePaymentsEnabled } from "@/lib/billing/paymentsEnabled";
 
 const Schema = z.object({
   amountCents: z.number().int().min(100, "Minimum donation is $1").max(1_000_000),
@@ -13,6 +14,9 @@ const Schema = z.object({
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL_PRODUCTION ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export async function POST(request: Request) {
+  const gate = requirePaymentsEnabled();
+  if (gate) return gate;
+
   try {
     if (!stripeConfigured()) {
       return NextResponse.json({ error: "Billing is not configured yet." }, { status: 503 });

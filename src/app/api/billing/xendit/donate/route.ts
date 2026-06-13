@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createRawAdminClient } from "@/lib/supabase/server";
 import { getXendit, xenditConfigured } from "@/lib/billing/xendit";
+import { requirePaymentsEnabled } from "@/lib/billing/paymentsEnabled";
 
 const Schema = z.object({
   amountIDR:   z.number().int().min(10_000, "Minimum donation is Rp 10.000"),
@@ -12,6 +13,9 @@ const Schema = z.object({
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://selah-umber.vercel.app";
 
 export async function POST(request: Request) {
+  const gate = requirePaymentsEnabled();
+  if (gate) return gate;
+
   try {
     if (!xenditConfigured()) {
       return NextResponse.json({ error: "Xendit is not configured yet." }, { status: 503 });

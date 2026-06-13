@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { canAccess } from "@/lib/billing/features";
 import { Flame, BookOpen, NotebookPen, HandHeart, TrendingUp, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,13 +17,7 @@ export default async function GrowthPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/bibleapp/login");
 
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
+  const isPremium = await canAccess("growth_dashboard");
 
   if (!isPremium) {
     return (
