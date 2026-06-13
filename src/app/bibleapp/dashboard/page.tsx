@@ -113,11 +113,11 @@ export default async function DashboardPage() {
     devosResult,
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase.from("verse_of_day").select("*").lte("scheduled_date", new Date().toISOString().split("T")[0]).order("scheduled_date", { ascending: false }).limit(1).single(),
+    supabase.from("verse_of_day").select("*").eq("scheduled_date", new Date().toISOString().split("T")[0]).single(),
     supabase.from("plan_progress").select("*, reading_plans(*)").eq("user_id", user.id).eq("is_active", true).limit(3),
     supabase.from("journal_entries").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
     supabase.from("prayer_requests").select("*, profiles(display_name, full_name, avatar_url)").eq("is_public", true).order("created_at", { ascending: false }).limit(3),
-    supabase.from("devotionals").select("*").eq("is_published", true).eq("is_featured", true).order("published_at", { ascending: false }).limit(2),
+    supabase.from("devotionals").select("*").eq("is_published", true).order("published_at", { ascending: true }),
   ]);
 
   const profile = profileResult.data as Profile | null;
@@ -125,8 +125,9 @@ export default async function DashboardPage() {
   const fallbackVerse = getDailyFallbackVerse();
   const verseOfDay = verseRaw ?? fallbackVerse;
 
-  const featuredDevotionals = (devosResult.data ?? []) as Devotional[];
-  const devo = featuredDevotionals[0] ?? null;
+  const allDevotionals = (devosResult.data ?? []) as Devotional[];
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  const devo = allDevotionals.length > 0 ? allDevotionals[dayOfYear % allDevotionals.length] : null;
 
   const rawReflection = "reflection" in verseOfDay ? (verseOfDay.reflection as string | null) : null;
 

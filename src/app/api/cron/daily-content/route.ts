@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
+import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+webpush.setVapidDetails(
+  `mailto:${process.env.VAPID_SUBJECT}`,
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
 
 export async function GET(request: Request) {
   const auth = request.headers.get("authorization");
@@ -54,30 +61,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, skipped: "no content" });
   }
 
-  // ── 3. ALL users (in-app bell goes to everyone) ─────────────────────────────
-  // Use profiles as the source of truth so users without a prefs row are included.
-  // verse_of_day → all users; reading_reminder → only those with flag enabled.
-  const { data: profiles, error: profilesErr } = await admin
-    .from("profiles")
-    .select("id");
-
+  // ── 3. All user profiles ────────────────────────────────────────────────────
+  const { data: profiles, error: profilesErr } = await admin.from("profiles").select("id");
   if (profilesErr || !profiles || profiles.length === 0) {
-    return NextResponse.json({ ok: true, notified: 0, reason: "no users found" });
+    return NextResponse.json({ ok: true, notified: 0, reason: "no users" });
   }
 
   const { data: prefsRows } = await admin
     .from("user_preferences")
     .select("user_id, reading_reminder_enabled");
-
   const prefsMap = new Map((prefsRows ?? []).map((p) => [p.user_id, p]));
-
-  // Merge: every profile gets a record, with pref defaults if missing
   const allPrefs = profiles.map((p) => ({
     user_id: p.id,
     reading_reminder_enabled: prefsMap.get(p.id)?.reading_reminder_enabled ?? false,
   }));
 
-  // ── 4. Dedup: skip users who already got verse_of_day today ────────────────
+  // ── 4. Dedup: skip users already notified today ─────────────────────────────
   const todayStart = `${today}T00:00:00.000Z`;
   const { data: alreadyNotified } = await admin
     .from("notifications")
@@ -85,36 +84,29 @@ export async function GET(request: Request) {
     .eq("type", "verse_of_day")
     .gte("created_at", todayStart);
 
-  const alreadySet = new Set((alreadyNotified ?? []).map((r) => r.user_id));
+  const alreadySet = new Set((alreadyNotified ?? []).map((r) => r.user_id as string));
   const targets = allPrefs.filter((p) => !alreadySet.has(p.user_id as string));
 
   if (targets.length === 0) {
     return NextResponse.json({ ok: true, notified: 0, reason: "already sent today" });
   }
 
-  // ── 5. Build rows ───────────────────────────────────────────────────────────
-  const rows: {
-    user_id: string;
-    type: string;
-    title: string;
-    body: string;
-    data: { [key: string]: string };
-  }[] = [];
+  // ── 5. Insert in-app notifications ──────────────────────────────────────────
+  const rows: { user_id: string; type: string; title: string; body: string; data: { [key: string]: string } }[] = [];
 
   for (const pref of targets) {
     if (verse) {
       rows.push({
-        user_id: pref.user_id,
+        user_id: pref.user_id as string,
         type: "verse_of_day",
         title: verse.verse_reference,
         body: verse.verse_text.slice(0, 140),
         data: { verse_reference: verse.verse_reference },
       });
     }
-
     if (pref.reading_reminder_enabled && devotional) {
       rows.push({
-        user_id: pref.user_id,
+        user_id: pref.user_id as string,
         type: "reading_reminder",
         title: devotional.title,
         body: devotional.excerpt?.slice(0, 120) ?? "Open today's devotional",
@@ -124,11 +116,46 @@ export async function GET(request: Request) {
   }
 
   const { error: insertErr } = await admin.from("notifications").insert(rows);
-
   if (insertErr) {
-    console.error("[cron/daily-content] insert error:", insertErr.message);
+    console.error("[cron] insert error:", insertErr.message);
     return NextResponse.json({ error: insertErr.message }, { status: 500 });
   }
+
+  // ── 6. Send Web Push to subscribed devices ───────────────────────────────────
+  const targetIds = targets.map((p) => p.user_id as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pushSubs } = await (admin as any)
+    .from("push_subscriptions")
+    .select("endpoint, p256dh, auth")
+    .in("user_id", targetIds);
+
+  const pushPayload = JSON.stringify({
+    title: verse ? verse.verse_reference : devotional?.title ?? "Selah",
+    body: verse ? verse.verse_text.slice(0, 120) : devotional?.excerpt?.slice(0, 120) ?? "",
+    url: "/bibleapp/dashboard",
+  });
+
+  let pushed = 0;
+  let pushFailed = 0;
+
+  await Promise.allSettled(
+    (pushSubs ?? []).map(async (sub: { endpoint: string; p256dh: string; auth: string }) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          pushPayload
+        );
+        pushed++;
+      } catch (err: unknown) {
+        // 410 Gone = subscription expired, remove it
+        if (err && typeof err === "object" && "statusCode" in err && (err as { statusCode: number }).statusCode === 410) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (admin as any).from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+        }
+        pushFailed++;
+      }
+    })
+  );
 
   return NextResponse.json({
     ok: true,
@@ -136,6 +163,8 @@ export async function GET(request: Request) {
     verse: verse?.verse_reference ?? null,
     devotional: devotional?.title ?? null,
     notified: targets.length,
-    rows: rows.length,
+    db_rows: rows.length,
+    push_sent: pushed,
+    push_failed: pushFailed,
   });
 }

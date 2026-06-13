@@ -4,6 +4,7 @@ import { BibleAppSidebar } from "@/components/bibleapp/BibleAppSidebar";
 import { BibleAppMobileNav } from "@/components/bibleapp/BibleAppMobileNav";
 import { BibleAppHeader } from "@/components/bibleapp/BibleAppHeader";
 import { AppShell } from "@/components/bibleapp/AppShell";
+import { PushPermission } from "@/components/bibleapp/PushPermission";
 import type { Language } from "@/i18n/translations";
 
 export default async function BibleAppLayout({
@@ -39,6 +40,7 @@ export default async function BibleAppLayout({
           </main>
         </div>
         <BibleAppMobileNav />
+        <PushPermission />
       </div>
     </AppShell>
   );
