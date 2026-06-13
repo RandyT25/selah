@@ -5,25 +5,13 @@ import type { Database } from "@/types/database";
 
 type CookieItem = { name: string; value: string; options: CookieOptions };
 
-const PROTECTED = [
-  "/bibleapp/dashboard",
-  "/bibleapp/bible",
-  "/bibleapp/audio",
-  "/bibleapp/plans",
-  "/bibleapp/devotionals",
-  "/bibleapp/journal",
-  "/bibleapp/community",
-  "/bibleapp/settings",
-  "/bibleapp/profile",
-  "/bibleapp/ai",
-  "/bibleapp/search",
-  "/bibleapp/notifications",
-];
-
-const AUTH_ROUTES = [
+// Routes under /bibleapp that don't require authentication
+const PUBLIC_BIBLEAPP_ROUTES = [
   "/bibleapp/login",
   "/bibleapp/register",
   "/bibleapp/forgot-password",
+  "/bibleapp/onboarding",
+  "/bibleapp/checkin",
 ];
 
 const ADMIN_ROUTES = ["/admin"];
@@ -55,16 +43,20 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Logged-in user hitting auth screens → send to dashboard
-  if (user && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL("/bibleapp/dashboard", request.url));
-  }
+  if (pathname.startsWith("/bibleapp")) {
+    const isPublic = PUBLIC_BIBLEAPP_ROUTES.some((r) => pathname.startsWith(r));
 
-  // Unauthenticated user hitting protected routes → send to login
-  if (!user && PROTECTED.some((r) => pathname.startsWith(r))) {
-    const url = new URL("/bibleapp/login", request.url);
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    // Logged-in user hitting auth screens → send to dashboard
+    if (user && (pathname.startsWith("/bibleapp/login") || pathname.startsWith("/bibleapp/register"))) {
+      return NextResponse.redirect(new URL("/bibleapp/dashboard", request.url));
+    }
+
+    // Unauthenticated user hitting protected routes → login with ?next= return path
+    if (!user && !isPublic) {
+      const url = new URL("/bibleapp/login", request.url);
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   // Admin routes — must be logged in and have admin/moderator role
