@@ -6,18 +6,18 @@ import {
   BookOpen,
   LayoutDashboard,
   NotebookPen,
-  HandHeart,
+  Users,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MOBILE_NAV = [
-  { key: "home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
-  { key: "bible", href: "/bibleapp/bible", icon: BookOpen },
-  { key: "journal", href: "/bibleapp/journal", icon: NotebookPen },
-  { key: "prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
-  { key: "settings", href: "/bibleapp/settings", icon: Settings },
+  { key: "home",      href: "/bibleapp/dashboard",  icon: LayoutDashboard },
+  { key: "bible",     href: "/bibleapp/bible",       icon: BookOpen },
+  { key: "journal",   href: "/bibleapp/journal",     icon: NotebookPen },
+  { key: "community", href: "/bibleapp/community",   icon: Users },
+  { key: "settings",  href: "/bibleapp/settings",    icon: Settings },
 ] as const;
 
 export function BibleAppMobileNav() {

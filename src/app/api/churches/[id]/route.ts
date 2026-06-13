@@ -33,6 +33,7 @@ export async function PATCH(request: Request, { params }: Params) {
         denomination: body.denomination || null,
         pastor_name:  body.pastorName   || null,
         website:      body.website      || null,
+        logo_url:     body.logo_url     || null,
         latitude:     typeof body.latitude  === "number" ? body.latitude  : null,
         longitude:    typeof body.longitude === "number" ? body.longitude : null,
         updated_at:   new Date().toISOString(),

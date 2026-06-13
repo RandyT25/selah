@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Palette, Bell, BookOpen, Shield, LogOut, Save, Loader2 } from "lucide-react";
+import { User, Palette, Bell, BookOpen, Shield, LogOut, Save, Loader2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,7 +50,10 @@ export default function SettingsPage() {
     push_notifications_enabled: boolean; email_notifications_enabled: boolean;
   } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [fontSize, setFontSize] = useState(18);
+  const [userId, setUserId] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -58,6 +61,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
       const res = await fetch("/api/profile");
       if (!res.ok) return;
       const { profile: p, prefs: pr } = await res.json();
@@ -66,6 +71,25 @@ export default function SettingsPage() {
     };
     load();
   }, []);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !userId) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const form = new FormData();
+    form.append("file", file);
+    form.append("bucket", "avatars");
+    form.append("path", `${userId}/avatar.${ext}`);
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    if (!res.ok) { setUploading(false); toast.error("Upload failed"); return; }
+    const { url } = await res.json();
+    await api("/api/profile", "PATCH", { avatar_url: url });
+    setProfile((prev) => prev ? { ...prev, avatar_url: url } : prev);
+    setUploading(false);
+    toast.success("Photo updated!");
+    e.target.value = "";
+  };
 
   const saveProfile = async (data: ProfileForm) => {
     setSaving(true);
@@ -114,15 +138,36 @@ export default function SettingsPage() {
             <CardContent>
               {profile && (
                 <div className="flex items-center gap-4 mb-6">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={profile.avatar_url ?? undefined} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
-                      {getInitials(profile.full_name ?? profile.email ?? "U")}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative flex-shrink-0">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={profile.avatar_url ?? undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+                        {getInitials(profile.full_name ?? profile.email ?? "U")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={uploading}
+                      className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-md hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
+                      {uploading
+                        ? <Loader2 className="h-3 w-3 text-white animate-spin" />
+                        : <Camera className="h-3 w-3 text-white" />
+                      }
+                    </button>
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                    />
+                  </div>
                   <div>
                     <p className="font-semibold">{profile.full_name}</p>
                     <p className="text-sm text-muted-foreground">{profile.email}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Click the camera to change photo</p>
                   </div>
                 </div>
               )}
