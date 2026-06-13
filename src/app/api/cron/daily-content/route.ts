@@ -5,7 +5,6 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  // Verify Vercel cron secret
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,8 +12,11 @@ export async function GET(request: Request) {
 
   const admin = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
 
-  // ── 1. Today's verse of the day ──────────────────────────────────────────
+  // ── 1. Today's verse ────────────────────────────────────────────────────────
   let verse: { verse_reference: string; verse_text: string } | null = null;
 
   const { data: todayVerse } = await admin
@@ -26,21 +28,16 @@ export async function GET(request: Request) {
   if (todayVerse) {
     verse = todayVerse;
   } else {
-    // Fallback: rotate by day-of-year across all existing verses
     const { data: allVerses } = await admin
       .from("verse_of_day")
       .select("verse_reference, verse_text")
       .order("scheduled_date", { ascending: true });
-
     if (allVerses && allVerses.length > 0) {
-      const dayOfYear = Math.floor(
-        (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-      );
       verse = allVerses[dayOfYear % allVerses.length];
     }
   }
 
-  // ── 2. Today's devotional (day-of-year rotation) ─────────────────────────
+  // ── 2. Today's devotional ───────────────────────────────────────────────────
   let devotional: { title: string; slug: string; excerpt: string | null } | null = null;
 
   const { data: allDevotionals } = await admin
@@ -50,27 +47,37 @@ export async function GET(request: Request) {
     .order("published_at", { ascending: true });
 
   if (allDevotionals && allDevotionals.length > 0) {
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-    );
     devotional = allDevotionals[dayOfYear % allDevotionals.length];
   }
 
   if (!verse && !devotional) {
-    return NextResponse.json({ ok: true, skipped: "no content to notify about" });
+    return NextResponse.json({ ok: true, skipped: "no content" });
   }
 
-  // ── 3. Users who have notifications enabled ───────────────────────────────
-  const { data: prefs, error: prefsErr } = await admin
+  // ── 3. ALL users (in-app bell goes to everyone) ─────────────────────────────
+  // Use profiles as the source of truth so users without a prefs row are included.
+  // verse_of_day → all users; reading_reminder → only those with flag enabled.
+  const { data: profiles, error: profilesErr } = await admin
+    .from("profiles")
+    .select("id");
+
+  if (profilesErr || !profiles || profiles.length === 0) {
+    return NextResponse.json({ ok: true, notified: 0, reason: "no users found" });
+  }
+
+  const { data: prefsRows } = await admin
     .from("user_preferences")
-    .select("user_id, reading_reminder_enabled, push_notifications_enabled")
-    .or("reading_reminder_enabled.eq.true,push_notifications_enabled.eq.true");
+    .select("user_id, reading_reminder_enabled");
 
-  if (prefsErr || !prefs || prefs.length === 0) {
-    return NextResponse.json({ ok: true, notified: 0 });
-  }
+  const prefsMap = new Map((prefsRows ?? []).map((p) => [p.user_id, p]));
 
-  // ── 4. Skip users who already got a verse_of_day notification today ───────
+  // Merge: every profile gets a record, with pref defaults if missing
+  const allPrefs = profiles.map((p) => ({
+    user_id: p.id,
+    reading_reminder_enabled: prefsMap.get(p.id)?.reading_reminder_enabled ?? false,
+  }));
+
+  // ── 4. Dedup: skip users who already got verse_of_day today ────────────────
   const todayStart = `${today}T00:00:00.000Z`;
   const { data: alreadyNotified } = await admin
     .from("notifications")
@@ -79,13 +86,13 @@ export async function GET(request: Request) {
     .gte("created_at", todayStart);
 
   const alreadySet = new Set((alreadyNotified ?? []).map((r) => r.user_id));
-  const targets = prefs.filter((p) => !alreadySet.has(p.user_id));
+  const targets = allPrefs.filter((p) => !alreadySet.has(p.user_id as string));
 
   if (targets.length === 0) {
     return NextResponse.json({ ok: true, notified: 0, reason: "already sent today" });
   }
 
-  // ── 5. Build and insert notifications ─────────────────────────────────────
+  // ── 5. Build rows ───────────────────────────────────────────────────────────
   const rows: {
     user_id: string;
     type: string;
@@ -95,7 +102,6 @@ export async function GET(request: Request) {
   }[] = [];
 
   for (const pref of targets) {
-    // Verse of day notification
     if (verse) {
       rows.push({
         user_id: pref.user_id,
@@ -106,7 +112,6 @@ export async function GET(request: Request) {
       });
     }
 
-    // Reading reminder notification (links to today's devotional)
     if (pref.reading_reminder_enabled && devotional) {
       rows.push({
         user_id: pref.user_id,
