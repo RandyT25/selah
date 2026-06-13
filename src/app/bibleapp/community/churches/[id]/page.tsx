@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Users, Globe, Calendar, Clock, Repeat, Wifi, Church, Megaphone, ShieldCheck } from "lucide-react";
+import { ArrowLeft, MapPin, Users, Globe, Calendar, Clock, Repeat, Wifi, Church, Megaphone, ShieldCheck, BarChart3, Sparkles, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,9 @@ import { CreateEventModal } from "@/components/churches/CreateEventModal";
 import { EditChurchModal } from "@/components/churches/EditChurchModal";
 import { AnnouncementFeed } from "@/components/churches/AnnouncementFeed";
 import { MembersPanel } from "@/components/churches/MembersPanel";
+import { MinistryTeamsList } from "@/components/churches/MinistryTeamsList";
+import { ChurchPlusGate } from "@/components/churches/ChurchPlusGate";
+import { createRawAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import type { Church as ChurchType } from "@/types/database";
 
@@ -47,12 +50,15 @@ export default async function ChurchDetailPage({ params, searchParams }: PagePro
 
   const today = new Date().toISOString().split("T")[0];
 
-  const [churchResult, myMemberResult] = await Promise.all([
+  const rawAdmin = createRawAdminClient();
+  const [churchResult, myMemberResult, churchSubResult] = await Promise.all([
     supabase.from("churches").select("*").eq("id", id).single(),
     user
       ? supabase.from("church_members").select("role").eq("church_id", id).eq("user_id", user.id).single()
       : Promise.resolve({ data: null }),
+    rawAdmin.from("church_subscriptions").select("plan, status").eq("church_id", id).maybeSingle(),
   ]);
+  const isChurchPlus = churchSubResult.data?.plan === "plus" && churchSubResult.data?.status === "active";
 
   const church = churchResult.data as ChurchType | null;
   if (!church) notFound();
@@ -100,9 +106,13 @@ export default async function ChurchDetailPage({ params, searchParams }: PagePro
   }>;
 
   const TABS = [
-    { key: "events",        label: "Events",       icon: Calendar },
-    { key: "announcements", label: "Announcements", icon: Megaphone },
-    ...(isAdmin ? [{ key: "members", label: "Members", icon: ShieldCheck }] : []),
+    { key: "events",        label: "Events",        icon: Calendar    },
+    { key: "announcements", label: "Announcements", icon: Megaphone   },
+    ...(isMember ? [{ key: "teams", label: "Teams", icon: Users }] : []),
+    ...(isAdmin  ? [
+      { key: "members",  label: "Members",    icon: ShieldCheck },
+      { key: "analytics",label: "Analytics",  icon: BarChart3   },
+    ] : []),
   ];
 
   return (
@@ -257,6 +267,36 @@ export default async function ChurchDetailPage({ params, searchParams }: PagePro
               currentUserId={user!.id}
               members={members}
             />
+          )}
+
+          {/* Teams tab (all members) */}
+          {tab === "teams" && isMember && (
+            isChurchPlus ? (
+              <MinistryTeamsList churchId={church.id} isAdmin={isAdmin} />
+            ) : (
+              <ChurchPlusGate churchId={church.id} featureName="Ministry Teams">
+                <MinistryTeamsList churchId={church.id} isAdmin={isAdmin} />
+              </ChurchPlusGate>
+            )
+          )}
+
+          {/* Analytics tab (admin only) */}
+          {tab === "analytics" && isAdmin && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Full analytics dashboard</p>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/bibleapp/community/churches/${church.id}/analytics`}>
+                    <BarChart3 className="h-4 w-4 mr-1" /> Open Dashboard
+                  </Link>
+                </Button>
+              </div>
+              {!isChurchPlus && (
+                <ChurchPlusGate churchId={church.id} featureName="Church Analytics">
+                  <div className="h-24 bg-muted rounded-xl" />
+                </ChurchPlusGate>
+              )}
+            </div>
           )}
         </div>
 
