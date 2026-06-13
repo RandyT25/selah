@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Shield, Zap, BookOpen, FileText, Headphones, BarChart3, Loader2, Bell } from "lucide-react";
+import { Sparkles, Shield, Zap, BookOpen, FileText, Headphones, BarChart3, Loader2, Bell, Check, X } from "lucide-react";
 import { PricingCard } from "@/components/billing/PricingCard";
 import { WaitlistForm } from "@/components/billing/WaitlistForm";
 import { usePremium } from "@/hooks/usePremium";
@@ -16,6 +16,19 @@ const FEATURE_HIGHLIGHTS = [
   { icon: Headphones, label: "Offline Audio",       sub: "Listen without internet"         },
   { icon: BarChart3,  label: "Growth Dashboard",    sub: "See your spiritual progress"     },
   { icon: Shield,     label: "Support the Mission", sub: "Keep Selah free for everyone"    },
+];
+
+const COMPARISON_ROWS: { label: string; free: string | boolean; premium: string | boolean }[] = [
+  { label: "Bible reading (all versions)",  free: true,        premium: true        },
+  { label: "Daily devotionals",            free: true,        premium: true        },
+  { label: "Prayer community",             free: true,        premium: true        },
+  { label: "Journal (unlimited entries)",  free: true,        premium: true        },
+  { label: "Church community",             free: true,        premium: true        },
+  { label: "AI Bible assistant",           free: "3 / day",   premium: "Unlimited" },
+  { label: "Reading plans",               free: "Free plans", premium: "All plans" },
+  { label: "Spiritual growth dashboard",  free: false,       premium: true        },
+  { label: "PDF journal export",          free: false,       premium: true        },
+  { label: "Offline audio",              free: false,       premium: true        },
 ];
 
 interface Props {
@@ -75,6 +88,44 @@ export function UpgradePageClient({ paymentsEnabled }: Props) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Comparison table */}
+      <div className="overflow-hidden rounded-xl border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left px-4 py-3 font-semibold text-muted-foreground w-1/2">Feature</th>
+              <th className="text-center px-4 py-3 font-semibold w-1/4">Free</th>
+              <th className="text-center px-4 py-3 font-semibold w-1/4 text-amber-600 dark:text-amber-400">Premium</th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARISON_ROWS.map((row, i) => (
+              <tr key={row.label} className={i % 2 === 0 ? "bg-background" : "bg-muted/30"}>
+                <td className="px-4 py-2.5 text-muted-foreground">{row.label}</td>
+                <td className="px-4 py-2.5 text-center">
+                  {typeof row.free === "boolean" ? (
+                    row.free
+                      ? <Check className="h-4 w-4 text-green-500 mx-auto" />
+                      : <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">{row.free}</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5 text-center">
+                  {typeof row.premium === "boolean" ? (
+                    row.premium
+                      ? <Check className="h-4 w-4 text-amber-500 mx-auto" />
+                      : <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
+                  ) : (
+                    <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">{row.premium}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Pricing / waitlist section */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, BookOpen, RotateCcw, Loader2 } from "lucide-react";
+import { Send, Sparkles, BookOpen, RotateCcw, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils/cn";
 import type { AIMessage } from "@/types/app";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import Link from "next/link";
 
 const SUGGESTED_PROMPTS = [
   "What does John 3:16 mean?",
@@ -27,6 +28,7 @@ export function AIAssistant() {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const loadingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +66,8 @@ export function AIAssistant() {
         const body = await response.json().catch(() => ({}));
         if (response.status === 429 || body.code === "RATE_LIMITED") {
           capture("ai_limit_reached", { limit: body.limit ?? 3 });
+          setRateLimited(true);
+          return;
         }
         throw new Error(body.detail || body.error || "AI request failed");
       }
@@ -228,34 +232,54 @@ export function AIAssistant() {
         )}
       </ScrollArea>
 
-      {/* Input */}
+      {/* Input / rate-limit gate */}
       <div className="px-4 pb-4 pt-2 border-t">
-        <div className="flex gap-2 items-end">
-          <Textarea
-            placeholder="Ask about any Bible verse, passage, or theological question..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="min-h-[52px] max-h-32 resize-none"
-            disabled={loading}
-          />
-          <Button
-            variant="gold"
-            size="icon"
-            onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            className="shrink-0 h-[52px] w-[52px]"
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Selah AI can make mistakes. Always verify with Scripture.
-        </p>
+        {rateLimited ? (
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 p-4 flex flex-col items-center text-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm">You&apos;ve used your 3 free questions today</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Upgrade to Premium for unlimited AI Bible study — no daily cap.
+              </p>
+            </div>
+            <Button variant="gold" size="sm" asChild>
+              <Link href="/bibleapp/upgrade">Unlock Unlimited AI</Link>
+            </Button>
+            <p className="text-xs text-muted-foreground">Resets at midnight · Free limit: 3/day</p>
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2 items-end">
+              <Textarea
+                placeholder="Ask about any Bible verse, passage, or theological question..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="min-h-[52px] max-h-32 resize-none"
+                disabled={loading}
+              />
+              <Button
+                variant="gold"
+                size="icon"
+                onClick={() => sendMessage()}
+                disabled={!input.trim() || loading}
+                className="shrink-0 h-[52px] w-[52px]"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              Selah AI can make mistakes. Always verify with Scripture.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ import type { Profile, PlanProgress, ReadingPlan, JournalEntry, PrayerRequest, D
 import { DailyCheckIn } from "@/components/dashboard/DailyCheckIn";
 import { DashboardBanner } from "@/components/dashboard/DashboardBanner";
 import { PWAInstallBanner } from "@/components/shared/PWAInstallBanner";
+import { UpgradeBanner } from "@/components/billing/UpgradeBanner";
 import { getServerT } from "@/lib/utils/server-i18n";
 import { fetchAytVerse, localizeVerseReference } from "@/lib/bible/ayt";
 import { translateAllToId } from "@/lib/utils/translate";
@@ -175,6 +176,7 @@ export default async function DashboardPage() {
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
       <DailyCheckIn />
       <PWAInstallBanner />
+      <UpgradeBanner />
       <DashboardBanner />
       {/* Greeting */}
       <div className="flex items-start justify-between">

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { canAccess } from "@/lib/billing/features";
 import Link from "next/link";
 import { Calendar, Users, Star, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,14 +20,11 @@ export default async function PlansPage() {
   const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [plansResult, progressResult, subResult] = await Promise.all([
+  const [plansResult, progressResult, isPremium] = await Promise.all([
     supabase.from("reading_plans").select("*").eq("is_published", true).order("is_featured", { ascending: false }).order("subscriber_count", { ascending: false }),
     user ? supabase.from("plan_progress").select("*, reading_plans(*)").eq("user_id", user.id) : Promise.resolve({ data: [] }),
-    user ? supabase.from("subscriptions").select("plan, status").eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+    canAccess("premium_plans"),
   ]);
-
-  const sub = subResult.data;
-  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
 
   const plans = (plansResult.data ?? []) as ReadingPlan[];
   const myProgress = (progressResult.data ?? []) as unknown as ProgressWithPlan[];

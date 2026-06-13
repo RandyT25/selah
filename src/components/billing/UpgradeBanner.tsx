@@ -4,23 +4,29 @@ import { useState, useEffect } from "react";
 import { Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { usePremium } from "@/hooks/usePremium";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const DISMISSED_KEY = "selah_upgrade_banner_dismissed";
 
 export function UpgradeBanner() {
+  const { isPremium } = usePremium();
+  const { capture } = useAnalytics();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (isPremium) return;
     const dismissed = localStorage.getItem(DISMISSED_KEY);
     if (!dismissed) setVisible(true);
-  }, []);
+  }, [isPremium]);
 
   const dismiss = () => {
     localStorage.setItem(DISMISSED_KEY, "1");
+    capture("upgrade_banner_dismissed");
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || isPremium) return null;
 
   return (
     <div className={cn(
@@ -36,7 +42,7 @@ export function UpgradeBanner() {
           Unlock Premium features
         </p>
         <p className="text-xs text-amber-700 dark:text-amber-500 truncate">
-          Unlimited AI, PDF export, growth dashboard &amp; more — from $3.99/mo
+          Unlimited AI, PDF export, growth dashboard &amp; more
         </p>
       </div>
       <Link

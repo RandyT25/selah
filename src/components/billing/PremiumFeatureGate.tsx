@@ -9,11 +9,13 @@ interface Props {
   featureKey: string;
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  title?: string;
+  description?: string;
   /** Show a soft overlay instead of replacing children */
   overlay?: boolean;
 }
 
-export function PremiumFeatureGate({ featureKey, children, fallback, overlay = false }: Props) {
+export function PremiumFeatureGate({ featureKey, children, fallback, title, description, overlay = false }: Props) {
   const { canAccess, upgrade } = usePremium();
 
   if (canAccess(featureKey)) return <>{children}</>;
@@ -44,8 +46,8 @@ export function PremiumFeatureGate({ featureKey, children, fallback, overlay = f
         <Lock className="h-5 w-5 text-amber-600" />
       </div>
       <div>
-        <p className="font-semibold text-sm">Premium Feature</p>
-        <p className="text-xs text-muted-foreground mt-0.5">Upgrade to unlock this feature.</p>
+        <p className="font-semibold text-sm">{title ?? "Premium Feature"}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description ?? "Upgrade to unlock this feature."}</p>
       </div>
       <Button size="sm" variant="gold" onClick={upgrade}>Upgrade to Premium</Button>
     </div>
