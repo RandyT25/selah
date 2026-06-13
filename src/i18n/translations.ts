@@ -182,6 +182,7 @@ export const translations = {
       prayer: "Prayer",
       community: "Community",
       settings: "Settings",
+      growth: "Growth",
     },
     community: {
       title: "Community",
@@ -403,6 +404,7 @@ export const translations = {
       prayer: "Doa",
       community: "Komunitas",
       settings: "Pengaturan",
+      growth: "Pertumbuhan",
     },
     community: {
       title: "Komunitas",

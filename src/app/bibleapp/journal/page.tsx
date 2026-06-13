@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { JournalEntry } from "@/types/database";
 import { PenLine, Plus, Search, Filter } from "lucide-react";
+import { JournalExportButton } from "@/components/premium/JournalExportButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,12 +49,15 @@ export default async function JournalPage() {
             {count ?? 0} entries · {totalWords.toLocaleString()} words · {journalDays} days
           </p>
         </div>
-        <Button variant="gold" asChild>
-          <Link href="/bibleapp/journal/new">
-            <Plus className="h-4 w-4" />
-            {t("journal", "new_entry")}
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <JournalExportButton />
+          <Button variant="gold" asChild>
+            <Link href="/bibleapp/journal/new">
+              <Plus className="h-4 w-4" />
+              {t("journal", "new_entry")}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

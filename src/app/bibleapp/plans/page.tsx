@@ -1,12 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Calendar, Users, Star } from "lucide-react";
+import { Calendar, Users, Star, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import type { ReadingPlan, PlanProgress } from "@/types/database";
 import { getServerT } from "@/lib/utils/server-i18n";
+import { PremiumPlanCard } from "@/components/premium/PremiumPlanCard";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Reading Plans" };
@@ -17,10 +19,14 @@ export default async function PlansPage() {
   const [supabase, t] = await Promise.all([createClient(), getServerT()]);
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [plansResult, progressResult] = await Promise.all([
+  const [plansResult, progressResult, subResult] = await Promise.all([
     supabase.from("reading_plans").select("*").eq("is_published", true).order("is_featured", { ascending: false }).order("subscriber_count", { ascending: false }),
     user ? supabase.from("plan_progress").select("*, reading_plans(*)").eq("user_id", user.id) : Promise.resolve({ data: [] }),
+    user ? supabase.from("subscriptions").select("plan, status").eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
   ]);
+
+  const sub = subResult.data;
+  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
 
   const plans = (plansResult.data ?? []) as ReadingPlan[];
   const myProgress = (progressResult.data ?? []) as unknown as ProgressWithPlan[];
@@ -40,16 +46,29 @@ export default async function PlansPage() {
   const PlanCard = ({ plan, progress }: { plan: ReadingPlan; progress?: ProgressWithPlan }) => {
     const isEnrolled = enrolledPlanIds.has(plan.id);
     const pct = progress ? Math.round((progress.completed_days.length / plan.duration_days) * 100) : 0;
+    const isPremiumPlan = (plan as ReadingPlan & { is_premium?: boolean }).is_premium;
+    const isLocked = isPremiumPlan && !isPremium;
+
+    if (isLocked) {
+      return <PremiumPlanCard plan={plan} />;
+    }
 
     return (
       <Card className="card-hover h-full flex flex-col">
         <CardContent className="p-5 flex-1 flex flex-col">
-          {plan.is_featured && (
-            <div className="flex items-center gap-1 text-primary mb-2">
-              <Star className="h-3.5 w-3.5 fill-primary" />
-              <span className="text-xs font-semibold">{t("plans", "featured").replace(" Plans", "")}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            {plan.is_featured && (
+              <div className="flex items-center gap-1 text-primary">
+                <Star className="h-3.5 w-3.5 fill-primary" />
+                <span className="text-xs font-semibold">{t("plans", "featured").replace(" Plans", "")}</span>
+              </div>
+            )}
+            {isPremiumPlan && (
+              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0 text-[10px] h-4 px-1.5">
+                Premium
+              </Badge>
+            )}
+          </div>
           <h3 className="font-semibold text-base mb-1 line-clamp-2">{plan.title}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3 flex-1">{plan.description}</p>
 

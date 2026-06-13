@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createRawAdminClient } from "@/lib/supabase/server";
 import { AI_SYSTEM_PROMPTS } from "@/lib/ai/provider";
 import type { AIMessage } from "@/types/app";
+
+const FREE_DAILY_LIMIT = 10;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -19,6 +21,45 @@ export async function POST(request: Request) {
       { error: "AI service not configured. Add GEMINI_API_KEY to your environment variables." },
       { status: 503 }
     );
+  }
+
+  // Check subscription plan
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const isPremium = (sub?.plan === "premium" || sub?.plan === "annual") && sub?.status === "active";
+
+  // Rate limiting — free users only
+  if (!isPremium) {
+    const rawAdmin = createRawAdminClient();
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { data: usageRow } = await rawAdmin
+      .from("ai_usage")
+      .select("query_count")
+      .eq("user_id", user.id)
+      .eq("date", today)
+      .maybeSingle();
+
+    const currentCount = usageRow?.query_count ?? 0;
+
+    if (currentCount >= FREE_DAILY_LIMIT) {
+      return NextResponse.json(
+        { error: "Daily limit reached", code: "RATE_LIMITED", limit: FREE_DAILY_LIMIT },
+        { status: 429 }
+      );
+    }
+
+    // Increment counter (upsert so it works on first use each day)
+    await rawAdmin.from("ai_usage").upsert({
+      user_id:     user.id,
+      date:        today,
+      query_count: currentCount + 1,
+      token_count: 0,
+    }, { onConflict: "user_id,date" }).select();
   }
 
   // Convert messages to Gemini native format (role: user | model)
@@ -39,7 +80,6 @@ export async function POST(request: Request) {
     },
   };
 
-  // Use Gemini native streaming endpoint
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`,
     {

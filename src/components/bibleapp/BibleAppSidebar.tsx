@@ -11,6 +11,7 @@ import {
   HandHeart,
   Users,
   Settings,
+  TrendingUp,
 } from "lucide-react";
 import { NotificationBell } from "@/components/bibleapp/NotificationBell";
 import { cn } from "@/lib/utils/cn";
@@ -26,12 +27,13 @@ import { getInitials } from "@/lib/utils/format";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const NAV_KEYS = [
-  { key: "home", href: "/bibleapp/dashboard", icon: LayoutDashboard },
-  { key: "bible", href: "/bibleapp/bible", icon: BookOpen },
-  { key: "plans", href: "/bibleapp/plans", icon: Calendar },
-  { key: "journal", href: "/bibleapp/journal", icon: NotebookPen },
-  { key: "prayer", href: "/bibleapp/community/prayer", icon: HandHeart },
-  { key: "community", href: "/bibleapp/community", icon: Users },
+  { key: "home",      href: "/bibleapp/dashboard",        icon: LayoutDashboard },
+  { key: "bible",     href: "/bibleapp/bible",            icon: BookOpen },
+  { key: "plans",     href: "/bibleapp/plans",            icon: Calendar },
+  { key: "journal",   href: "/bibleapp/journal",          icon: NotebookPen },
+  { key: "prayer",    href: "/bibleapp/community/prayer", icon: HandHeart },
+  { key: "community", href: "/bibleapp/community",        icon: Users },
+  { key: "growth",    href: "/bibleapp/growth",           icon: TrendingUp },
 ] as const;
 
 interface CompactSidebarProps {

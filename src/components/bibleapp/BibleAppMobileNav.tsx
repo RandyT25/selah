@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   NotebookPen,
   Users,
-  Settings,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -17,7 +17,7 @@ const MOBILE_NAV = [
   { key: "bible",     href: "/bibleapp/bible",       icon: BookOpen },
   { key: "journal",   href: "/bibleapp/journal",     icon: NotebookPen },
   { key: "community", href: "/bibleapp/community",   icon: Users },
-  { key: "settings",  href: "/bibleapp/settings",    icon: Settings },
+  { key: "growth",    href: "/bibleapp/growth",      icon: TrendingUp },
 ] as const;
 
 export function BibleAppMobileNav() {
