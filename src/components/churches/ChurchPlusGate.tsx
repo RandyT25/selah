@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { usePaymentProvider } from "@/hooks/usePaymentProvider";
 
 interface Props {
   churchId: string;
@@ -16,18 +17,13 @@ interface Props {
 export function ChurchPlusGate({ churchId, featureName, children }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { churchPlus, pricing } = usePaymentProvider();
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/billing/church/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ churchId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      router.push(data.url);
+      const url = await churchPlus(churchId);
+      router.push(url);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to start checkout");
       setLoading(false);
@@ -50,7 +46,7 @@ export function ChurchPlusGate({ churchId, featureName, children }: Props) {
           </p>
           <Button variant="gold" size="sm" onClick={handleUpgrade} disabled={loading} className="gap-1.5">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            Upgrade to Church Plus — $9.99/mo
+            {pricing.provider === "xendit" ? "Upgrade ke Church Plus — Rp 149.000/bln" : "Upgrade to Church Plus — $9.99/mo"}
           </Button>
         </div>
       </div>

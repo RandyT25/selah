@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { PREMIUM_FEATURES } from "@/lib/billing/plans";
+import { usePaymentProvider } from "@/hooks/usePaymentProvider";
 import { toast } from "sonner";
 
 interface Props {
@@ -19,18 +20,13 @@ export function UpgradeModal({ open, onOpenChange, featureName }: Props) {
   const [selected, setSelected] = useState<"monthly" | "annual">("annual");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { pricing, checkout } = usePaymentProvider();
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selected }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      router.push(data.url);
+      const url = await checkout(selected);
+      router.push(url);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to start checkout");
       setLoading(false);
@@ -61,8 +57,8 @@ export function UpgradeModal({ open, onOpenChange, featureName }: Props) {
         {/* Plan toggle */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           {[
-            { key: "monthly" as const, label: "$3.99", sub: "per month" },
-            { key: "annual"  as const, label: "$29.99", sub: "per year · save 37%" },
+            { key: "monthly" as const, label: pricing.monthly, sub: pricing.provider === "xendit" ? "per bulan" : "per month" },
+            { key: "annual"  as const, label: pricing.annual,  sub: `per ${pricing.provider === "xendit" ? "tahun" : "year"} · ${pricing.annualSub}` },
           ].map((opt) => (
             <button
               key={opt.key}
@@ -79,15 +75,18 @@ export function UpgradeModal({ open, onOpenChange, featureName }: Props) {
             </button>
           ))}
         </div>
+        {pricing.provider === "xendit" && (
+          <p className="text-[10px] text-muted-foreground text-center mb-3">GoPay · OVO · DANA · Transfer Bank · QRIS</p>
+        )}
 
         <Button variant="gold" className="w-full" onClick={handleUpgrade} disabled={loading}>
           {loading
             ? <Loader2 className="h-4 w-4 animate-spin" />
-            : `Start Premium — ${selected === "monthly" ? "$3.99/mo" : "$29.99/yr"}`
+            : `${pricing.provider === "xendit" ? "Mulai" : "Start"} Premium — ${selected === "monthly" ? pricing.monthly : pricing.annual}`
           }
         </Button>
         <p className="text-[10px] text-muted-foreground text-center mt-2">
-          Cancel anytime. Bible reading is always free.
+          {pricing.provider === "xendit" ? "Batalkan kapan saja. Membaca Alkitab selalu gratis." : "Cancel anytime. Bible reading is always free."}
         </p>
       </DialogContent>
     </Dialog>

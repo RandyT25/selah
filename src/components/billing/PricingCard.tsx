@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { PREMIUM_FEATURES, FREE_FEATURES } from "@/lib/billing/plans";
+import { usePaymentProvider } from "@/hooks/usePaymentProvider";
 import { toast } from "sonner";
 
 interface Props {
@@ -13,31 +14,26 @@ interface Props {
   highlighted?: boolean;
 }
 
-const COPY = {
-  free:    { label: "Free",    price: "$0",     period: "forever",  cta: "Current plan" },
-  monthly: { label: "Premium", price: "$3.99",  period: "/ month",  cta: "Start Monthly" },
-  annual:  { label: "Premium", price: "$29.99", period: "/ year",   cta: "Start Annual — Save 37%" },
-};
-
 export function PricingCard({ variant, highlighted = false }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const copy = COPY[variant];
+  const { pricing, checkout } = usePaymentProvider();
   const isFree = variant === "free";
+
+  const COPY = {
+    free:    { label: "Free",    price: "$0",          period: "selamanya",   cta: "Paket saat ini" },
+    monthly: { label: "Premium", price: pricing.monthly, period: "/ bulan",   cta: "Mulai Bulanan" },
+    annual:  { label: "Premium", price: pricing.annual,  period: "/ tahun",   cta: `Mulai Tahunan — ${pricing.annualSub}` },
+  };
+  const copy = COPY[variant];
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: variant }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      router.push(data.url);
+      const url = await checkout(variant as "monthly" | "annual");
+      router.push(url);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to start checkout");
+      toast.error(e instanceof Error ? e.message : "Gagal memulai pembayaran");
       setLoading(false);
     }
   };
@@ -51,7 +47,7 @@ export function PricingCard({ variant, highlighted = false }: Props) {
       {highlighted && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-            Most Popular
+            Terpopuler
           </span>
         </div>
       )}
@@ -64,8 +60,11 @@ export function PricingCard({ variant, highlighted = false }: Props) {
         </div>
         {variant === "annual" && (
           <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
-            Only $2.50/month — save $17.89/year
+            {pricing.provider === "xendit" ? "Hanya Rp 37.417/bulan" : "Only $2.50/month — save $17.89/year"}
           </p>
+        )}
+        {pricing.provider === "xendit" && !isFree && (
+          <p className="text-[10px] text-muted-foreground mt-0.5">GoPay · OVO · DANA · Transfer Bank · QRIS</p>
         )}
       </div>
 
@@ -77,7 +76,7 @@ export function PricingCard({ variant, highlighted = false }: Props) {
           </li>
         )) : (
           <>
-            <li className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Everything in Free, plus:</li>
+            <li className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Semua fitur Gratis, plus:</li>
             {PREMIUM_FEATURES.map((f) => (
               <li key={f.key} className="flex items-start gap-2 text-sm">
                 <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
