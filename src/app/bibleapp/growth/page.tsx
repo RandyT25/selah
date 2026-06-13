@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GrowthStatsCard } from "@/components/premium/GrowthStatsCard";
 import { GrowthChartSection } from "@/components/premium/GrowthChartSection";
+import { GrowthTeaserSection } from "@/components/premium/GrowthTeaserSection";
 import { formatDistanceToNow } from "date-fns";
 import type { Metadata } from "next";
 
@@ -51,6 +52,11 @@ export default async function GrowthPage() {
           <Link href="/bibleapp/upgrade">Unlock Growth Dashboard</Link>
         </Button>
         <p className="text-xs text-muted-foreground">Bible reading is always free. Premium unlocks analytics.</p>
+
+        {/* Teaser chart — shows blurred demo data to motivate upgrade */}
+        <div className="w-full text-left">
+          <GrowthTeaserSection />
+        </div>
       </div>
     );
   }

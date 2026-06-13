@@ -96,6 +96,29 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+// Offline chapter pre-caching — triggered by premium users
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "CACHE_CHAPTERS") return;
+  const urls = Array.isArray(event.data.urls) ? event.data.urls : [];
+  event.waitUntil(
+    caches.open(BIBLE_CACHE).then(async (cache) => {
+      for (const url of urls) {
+        try {
+          const req = new Request(url, { credentials: "include" });
+          const existing = await cache.match(req);
+          if (existing) continue;
+          const res = await fetch(req);
+          if (res.ok) await cache.put(req, res);
+        } catch { /* skip — offline or fetch failed */ }
+      }
+      // Notify the client when done
+      if (event.source) {
+        event.source.postMessage({ type: "CACHE_CHAPTERS_DONE", urls });
+      }
+    })
+  );
+});
+
 // Push notifications
 self.addEventListener("push", (event) => {
   const data = event.data?.json() ?? {};
