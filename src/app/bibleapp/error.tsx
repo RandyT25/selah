@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import posthog from "posthog-js";
 
 export default function BibleAppError({
   error,
@@ -13,6 +14,7 @@ export default function BibleAppError({
 }) {
   useEffect(() => {
     console.error("[bibleapp]", error.message, error.digest);
+    try { posthog.captureException(error, { section: "bibleapp" }); } catch { /* not init */ }
   }, [error]);
 
   return (

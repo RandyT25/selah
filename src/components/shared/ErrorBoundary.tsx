@@ -1,11 +1,13 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
+import posthog from "posthog-js";
 import { SectionError } from "./SectionError";
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  context?: string;
 }
 
 interface State {
@@ -24,7 +26,13 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
-    console.error("[ErrorBoundary]", error.message);
+    console.error(`[ErrorBoundary${this.props.context ? `:${this.props.context}` : ""}]`, error.message);
+    // Report to PostHog — free alternative to Sentry
+    try {
+      posthog.captureException(error, { context: this.props.context ?? "unknown" });
+    } catch {
+      // PostHog not initialised yet (e.g. during SSR)
+    }
   }
 
   render() {
