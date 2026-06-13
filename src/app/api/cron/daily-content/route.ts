@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const force = new URL(request.url).searchParams.get("force") === "1";
   const admin = createAdminClient();
   const today = new Date().toISOString().split("T")[0];
   const dayOfYear = Math.floor(
@@ -85,7 +86,9 @@ export async function GET(request: Request) {
     .gte("created_at", todayStart);
 
   const alreadySet = new Set((alreadyNotified ?? []).map((r) => r.user_id as string));
-  const targets = allPrefs.filter((p) => !alreadySet.has(p.user_id as string));
+  const targets = force
+    ? allPrefs
+    : allPrefs.filter((p) => !alreadySet.has(p.user_id as string));
 
   if (targets.length === 0) {
     return NextResponse.json({ ok: true, notified: 0, reason: "already sent today" });
