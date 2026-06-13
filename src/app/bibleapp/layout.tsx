@@ -6,6 +6,7 @@ import { BibleAppHeader } from "@/components/bibleapp/BibleAppHeader";
 import { AppShell } from "@/components/bibleapp/AppShell";
 import { PushPermission } from "@/components/bibleapp/PushPermission";
 import type { Language } from "@/i18n/translations";
+import type { Plan, SubscriptionStatus } from "@/lib/billing/plans";
 
 export default async function BibleAppLayout({
   children,
@@ -20,24 +21,39 @@ export default async function BibleAppLayout({
     return <>{children}</>;
   }
 
-  const [profileResult, unreadResult, cookieStore] = await Promise.all([
+  const [profileResult, unreadResult, subscriptionResult, cookieStore] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase
       .from("notifications")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .eq("is_read", false),
+    supabase
+      .from("subscriptions")
+      .select("plan, status, current_period_end")
+      .eq("user_id", user.id)
+      .maybeSingle(),
     cookies(),
   ]);
 
   const profile = profileResult.data;
   const unreadCount = unreadResult.count ?? 0;
+  const sub = subscriptionResult.data;
   const lang = (cookieStore.get("selah_language")?.value ?? "") as Language;
   const initialLanguage: Language = lang === "id" ? "id" : "en";
   const onboardingCompleted = profile?.onboarding_completed ?? true;
+  const initialPlan: Plan = (sub?.plan as Plan) ?? "free";
+  const initialStatus: SubscriptionStatus = (sub?.status as SubscriptionStatus) ?? "active";
+  const initialPeriodEnd: string | null = sub?.current_period_end ?? null;
 
   return (
-    <AppShell initialLanguage={initialLanguage} onboardingCompleted={onboardingCompleted}>
+    <AppShell
+      initialLanguage={initialLanguage}
+      onboardingCompleted={onboardingCompleted}
+      initialPlan={initialPlan}
+      initialStatus={initialStatus}
+      initialPeriodEnd={initialPeriodEnd}
+    >
       <div className="flex min-h-screen bg-background">
         <BibleAppSidebar profile={profile} userId={user.id} unreadNotifications={unreadCount} />
         <div className="flex-1 flex flex-col min-w-0">

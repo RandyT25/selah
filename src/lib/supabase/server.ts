@@ -41,3 +41,16 @@ export function createAdminClient(): ServerClient {
     { auth: { autoRefreshToken: false, persistSession: false } }
   ) as unknown as ServerClient;
 }
+
+// Raw (untyped) admin client for tables added in migrations that haven't been
+// regenerated into the TypeScript types yet (e.g. donations, church_subscriptions).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createRawAdminClient(): any {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set in environment variables");
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    key,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
