@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getDailyFallbackVerse } from "@/lib/bible/fallback-verses";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
   );
 
   // ── 1. Today's verse ────────────────────────────────────────────────────────
-  let verse: { verse_reference: string; verse_text: string } | null = null;
+  // Always send — fall back to the same rotating array the dashboard uses
+  let verse: { verse_reference: string; verse_text: string };
 
   const { data: todayVerse } = await admin
     .from("verse_of_day")
@@ -40,9 +42,9 @@ export async function GET(request: Request) {
       .from("verse_of_day")
       .select("verse_reference, verse_text")
       .order("scheduled_date", { ascending: true });
-    if (allVerses && allVerses.length > 0) {
-      verse = allVerses[dayOfYear % allVerses.length];
-    }
+    verse = allVerses && allVerses.length > 0
+      ? allVerses[dayOfYear % allVerses.length]
+      : getDailyFallbackVerse();
   }
 
   // ── 2. Today's devotional ───────────────────────────────────────────────────
@@ -58,7 +60,7 @@ export async function GET(request: Request) {
     devotional = allDevotionals[dayOfYear % allDevotionals.length];
   }
 
-  if (!verse && !devotional) {
+  if (!verse) {
     return NextResponse.json({ ok: true, skipped: "no content" });
   }
 
@@ -98,15 +100,13 @@ export async function GET(request: Request) {
   const rows: { user_id: string; type: string; title: string; body: string; data: { [key: string]: string } }[] = [];
 
   for (const pref of targets) {
-    if (verse) {
-      rows.push({
-        user_id: pref.user_id as string,
-        type: "verse_of_day",
-        title: verse.verse_reference,
-        body: verse.verse_text.slice(0, 140),
-        data: { verse_reference: verse.verse_reference },
-      });
-    }
+    rows.push({
+      user_id: pref.user_id as string,
+      type: "verse_of_day",
+      title: verse.verse_reference,
+      body: verse.verse_text.slice(0, 140),
+      data: { verse_reference: verse.verse_reference },
+    });
     if (pref.reading_reminder_enabled && devotional) {
       rows.push({
         user_id: pref.user_id as string,
@@ -133,8 +133,8 @@ export async function GET(request: Request) {
     .in("user_id", targetIds);
 
   const pushPayload = JSON.stringify({
-    title: verse ? verse.verse_reference : devotional?.title ?? "Selah",
-    body: verse ? verse.verse_text.slice(0, 120) : devotional?.excerpt?.slice(0, 120) ?? "",
+    title: verse.verse_reference,
+    body: verse.verse_text.slice(0, 120),
     url: "/bibleapp/dashboard",
   });
 

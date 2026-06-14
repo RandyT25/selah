@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Settings, Calendar, Flame, BookOpen, NotebookPen } from "lucide-react";
+import { Settings, Calendar, Flame, BookOpen, NotebookPen, Zap } from "lucide-react";
 import Link from "next/link";
 import type { Profile, PlanProgress, ReadingPlan } from "@/types/database";
 
@@ -37,27 +37,28 @@ export default async function ProfilePage() {
   if (!profile) redirect("/bibleapp/dashboard");
 
   const subscription = profile.subscriptions;
+  const isPremium = Array.isArray(subscription) && subscription.length > 0 && subscription[0].status === "active" && subscription[0].plan !== "free";
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
       {/* Profile Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20">
+      <div className="flex items-start gap-3 mb-8">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <Avatar className="h-16 w-16 shrink-0">
             <AvatarImage src={profile.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+            <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
               {getInitials(profile.full_name ?? profile.email ?? "U")}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold truncate">
               {profile.display_name ?? profile.full_name ?? "User"}
             </h1>
-            <p className="text-muted-foreground">{profile.email}</p>
+            <p className="text-muted-foreground text-sm truncate">{profile.email}</p>
             {profile.bio && (
-              <p className="text-sm mt-2 max-w-sm">{profile.bio}</p>
+              <p className="text-sm mt-1 line-clamp-2">{profile.bio}</p>
             )}
-            <div className="flex items-center gap-3 mt-2 flex-wrap">
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {subscription && Array.isArray(subscription) && subscription.length > 0 && subscription[0].plan !== "free" && (
                 <Badge variant="gold">
                   ✨ {subscription[0].plan === "premium" ? "Premium" : "Annual"}
@@ -73,7 +74,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="outline" size="sm" asChild className="shrink-0">
           <Link href="/bibleapp/settings">
             <Settings className="h-4 w-4 mr-1" />
             {t("profile", "edit_profile")}
@@ -98,6 +99,26 @@ export default async function ProfilePage() {
           </Card>
         ))}
       </div>
+
+      {/* Premium upgrade card for free users */}
+      {!isPremium && (
+        <Card className="mb-6 border-amber-200 dark:border-amber-800 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
+          <CardContent className="p-5 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+              <Zap className="h-5 w-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">Upgrade to Premium</p>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                Unlock unlimited AI study, offline Bible access, journal PDF export, and more.
+              </p>
+              <Button asChild size="sm" variant="gold" className="mt-3">
+                <Link href="/bibleapp/upgrade">See plans</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Completed Plans */}
       {completedPlans && completedPlans.length > 0 && (
