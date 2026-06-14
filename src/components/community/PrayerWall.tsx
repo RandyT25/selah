@@ -241,21 +241,15 @@ export function PrayerWall({ publicPrayers, myPrayers, prayedForIds, userId }: P
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <HandHeart className="h-6 w-6 text-primary" />
-            Prayer Wall
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Pray for one another and share your needs
-          </p>
-        </div>
-        <Button variant="gold" onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Add Prayer
-        </Button>
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <HandHeart className="h-6 w-6 text-primary" />
+          Prayer Wall
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Pray for one another and share your needs
+        </p>
       </div>
 
       <Tabs defaultValue="community">
@@ -347,6 +341,17 @@ export function PrayerWall({ publicPrayers, myPrayers, prayedForIds, userId }: P
           )}
         </TabsContent>
       </Tabs>
+
+      {/* FAB */}
+      {userId && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full bg-primary shadow-lg flex items-center justify-center text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
+          aria-label="Add prayer request"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      )}
 
       {/* Prayer Request Form (create + edit) */}
       <Dialog open={showForm} onOpenChange={(open) => {

@@ -40,7 +40,7 @@ interface NearbyChurch {
 function geoErrorMessage(error: GeolocationPositionError): string {
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      return "Location access was denied. Open your browser settings and allow location for this site.";
+      return "Location not available — you can enter your city manually.";
     case error.POSITION_UNAVAILABLE:
       return "Your location could not be determined. Make sure GPS is enabled on your device.";
     case error.TIMEOUT:
@@ -71,8 +71,31 @@ async function fetchNearbyChurches(lat: number, lng: number): Promise<NearbyChur
   return data ?? [];
 }
 
-export function CreateChurchModal() {
-  const [open, setOpen] = useState(false);
+export type PlaceInitialData = {
+  google_place_id: string;
+  name: string;
+  address: string;
+  city: string;
+  province?: string;
+  latitude: number;
+  longitude: number;
+  website?: string;
+};
+
+interface CreateChurchModalProps {
+  initialData?: PlaceInitialData | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function CreateChurchModal({ initialData, open: controlledOpen, onOpenChange }: CreateChurchModalProps = {}) {
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isControlled ? controlledOpen! : internalOpen;
+  const setIsOpen = isControlled
+    ? onOpenChange!
+    : (v: boolean) => setInternalOpen(v);
+
   const [geoLoading, setGeoLoading] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -87,9 +110,25 @@ export function CreateChurchModal() {
     resolver: zodResolver(schema),
   });
 
+  // Pre-fill form when initialData is provided (from Google Places)
+  useEffect(() => {
+    if (!initialData || !isOpen) return;
+    reset({
+      name: initialData.name,
+      address: initialData.address,
+      city: initialData.city,
+      province: initialData.province ?? "",
+      description: "",
+      denomination: "",
+      pastorName: "",
+      website: initialData.website ?? "",
+    });
+    setCoords({ lat: initialData.latitude, lng: initialData.longitude });
+  }, [initialData, isOpen, reset]);
+
   // Load Google Places autocomplete when modal opens
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey || !addressInputRef.current) return;
 
@@ -125,7 +164,7 @@ export function CreateChurchModal() {
         setNearbyLoading(false);
       });
     });
-  }, [open, setValue]);
+  }, [isOpen, setValue]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -182,6 +221,7 @@ export function CreateChurchModal() {
         logo_url: logoUrl ?? null,
         latitude: coords?.lat ?? null,
         longitude: coords?.lng ?? null,
+        google_place_id: initialData?.google_place_id ?? null,
       }),
     });
     if (!res.ok) {
@@ -195,12 +235,12 @@ export function CreateChurchModal() {
     setCoords(null);
     setLogoUrl(null);
     setNearby([]);
-    setOpen(false);
+    setIsOpen(false);
     router.push(`/bibleapp/community/churches/${church.id}`);
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setIsOpen(false);
     setNearby([]);
     setCoords(null);
     setLogoUrl(null);
@@ -208,12 +248,15 @@ export function CreateChurchModal() {
 
   return (
     <>
-      <Button variant="gold" onClick={() => setOpen(true)}>
-        <Plus className="h-4 w-4 mr-1" />
-        Add Church
-      </Button>
+      {/* Only show trigger button in self-controlled (unmanaged) mode */}
+      {!isControlled && (
+        <Button variant="gold" onClick={() => setIsOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Add Church
+        </Button>
+      )}
 
-      <Dialog open={open} onOpenChange={handleClose}>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Your Church</DialogTitle>
@@ -297,25 +340,12 @@ export function CreateChurchModal() {
               </div>
             </div>
 
-            {/* Location button */}
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleUseMyLocation}
-                disabled={geoLoading}
-                className="gap-1.5 text-xs"
-              >
-                {geoLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
-                {coords ? "Location set ✓" : "Use My Location"}
-              </Button>
-              {coords && (
-                <span className="text-xs text-muted-foreground">
-                  {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
-                </span>
-              )}
-            </div>
+            {coords && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Navigation className="h-3 w-3" />
+                Location: {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+              </p>
+            )}
 
             {/* Nearby churches panel */}
             {(nearbyLoading || nearby.length > 0) && (

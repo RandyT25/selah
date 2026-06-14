@@ -319,30 +319,18 @@ export default function SettingsPage() {
 
         {/* Account */}
         <TabsContent value="account">
-          <div className="space-y-4">
-            <Card>
-              <CardHeader><CardTitle>{t("settings", "subscription")}</CardTitle></CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{t("settings", "free_plan")}</p>
-                    <p className="text-sm text-muted-foreground">{t("settings", "free_plan_desc")}</p>
-                  </div>
-                  <Button variant="gold">{t("settings", "upgrade")}</Button>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-destructive/20">
-              <CardHeader><CardTitle className="text-destructive">{t("settings", "danger_zone")}</CardTitle></CardHeader>
-              <CardContent>
-                <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                  onClick={async () => { await supabase.auth.signOut(); router.push("/"); }}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {t("settings", "sign_out")}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <Button
+                variant="outline"
+                className="w-full h-12 text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40"
+                onClick={async () => { await supabase.auth.signOut(); router.push("/"); }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {t("settings", "sign_out")}
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

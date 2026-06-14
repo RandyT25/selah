@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Church, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { CreateChurchModal } from "@/components/churches/CreateChurchModal";
+import { ChurchActions } from "@/components/churches/ChurchActions";
 import { ChurchesListWithLocation } from "@/components/churches/ChurchesListWithLocation";
 import type { Church as ChurchType } from "@/types/database";
 import type { Metadata } from "next";
@@ -36,17 +36,15 @@ export default async function ChurchesPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Church className="h-6 w-6 text-primary" />
-            Church Directory
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Find and connect with churches in your community
-          </p>
-        </div>
-        {user && <CreateChurchModal />}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Church className="h-6 w-6 text-primary" />
+          Church Directory
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1 mb-3">
+          Find and connect with churches in your community
+        </p>
+        <ChurchActions isLoggedIn={!!user} />
       </div>
 
       {/* Search */}

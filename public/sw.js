@@ -125,7 +125,6 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title ?? "Selah", {
       body: data.body ?? "Time for your daily Scripture reading.",
-      icon: "/icons/notification-icon.png",
       badge: "/icons/badge-96x96.png",
       data: { url: data.url ?? "/bibleapp/dashboard" },
       actions: [

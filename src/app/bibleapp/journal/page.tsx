@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { JournalEntry } from "@/types/database";
-import { PenLine, Plus, Search, Filter } from "lucide-react";
-import { JournalExportButton } from "@/components/premium/JournalExportButton";
+import { PenLine, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,24 +39,13 @@ export default async function JournalPage() {
   const journalDays = new Set<string>(entries.map(e => e.created_at.split("T")[0])).size;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{t("journal", "my_journal")}</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {count ?? 0} entries · {totalWords.toLocaleString()} words · {journalDays} days
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <JournalExportButton />
-          <Button variant="gold" asChild>
-            <Link href="/bibleapp/journal/new">
-              <Plus className="h-4 w-4" />
-              {t("journal", "new_entry")}
-            </Link>
-          </Button>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{t("journal", "my_journal")}</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          {count ?? 0} entries · {totalWords.toLocaleString()} words · {journalDays} days
+        </p>
       </div>
 
       {/* Stats */}
@@ -75,6 +63,15 @@ export default async function JournalPage() {
           </Card>
         ))}
       </div>
+
+      {/* FAB */}
+      <Link
+        href="/bibleapp/journal/new"
+        className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full bg-primary shadow-lg flex items-center justify-center text-primary-foreground hover:opacity-90 active:scale-95 transition-all"
+        aria-label="New journal entry"
+      >
+        <Plus className="h-6 w-6" />
+      </Link>
 
       {/* Entries */}
       {entries.length > 0 ? (
