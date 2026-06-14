@@ -19,16 +19,16 @@ const FEATURE_HIGHLIGHTS = [
 ];
 
 const COMPARISON_ROWS: { label: string; free: string | boolean; premium: string | boolean }[] = [
-  { label: "Bible reading (all versions)",  free: true,        premium: true        },
+  { label: "Bible reading (KJV + AYT)",    free: true,        premium: true        },
   { label: "Daily devotionals",            free: true,        premium: true        },
   { label: "Prayer community",             free: true,        premium: true        },
   { label: "Journal (unlimited entries)",  free: true,        premium: true        },
   { label: "Church community",             free: true,        premium: true        },
-  { label: "AI Bible assistant",           free: "3 / day",   premium: "Unlimited" },
-  { label: "Reading plans",               free: "Free plans", premium: "All plans" },
-  { label: "Spiritual growth dashboard",  free: false,       premium: true        },
+  { label: "Growth dashboard & streaks",   free: true,        premium: true        },
+  { label: "AI Bible assistant",           free: "10 / day",  premium: "Unlimited" },
+  { label: "Reading plans",               free: "3 plans",   premium: "Unlimited" },
   { label: "PDF journal export",          free: false,       premium: true        },
-  { label: "Offline audio",              free: false,       premium: true        },
+  { label: "Audio Bible (OT + NT)",       free: false,       premium: true        },
 ];
 
 interface Props {

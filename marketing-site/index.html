@@ -821,13 +821,11 @@
         </a>
         <ul class="space-y-2.5 flex-1">
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Everything in Free</li>
-          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>More Bible translations</li>
-          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Unlimited reading plans</li>
+          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Unlimited reading plans + full catalog</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Unlimited AI Bible study</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Human-recorded Audio Bible (OT + NT)</li>
+          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Playback speed control (0.5× – 2×)</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Journal export (PDF &amp; Markdown)</li>
-          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Church admin tools</li>
-          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>No ads, ever</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Priority support</li>
         </ul>
       </div>
@@ -852,7 +850,7 @@
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Everything in Premium</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Save $20 vs monthly billing</li>
           <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Early access to new features</li>
-          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Exclusive seasonal reading plans</li>
+          <li class="flex items-start gap-2 text-sm text-slate-600"><i data-lucide="check" style="width:14px;height:14px;stroke:#B8860B;flex-shrink:0;margin-top:1px;"></i>Priority support &amp; direct feedback channel</li>
         </ul>
       </div>
 
@@ -1002,11 +1000,11 @@ lucide.createIcons();
 const cmpRows = [
   { cat: "Bible Reading" },
   { label: "Bible reader",                  free: true,          prem: true },
-  { label: "Translations available",        free: "KJV",         prem: "KJV + more" },
+  { label: "Translations",                  free: "KJV + AYT",   prem: "KJV + AYT + more" },
   { label: "Verse highlighting & bookmarks",free: true,          prem: true },
   { label: "Verse notes & annotations",     free: true,          prem: true },
   { label: "Full-text search",              free: true,          prem: true },
-  { label: "PWA offline access",            free: true,          prem: true },
+  { label: "Install as app (PWA)",          free: true,          prem: true },
 
   { cat: "Reading Plans" },
   { label: "Active reading plans",          free: "3 plans",     prem: "Unlimited" },
@@ -1021,43 +1019,38 @@ const cmpRows = [
   { label: "Export — PDF & Markdown",       free: false,         prem: true },
 
   { cat: "AI Bible Study" },
-  { label: "Daily AI queries",              free: "10 / day",    prem: "Unlimited" },
-  { label: "Deep study mode",               free: false,         prem: true },
-  { label: "Sermon notes summarization",    free: false,         prem: true },
+  { label: "AI Bible assistant",            free: "10 / day",    prem: "Unlimited" },
+  { label: "Theology & contextual answers", free: true,          prem: true },
+  { label: "Unlimited study sessions",      free: false,         prem: true },
 
   { cat: "Audio Bible" },
   { label: "Human-recorded audio (OT + NT)",free: false,         prem: true },
-  { label: "Speed control (0.5× – 2×)",     free: false,         prem: true },
-  { label: "Background playback",           free: false,         prem: true },
+  { label: "Verse-sync highlighting",       free: false,         prem: true },
+  { label: "Playback speed (0.5× – 2×)",    free: false,         prem: true },
 
   { cat: "Spiritual Growth" },
   { label: "Growth dashboard & streaks",    free: true,          prem: true },
   { label: "Daily check-in",               free: true,          prem: true },
+  { label: "Devotionals",                   free: true,          prem: true },
 
   { cat: "Community" },
   { label: "Prayer wall",                   free: true,          prem: true },
   { label: "Pray for others",               free: true,          prem: true },
-  { label: "Devotionals",                   free: true,          prem: true },
-
-  { cat: "Churches" },
-  { label: "Church directory",              free: true,          prem: true },
-  { label: "Find nearby churches",          free: true,          prem: true },
-  { label: "Follow & receive announcements",free: true,          prem: true },
-  { label: "Church admin tools",            free: false,         prem: true },
+  { label: "Church directory & nearby",     free: true,          prem: true },
+  { label: "Follow churches & announcements",free: true,         prem: true },
 
   { cat: "Notifications" },
   { label: "Daily verse push notification", free: true,          prem: true },
-  { label: "Reading reminders",             free: true,          prem: true },
+  { label: "Reading & prayer reminders",    free: true,          prem: true },
   { label: "Church announcement alerts",    free: true,          prem: true },
 
   { cat: "Language" },
-  { label: "English (KJV)",                 free: true,          prem: true },
-  { label: "Bahasa Indonesia (AYT Bible)",  free: true,          prem: true },
+  { label: "English",                       free: true,          prem: true },
+  { label: "Bahasa Indonesia (full app + AYT Bible)", free: true, prem: true },
 
   { cat: "Extras" },
   { label: "Dark mode",                     free: true,          prem: true },
-  { label: "PWA — install on any device",   free: true,          prem: true },
-  { label: "No ads, ever",                  free: false,         prem: true },
+  { label: "No ads, ever",                  free: true,          prem: true },
   { label: "Priority support",              free: false,         prem: true },
 ];
 
